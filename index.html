@@ -913,15 +913,24 @@ function addConta(){
 }
 function addMes(ds,n){var p=ds.split('-'),dt=new Date(+p[0],+p[1]-1+n,+p[2]);return dt.getFullYear()+'-'+('0'+(dt.getMonth()+1)).slice(-2)+'-'+('0'+dt.getDate()).slice(-2);}
 function saveTx(){
-  var data=document.getElementById('fdata').value;
-  var raw=parseFloat(document.getElementById('fval').value)||0;
-  var op=document.getElementById('fop').value;
+  try{
+  var fdataEl=document.getElementById('fdata');
+  var fvalEl=document.getElementById('fval');
+  var fopEl=document.getElementById('fop');
+  var fdescEl=document.getElementById('fdesc');
+  var fcontaEl=document.getElementById('fconta');
+  var fstatusEl=document.getElementById('fstatus');
+  if(!fdataEl||!fvalEl||!fopEl||!fdescEl||!fcontaEl||!fstatusEl){toast('Erro: formulario incompleto');return;}
+  var data=fdataEl.value||curMes+'-01';
+  var raw=parseFloat(fvalEl.value)||0;
+  var op=fopEl.value||'Saida';
   if(raw<0){op='Saida';raw=Math.abs(raw);}
+  if(raw===0){toast('Informe o valor');return;}
   var base={mes:data.slice(0,7),data:data,operacao:op,valor:raw,
-    descricao:document.getElementById('fdesc').value,
+    descricao:fdescEl.value||'Sem descricao',
     categoria:(document.getElementById('fcat')?document.getElementById('fcat').value:'Outros'),
-    conta:document.getElementById('fconta').value,
-    status:document.getElementById('fstatus').value};
+    conta:fcontaEl.value||'PJ Itau Nu',
+    status:fstatusEl.value};
   var db=load();
   if(editId){
     var i=db.fluxo.findIndex(function(x){return x.id===editId;});
@@ -943,6 +952,7 @@ function saveTx(){
   save(db);closeSH();
   if(base.mes!==curMes){curMes=base.mes;updML();}
   renderFluxo(db);
+  }catch(err){toast('Erro ao salvar: '+err.message);console.error(err);}
 }
 var gDef={
   bens:{t:'Bem',f:[{k:'nome',l:'Nome',tp:'text'},{k:'tipo',l:'Tipo',tp:'sel',o:['Imovel','Veiculo','Moveis','Equipamento','Outro']},{k:'valor',l:'Valor (R$)',tp:'num'},{k:'dono',l:'Dono',tp:'sel',o:['LF','TP','Scout']},{k:'obs',l:'Obs.',tp:'text'}]},
