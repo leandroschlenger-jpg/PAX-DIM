@@ -695,14 +695,14 @@ var fmtD=function(d){if(!d)return'--';var p=d.split('-');return p[2]+'/'+p[1];};
 var mNome=function(m){var n=['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];var p=m.split('-');return n[+p[1]-1]+'/'+p[0].slice(2);};
 var dName=function(d){return['Dom','Seg','Ter','Qua','Qui','Sex','Sab'][new Date(d+'T12:00').getDay()];};
 var fmtK=function(v){if(!v||isNaN(v))return'R$0';var a=Math.abs(v);return'R$'+(a>=1e6?(a/1e6).toFixed(1)+'M':a>=1000?Math.round(a/1000)+'k':a.toFixed(0));};
-var curPage='resumo',curMes='2026-06',curF='all',editId=null,charts={};
+var _hoje=new Date(),curPage='resumo',curMes=_hoje.getFullYear()+'-'+('0'+(_hoje.getMonth()+1)).slice(-2),  curF='all',editId=null,charts={};
 var tt;
 function toast(m){var e=document.getElementById('toast');e.textContent=m;e.classList.add('on');clearTimeout(tt);tt=setTimeout(function(){e.classList.remove('on');},2200);}
 function openMP(){
   var db=load(),hm={};db.fluxo.forEach(function(t){hm[t.mes]=1;});
   var g=document.getElementById('mgrid'),ms=[];
-  for(var i=6;i<=12;i++)ms.push('2026-'+('0'+i).slice(-2));
-  for(var i=1;i<=12;i++)ms.push('2027-'+('0'+i).slice(-2));
+  var hoje=new Date(), anoAtual=hoje.getFullYear();
+  for(var i=1;i<=12;i++)ms.push(anoAtual+'-'+('0'+i).slice(-2));
   g.innerHTML=ms.map(function(m){return '<button class="mpill '+(m===curMes?'cur':hm[m]?'has':'')+'" onclick="selMes(\''+m+'\')">'+mNome(m)+'</button>';}).join('');
   document.getElementById('mpbg').classList.add('on');
 }
@@ -1502,7 +1502,7 @@ function importData(e){
 function resetData(){localStorage.removeItem(KEY);_db=null;load();render('fluxo');renderLemb(load());toast('Dados de exemplo carregados');}
 (function(){
   try{['pax_v6','pax_v5','pax_v4','pax_v3'].forEach(function(k){localStorage.removeItem(k);});}catch(e){}
-  load();updML();render('resumo');renderLemb(load());
+  var _m=new Date();_mem&&(_mem=null);load();curMes=_m.getFullYear()+'-'+('0'+(_m.getMonth()+1)).slice(-2);updML();render('resumo');renderLemb(load());
 })();
 
 </script>
