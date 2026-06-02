@@ -18,15 +18,31 @@ button{font-family:inherit;cursor:pointer;border:none;background:none}
 .topbar{flex-shrink:0;display:flex;align-items:center;justify-content:space-between;padding:16px 20px 10px;background:var(--bg);position:sticky;top:0;z-index:80}
 .brand{font-size:22px;font-weight:800;letter-spacing:-.5px}
 .brand em{color:var(--acc);font-style:normal}
+.topbar-right{display:flex;align-items:center;gap:10px}
 .mbtn{display:flex;align-items:center;gap:6px;background:var(--s2);border:1px solid var(--bdr);border-radius:999px;padding:7px 14px;font-size:13px;font-weight:700;color:var(--t1)}
+.eyebtn{background:var(--s2);border:1px solid var(--bdr);border-radius:999px;padding:7px 12px;font-size:16px;color:var(--t3)}
 .nav{flex-shrink:0;display:flex;background:rgba(15,17,32,.92);border-top:1px solid var(--bdr);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);padding:6px 0 calc(6px + env(safe-area-inset-bottom,0px))}
-.ni{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding:6px 4px;font-size:10px;font-weight:600;color:var(--t3);transition:color .2s}
+.ni{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding:6px 4px;font-size:10px;font-weight:600;color:var(--t3);transition:color .2s;position:relative}
 .ni .ic{font-size:22px;line-height:1;transition:transform .2s}
 .ni.on{color:var(--accl)}.ni.on .ic{transform:translateY(-2px)}
 .page{display:none;padding-bottom:100px}
 .page.on{display:block;animation:pi .22s ease-out}
 @keyframes pi{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
-/* FLUXO HERO */
+/* LOCK SCREEN */
+.lockscreen{position:fixed;inset:0;background:var(--bg);z-index:1000;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px 30px}
+.lock-logo{font-size:48px;margin-bottom:8px}
+.lock-brand{font-size:28px;font-weight:800;margin-bottom:4px}
+.lock-brand em{color:var(--acc);font-style:normal}
+.lock-sub{font-size:14px;color:var(--t3);margin-bottom:40px}
+.lock-dots{display:flex;gap:16px;margin-bottom:32px}
+.lock-dot{width:16px;height:16px;border-radius:50%;border:2px solid var(--bdr2);background:transparent;transition:all .2s}
+.lock-dot.filled{background:var(--acc);border-color:var(--acc)}
+.lock-dot.error{background:var(--red);border-color:var(--red)}
+.numpad{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;width:260px}
+.npbtn{padding:18px;border-radius:16px;background:var(--s1);border:1px solid var(--bdr);font-size:22px;font-weight:700;color:var(--t1);text-align:center;transition:all .15s}
+.npbtn:active{background:var(--s2);transform:scale(.94)}
+.lock-err{font-size:14px;color:var(--red);margin-top:16px;min-height:20px;text-align:center}
+/* FLUXO */
 .fhero{margin:8px 16px 0;background:linear-gradient(145deg,#1a1060,#0f1120);border:1px solid rgba(123,110,246,.25);border-radius:24px;padding:22px 20px 18px;position:relative;overflow:hidden}
 .fhero::before{content:'';position:absolute;right:-40px;top:-40px;width:200px;height:200px;border-radius:50%;background:radial-gradient(circle,rgba(123,110,246,.2),transparent 70%)}
 .fhl{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--accl);opacity:.8;margin-bottom:6px}
@@ -35,18 +51,15 @@ button{font-family:inherit;cursor:pointer;border:none;background:none}
 .fhr{display:flex;gap:20px;margin-top:16px}
 .fsl{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:var(--t2);opacity:.7;margin-bottom:3px}
 .fsv{font-size:15px;font-weight:700}.fsv.e{color:var(--grn)}.fsv.s{color:var(--red)}
-/* ACCOUNT PILLS */
 .apills{display:flex;gap:8px;padding:12px 16px 0}
 .apill{flex:1;background:var(--s1);border:1px solid var(--bdr);border-radius:16px;padding:12px 14px;cursor:pointer;transition:border-color .15s}
 .apill.sel{border-color:var(--acc);background:rgba(123,110,246,.08)}
-.aname{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--t3);margin-bottom:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.aname{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--t3);margin-bottom:4px}
 .asaldo{font-size:16px;font-weight:800;letter-spacing:-.3px}
 .arow{display:flex;justify-content:space-between;margin-top:4px;font-size:11px}
-/* FILTERS */
 .fbar{display:flex;gap:6px;padding:12px 16px 6px;overflow-x:auto}
 .chip{flex-shrink:0;padding:7px 14px;border-radius:999px;font-size:12px;font-weight:700;color:var(--t3);background:var(--s1);border:1px solid var(--bdr);transition:all .15s}
 .chip.on{background:var(--acc);color:#fff;border-color:transparent}
-/* TX LIST */
 .txs{padding:6px 16px 0}
 .txdh{display:flex;justify-content:space-between;align-items:baseline;padding:10px 4px 6px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--t3)}
 .txwrap{position:relative;border-radius:18px;margin-bottom:7px;overflow:hidden}
@@ -58,26 +71,22 @@ button{font-family:inherit;cursor:pointer;border:none;background:none}
 .txico.e{background:var(--grnd)}.txico.s{background:var(--redd)}
 .txb{flex:1;min-width:0}
 .txd{font-size:14px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--t1)}
-.txm{display:flex;align-items:center;gap:6px;margin-top:3px}
+.txm{display:flex;align-items:center;gap:6px;margin-top:3px;flex-wrap:wrap}
 .ctag{font-size:10px;font-weight:700;padding:2px 7px;border-radius:999px}
 .ctag.pj{background:rgba(77,166,255,.15);color:var(--blu)}.ctag.vl{background:rgba(123,110,246,.15);color:var(--accl)}
 .txr{display:flex;flex-direction:column;align-items:flex-end;gap:6px;flex-shrink:0}
 .txa{font-size:15px;font-weight:800;letter-spacing:-.3px}
 .txa.e{color:var(--grn)}.txa.s{color:var(--red)}
 .sbtn{display:flex;align-items:center;gap:4px;padding:6px 12px;border-radius:999px;font-size:12px;font-weight:800;transition:all .2s;min-width:72px;justify-content:center}
-.sbtn.ok{background:var(--grnd);color:var(--grn);border:1px solid rgba(0,212,170,.25)}
-.sbtn.pnd{background:var(--s2);color:var(--t3);border:1px solid var(--bdr)}
+.sbtn.ok{background:var(--grnd);color:var(--grn);border:1px solid rgba(0,212,170,.25)}.sbtn.pnd{background:var(--s2);color:var(--t3);border:1px solid var(--bdr)}
 .sbtn:active{transform:scale(.9)}
-.ebtn{font-size:16px;opacity:.4;padding:2px 4px}
-/* EMPTY */
+.ebtn{font-size:20px;opacity:.7;padding:6px 8px;min-width:36px;min-height:36px;color:var(--t2)}
 .empty{text-align:center;padding:50px 20px}
 .eico{font-size:48px;margin-bottom:12px;opacity:.5}
 .etitle{font-size:16px;font-weight:700;color:var(--t2)}
 .esub{font-size:13px;color:var(--t3);margin-top:6px}
-/* FAB */
 .fab{position:fixed;right:20px;bottom:calc(80px + env(safe-area-inset-bottom,0px));width:58px;height:58px;border-radius:50%;background:var(--acc);box-shadow:0 6px 28px rgba(123,110,246,.5),0 2px 8px rgba(0,0,0,.4);display:flex;align-items:center;justify-content:center;z-index:100;transition:transform .2s;color:#fff;font-size:30px;line-height:1}
 .fab:active{transform:scale(.88)}
-/* SHEET */
 .sbg{position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:200;display:none;align-items:flex-end;backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px)}
 .sbg.on{display:flex;animation:bgi .2s ease}
 @keyframes bgi{from{opacity:0}to{opacity:1}}
@@ -97,8 +106,8 @@ button{font-family:inherit;cursor:pointer;border:none;background:none}
 .vhint{font-size:11px;margin:4px 2px 14px;min-height:16px}
 .field{margin-bottom:14px}
 .field label{display:block;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--t3);margin-bottom:6px}
-.field input,.field select{width:100%;background:var(--s2);border:1.5px solid var(--bdr);border-radius:12px;padding:13px 14px;font-size:15px;color:var(--t1);outline:none;font-family:inherit;-webkit-appearance:none;transition:border-color .15s}
-.field input:focus,.field select:focus{border-color:var(--acc)}
+.field input,.field select,.field textarea{width:100%;background:var(--s2);border:1.5px solid var(--bdr);border-radius:12px;padding:13px 14px;font-size:15px;color:var(--t1);outline:none;font-family:inherit;-webkit-appearance:none;transition:border-color .15s}
+.field input:focus,.field select:focus,.field textarea:focus{border-color:var(--acc)}
 .field select option{background:var(--s2)}
 .cgrid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:18px}
 .copt{padding:12px 10px;border-radius:12px;border:1.5px solid var(--bdr);background:var(--s2);color:var(--t3);font-size:13px;font-weight:700;text-align:center;transition:all .15s}
@@ -108,7 +117,6 @@ button{font-family:inherit;cursor:pointer;border:none;background:none}
 .savebtn{width:100%;padding:16px;border-radius:14px;background:var(--acc);color:#fff;font-size:16px;font-weight:800;box-shadow:0 4px 20px rgba(123,110,246,.35);transition:all .15s;margin-top:6px}
 .savebtn:active{transform:scale(.97);opacity:.9}
 .delbtn{width:100%;padding:14px;border-radius:14px;margin-top:10px;background:var(--redd);color:var(--red);font-size:14px;font-weight:700;border:1px solid rgba(255,95,87,.2)}
-/* OTHER PAGES */
 .pp{padding:16px 16px 20px}
 .ph1{font-size:26px;font-weight:800;letter-spacing:-.6px;margin-bottom:4px}
 .psub{font-size:13px;color:var(--t3);margin-bottom:18px}
@@ -131,7 +139,7 @@ button{font-family:inherit;cursor:pointer;border:none;background:none}
 .ls{font-size:11px;color:var(--t3);margin-top:2px}
 .lr{display:flex;flex-direction:column;align-items:flex-end;gap:5px}
 .lv{font-size:14px;font-weight:800;text-align:right}
-.eb{font-size:15px;opacity:.4;padding:2px 4px}
+.eb{font-size:20px;opacity:.6;padding:4px 6px;color:var(--t2)}
 .pb{height:4px;background:var(--bdr);border-radius:99px;overflow:hidden}
 .pf{height:100%;border-radius:99px;transition:width .6s}
 .prow{display:flex;justify-content:space-between;font-size:12px;color:var(--t3);margin-bottom:5px}
@@ -154,7 +162,6 @@ button{font-family:inherit;cursor:pointer;border:none;background:none}
 .bh{display:flex;align-items:center;gap:12px;padding:14px 16px 0;margin-bottom:8px}
 .bbtn{font-size:26px;color:var(--t3);line-height:1;padding:2px 4px}
 .cwrap{position:relative;margin-top:8px}
-/* MONTH PICKER */
 .mpbg{position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:400;display:none;align-items:center;justify-content:center}
 .mpbg.on{display:flex;animation:bgi .2s ease}
 .mp{background:var(--s1);border:1px solid var(--bdr2);border-radius:24px;padding:24px;width:320px}
@@ -162,7 +169,6 @@ button{font-family:inherit;cursor:pointer;border:none;background:none}
 .mgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
 .mpill{padding:11px 4px;border-radius:12px;text-align:center;font-size:12px;font-weight:700;color:var(--t3);background:var(--s2);border:1px solid var(--bdr);cursor:pointer;transition:all .15s}
 .mpill.has{color:var(--t2)}.mpill.cur{background:var(--acc);color:#fff;border-color:transparent}
-/* TOAST */
 .toast{position:fixed;bottom:calc(88px + env(safe-area-inset-bottom,0px));left:50%;transform:translateX(-50%) translateY(20px);background:var(--s3);border:1px solid var(--bdr2);padding:10px 18px;border-radius:999px;font-size:13px;font-weight:700;color:var(--t1);z-index:500;opacity:0;transition:all .25s cubic-bezier(.4,0,.2,1);pointer-events:none;white-space:nowrap}
 .toast.on{opacity:1;transform:translateX(-50%) translateY(0)}
 </style>
@@ -171,289 +177,272 @@ button{font-family:inherit;cursor:pointer;border:none;background:none}
 <div id="app">
   <header class="topbar">
     <div class="brand">PAX<em>.</em></div>
-    <button class="mbtn" onclick="openMP()"><span id="mlabel">--</span> &#9660;</button>
+    <div class="topbar-right">
+      <button class="eyebtn" id="eyebtn" onclick="toggleValues()">&#128584;</button>
+      <button class="mbtn" onclick="openMP()"><span id="mlabel">--</span> &#9660;</button>
+    </div>
   </header>
   <div id="screen">
-    <div id="pg-fluxo" class="page on">
-      <div class="fhero" id="fhero"></div>
-      <div class="apills" id="apills"></div>
-      <div class="fbar">
-        <button class="chip on" onclick="setF('all',this)">Todos</button>
-        <button class="chip" onclick="setF('ent',this)">Entradas</button>
-        <button class="chip" onclick="setF('sai',this)">Saidas</button>
-        <button class="chip" onclick="setF('pj',this)">PJ</button>
-        <button class="chip" onclick="setF('vl',this)">Ifood</button>
-        <button class="chip" onclick="setF('pend',this)">Pendentes</button>
-      </div>
-      <div class="txs" id="txlist"></div>
+  <!-- LOCK -->
+  <div class="lockscreen" id="lockscreen">
+    <div class="lock-logo">&#128274;</div>
+    <div class="lock-brand">PAX<em>.</em></div>
+    <div class="lock-sub">Financeiro pessoal</div>
+    <div class="lock-dots" id="lockdots">
+      <div class="lock-dot" id="d0"></div>
+      <div class="lock-dot" id="d1"></div>
+      <div class="lock-dot" id="d2"></div>
+      <div class="lock-dot" id="d3"></div>
     </div>
-    <div id="pg-resumo" class="page">
-      <div class="pp">
-        <div class="ph1">Resumo</div><div class="psub">Posicao patrimonial</div>
-        <div class="hcard" style="background:linear-gradient(145deg,#1a1060,#0f1120);border:1px solid rgba(123,110,246,.2)">
-          <div class="hlbl">Saldo Patrimonial</div><div class="hval" id="rSaldo">--</div><div class="hsub" id="rSub">--</div>
-        </div>
-        <div class="r2">
-          <div class="mc"><div class="mclbl">Bens</div><div class="mcval green" id="rBens">--</div></div>
-          <div class="mc"><div class="mclbl">Dividas</div><div class="mcval red" id="rDiv">--</div></div>
-        </div>
-        <div class="dc"><div class="dct">Fluxo por mes</div><div class="cwrap" style="height:150px"><canvas id="cR"></canvas></div></div>
-        <div class="dc" id="rMetas"></div>
-      </div>
+    <div class="numpad">
+      <button class="npbtn" onclick="numpad(1)">1</button>
+      <button class="npbtn" onclick="numpad(2)">2</button>
+      <button class="npbtn" onclick="numpad(3)">3</button>
+      <button class="npbtn" onclick="numpad(4)">4</button>
+      <button class="npbtn" onclick="numpad(5)">5</button>
+      <button class="npbtn" onclick="numpad(6)">6</button>
+      <button class="npbtn" onclick="numpad(7)">7</button>
+      <button class="npbtn" onclick="numpad(8)">8</button>
+      <button class="npbtn" onclick="numpad(9)">9</button>
+      <button class="npbtn" onclick="numpad(-1)" style="font-size:14px;color:var(--t3)">limpar</button>
+      <button class="npbtn" onclick="numpad(0)">0</button>
+      <button class="npbtn" onclick="numpad(-2)" style="font-size:18px;color:var(--t3)">&#9003;</button>
     </div>
-    <div id="pg-bens" class="page">
-      <div class="pp">
-        <div class="ph1">Patrimonio</div><div class="psub">Bens e ativos</div>
-        <div class="hcard" style="background:linear-gradient(145deg,#0d2040,#0f1120);border:1px solid rgba(77,166,255,.2)">
-          <div class="hlbl">Total</div><div class="hval" id="bTotal">--</div><div class="hsub" id="bSub">--</div>
-        </div>
-        <div class="dc"><div class="cwrap" style="height:190px"><canvas id="cB"></canvas></div></div>
-        <div class="dc"><div id="listB"></div></div>
-      </div>
-    </div>
-    <div id="pg-dividas" class="page">
-      <div class="pp">
-        <div class="ph1">Dividas</div><div class="psub">Passivos</div>
-        <div class="hcard" style="background:linear-gradient(145deg,#200d0d,#0f1120);border:1px solid rgba(255,95,87,.2)">
-          <div class="hlbl">Total devedor</div><div class="hval" id="dTotal">--</div><div class="hsub" id="dSub">--</div>
-        </div>
-        <div class="dc"><div class="cwrap" style="height:190px"><canvas id="cD"></canvas></div></div>
-        <div class="dc"><div id="listD"></div></div>
-      </div>
-    </div>
-    <div id="pg-mais" class="page">
-      <div class="pp">
-        <div class="ph1">Mais</div><div class="psub">Outros modulos</div>
-        <div class="tgrid">
-          <div class="tile" onclick="sub('inv')"><div class="tico">&#128200;</div><div class="tlbl">Investimentos</div><div class="tval yellow" id="tInv">--</div></div>
-          <div class="tile" onclick="sub('emg')"><div class="tico">&#128737;</div><div class="tlbl">Emergencia</div><div class="tval yellow" id="tEmg">--</div></div>
-        </div>
-        <div class="ar" style="margin-bottom:8px">
-          <div class="ai" onclick="sub('carro')">
-            <div class="aico" style="background:rgba(96,165,250,.12)">&#128663;</div>
-            <div class="abody"><div class="atitle">Carro</div><div class="asub">Financiamento + parcelas</div></div>
-            <div class="aarr">&#8250;</div>
-          </div>
-          <div class="ai" onclick="sub('apto')">
-            <div class="aico" style="background:rgba(45,212,191,.12)">&#127968;</div>
-            <div class="abody"><div class="atitle">Apto Cajamar</div><div class="asub">Venda + saldos</div></div>
-            <div class="aarr">&#8250;</div>
-          </div>
-          <div class="ai" onclick="sub('proc')">
-            <div class="aico" style="background:rgba(251,191,36,.12)">&#9878;</div>
-            <div class="abody"><div class="atitle">Processos Judiciais</div><div class="asub">6 processos ativos</div></div>
-            <div class="aarr">&#8250;</div>
-          </div>
-        </div>
-        <div class="ar">
-          <div class="ai" onclick="sub('cas')">
-            <div class="aico" style="background:rgba(167,139,250,.12)">&#128141;</div>
-            <div class="abody"><div class="atitle">Casamento</div><div class="asub" id="tCas">--</div></div>
-            <div class="aarr">&#8250;</div>
-          </div>
-        </div>
-        <div class="ar" style="margin-top:16px">
-          <div class="ai" onclick="exportData()">
-            <div class="aico" style="background:rgba(77,166,255,.1)">&#128190;</div>
-            <div class="abody"><div class="atitle">Exportar backup</div><div class="asub">Salvar dados em JSON</div></div>
-            <div class="aarr">&#8250;</div>
-          </div>
-          <div class="ai" onclick="document.getElementById('ifile').click()">
-            <div class="aico" style="background:rgba(77,166,255,.1)">&#128193;</div>
-            <div class="abody"><div class="atitle">Importar backup</div><div class="asub">Restaurar dados</div></div>
-            <div class="aarr">&#8250;</div>
-          </div>
-        </div>
-        <input id="ifile" type="file" accept=".json" style="display:none" onchange="importData(event)">
-      </div>
-    </div>
-    <div id="pg-carro" class="page">
-      <div class="bh"><button class="bbtn" onclick="closeSub()">&#8249;</button><div class="ph1" style="font-size:20px">Carro &#128663;</div></div>
-      <div class="pp" style="padding-top:0">
-        <div class="hcard" style="background:linear-gradient(145deg,#0d2040,#0f1120);border:1px solid rgba(96,165,250,.2)">
-          <div class="hlbl">Custo total</div><div class="hval" style="color:var(--blu)">R$ 200.280,24</div>
-          <div class="hsub">Entrada + Financiamento + IPVA</div>
-        </div>
-        <div class="r2">
-          <div class="mc"><div class="mclbl">Entrada</div><div class="mcval" style="color:var(--blu)">R$ 50.000</div></div>
-          <div class="mc"><div class="mclbl">Financiado</div><div class="mcval red">R$ 145.000</div><div style="font-size:11px;color:var(--t3)">48x R$ 5.288,54</div></div>
-        </div>
-        <div class="r2">
-          <div class="mc"><div class="mclbl">IPVA</div><div class="mcval">R$ 5.280,24</div></div>
-          <div class="mc"><div class="mclbl">Total financiamento</div><div class="mcval red">R$ 253.849,92</div></div>
-        </div>
-        <div class="dc">
-          <div class="dct">Avaliacao de mercado</div>
-          <div class="lrow"><div class="lb"><div class="lt">Tabela FIPE</div></div><div class="lr"><div class="lv">R$ 207.172</div></div></div>
-          <div class="lrow"><div class="lb"><div class="lt">Preco de mercado</div></div><div class="lr"><div class="lv">R$ 200.000</div></div></div>
-          <div class="lrow"><div class="lb"><div class="lt">Valor de venda estimado</div></div><div class="lr"><div class="lv green">R$ 195.000</div></div></div>
-          <div class="lrow"><div class="lb"><div class="lt">Ganho sobre custo</div></div><div class="lr"><div class="lv green">+ R$ 12.172</div></div></div>
-        </div>
-        <div class="dc">
-          <div class="dct">Parcelas pagas</div>
-          <div class="lrow"><div class="lb"><div class="lt">1a parcela</div><div class="ls">30/04/2026 - Pago pela Thays</div></div><div class="lr"><div class="lv">R$ 5.288,54</div></div></div>
-          <div class="lrow"><div class="lb"><div class="lt">2a parcela</div><div class="ls">08/05/2026 - Antecipacao Leandro</div></div><div class="lr"><div class="lv">R$ 5.212,30</div></div></div>
-          <div class="lrow"><div class="lb"><div class="lt">3a parcela</div><div class="ls">01/06/2026 - Antecipacao Leandro</div></div><div class="lr"><div class="lv">R$ 5.188,54</div></div></div>
-          <div class="lrow"><div class="lb"><div class="lt" style="font-weight:800">Saldo para quitacao</div></div><div class="lr"><div class="lv red">R$ 152.122,98</div></div></div>
-        </div>
-        <div class="dc">
-          <div class="dct">Acesso ao financiamento</div>
-          <div style="font-size:13px;color:var(--t2);line-height:1.8">
-            Site: <span style="color:var(--accl)">carbankbrasil.com.br</span><br>
-            CPF: 323.025.288-83<br>
-            Nova senha: 9297
-          </div>
-        </div>
-      </div>
-    </div>
+    <div class="lock-err" id="lockerr"></div>
+  </div>
 
-    <div id="pg-apto" class="page">
-      <div class="bh"><button class="bbtn" onclick="closeSub()">&#8249;</button><div class="ph1" style="font-size:20px">Apto Cajamar &#127968;</div></div>
-      <div class="pp" style="padding-top:0">
-        <div class="hcard" style="background:linear-gradient(145deg,#064e3b,#0f1120);border:1px solid rgba(45,212,170,.2)">
-          <div class="hlbl">Saldo da operacao</div><div class="hval green">R$ 5.677,02</div>
-          <div class="hsub">Troquei Apto pelo Carro, quitando financiamento Caixa</div>
-        </div>
-        <div class="dc">
-          <div class="dct">Valores da venda</div>
-          <div class="lrow"><div class="lb"><div class="lt">Valor de venda</div></div><div class="lr"><div class="lv">R$ 220.000</div></div></div>
-          <div class="lrow"><div class="lb"><div class="lt">Recebido</div></div><div class="lr"><div class="lv green">R$ 40.000</div></div></div>
-          <div class="lrow"><div class="lb"><div class="lt">A receber</div></div><div class="lr"><div class="lv yellow">R$ 15.000</div></div></div>
-          <div class="lrow"><div class="lb"><div class="lt">A receber - Inter</div></div><div class="lr"><div class="lv yellow">R$ 165.000</div></div></div>
-        </div>
-        <div class="dc">
-          <div class="dct">Saidas da operacao</div>
-          <div class="lrow"><div class="lb"><div class="lt">Financiamento Caixa (quitado)</div></div><div class="lr"><div class="lv red">R$ 49.000</div></div></div>
-          <div class="lrow"><div class="lb"><div class="lt">Comissao a pagar</div></div><div class="lr"><div class="lv red">R$ 13.200</div></div></div>
-          <div class="lrow"><div class="lb"><div class="lt">Saldo carro a pagar</div></div><div class="lr"><div class="lv red">R$ 152.122,98</div></div></div>
-        </div>
-        <div class="dc">
-          <div class="dct">Custo mensal do Apto</div>
-          <div class="lrow"><div class="lb"><div class="lt">Condominio</div></div><div class="lr"><div class="lv">R$ 532,16</div></div></div>
-          <div class="lrow"><div class="lb"><div class="lt">Parcela Caixa</div></div><div class="lr"><div class="lv">R$ 706,14</div></div></div>
-          <div class="lrow"><div class="lb"><div class="lt" style="font-weight:800">Total mensal</div></div><div class="lr"><div class="lv">R$ 1.238,30</div></div></div>
-        </div>
-      </div>
+  <div id="pg-fluxo" class="page on">
+    <div id="lembBanner" style="display:none;margin:8px 16px 0;background:rgba(255,95,87,.12);border:1px solid rgba(255,95,87,.3);border-radius:14px;padding:11px 14px;cursor:pointer" onclick="go('lemb')">
+      <div style="font-size:11px;font-weight:800;color:var(--red);text-transform:uppercase;letter-spacing:.06em;margin-bottom:3px">&#9888; Alertas pendentes</div>
+      <div id="lembBannerText" style="font-size:13px;color:var(--t2)"></div>
     </div>
+    <div class="fhero" id="fhero"></div>
+    <div class="apills" id="apills"></div>
+    <div class="fbar">
+      <button class="chip on" onclick="setF('all',this)">Todos</button>
+      <button class="chip" onclick="setF('ent',this)">Entradas</button>
+      <button class="chip" onclick="setF('sai',this)">Saidas</button>
+      <button class="chip" onclick="setF('pj',this)">PJ</button>
+      <button class="chip" onclick="setF('vl',this)">Ifood</button>
+      <button class="chip" onclick="setF('pend',this)">Pendentes</button>
+    </div>
+    <div class="txs" id="txlist"></div>
+  </div>
 
-    <div id="pg-proc" class="page">
-      <div class="bh"><button class="bbtn" onclick="closeSub()">&#8249;</button><div class="ph1" style="font-size:20px">Processos Judiciais</div></div>
-      <div class="pp" style="padding-top:0">
-        <div class="hcard" style="background:linear-gradient(145deg,#1c1a00,#0f1120);border:1px solid rgba(255,204,0,.2)">
-          <div class="hlbl">Processos ativos</div><div class="hval yellow">6 processos</div>
-          <div class="hsub">GO e SP</div>
-        </div>
-        <div class="dc">
-          <div class="dct">Processo 1 - Alimentos e guarda</div>
-          <div class="lrow"><div class="lb"><div class="lt">No Processo</div><div class="ls">5681687-06.2025.8.09.0051 (GO)</div></div><div class="lr"><div class="lv"><span class="badge bgg">Requerente</span></div></div></div>
-          <div class="lrow"><div class="lb"><div class="lt">Parte contraria</div></div><div class="lr"><div class="lv">Vanessa</div></div></div>
-          <div class="lrow"><div class="lb"><div class="lt">Advogado</div><div class="ls">Marina Araujo</div></div><div class="lr"><div class="lv">—</div></div></div>
-          <div class="lrow"><div class="lb"><div class="lt">Acesso</div><div class="ls">projudi.tjgo.jus.br</div></div><div class="lr"><div class="lv" style="font-size:11px">mt*x*phfw8cmznq7bj</div></div></div>
-        </div>
-        <div class="dc">
-          <div class="dct">Processo 2 - Agravo de instrumento</div>
-          <div class="lrow"><div class="lb"><div class="lt">No Processo</div><div class="ls">5890810-44.2025.8.09.0051 (GO)</div></div><div class="lr"><div class="lv"><span class="badge bgg">Requerente</span></div></div></div>
-          <div class="lrow"><div class="lb"><div class="lt">Parte contraria</div></div><div class="lr"><div class="lv">Vanessa</div></div></div>
-          <div class="lrow"><div class="lb"><div class="lt">Advogado</div><div class="ls">Felix ate 03/11/2025</div></div><div class="lr"><div class="lv">—</div></div></div>
-        </div>
-        <div class="dc">
-          <div class="dct">Processo 3 - Cobranca de alimentos</div>
-          <div class="lrow"><div class="lb"><div class="lt">No Processo</div><div class="ls">6036354-63.2025.8.09.0051 (GO)</div></div><div class="lr"><div class="lv"><span class="badge bgg">Requerente</span></div></div></div>
-          <div class="lrow"><div class="lb"><div class="lt">Valor almejado</div></div><div class="lr"><div class="lv green">R$ 5.000</div></div></div>
-          <div class="lrow"><div class="lb"><div class="lt">Honorarios</div><div class="ls">Marina Araujo</div></div><div class="lr"><div class="lv">R$ 2.000 + 10% exito</div></div></div>
-          <div class="lrow"><div class="lb"><div class="lt">Acesso</div><div class="ls">projudi.tjgo.jus.br</div></div><div class="lr"><div class="lv" style="font-size:11px">wjc2wdujeq8nd9hbkbf</div></div></div>
-        </div>
-        <div class="dc">
-          <div class="dct">Processo 4 - Cobranca de titulo (Requerido)</div>
-          <div class="lrow"><div class="lb"><div class="lt">No Processo</div><div class="ls">5140903-10.2026.8.09.0051 (GO)</div></div><div class="lr"><div class="lv"><span class="badge bgr">Requerido</span></div></div></div>
-          <div class="lrow"><div class="lb"><div class="lt">Parte contraria</div></div><div class="lr"><div class="lv">Felix</div></div></div>
-          <div class="lrow"><div class="lb"><div class="lt">Advogado</div><div class="ls">Abrão (Kenede Borges) - Pro bono</div></div><div class="lr"><div class="lv">—</div></div></div>
-          <div class="lrow"><div class="lb"><div class="lt">Deposito judicial</div><div class="ls">18/02/2026 - embargos execucao</div></div><div class="lr"><div class="lv">feito</div></div></div>
-        </div>
-        <div class="dc">
-          <div class="dct">Processo 5 - Embargos de cobranca</div>
-          <div class="lrow"><div class="lb"><div class="lt">No Processo</div><div class="ls">5140903-10.2026.8.09.0051 (GO)</div></div><div class="lr"><div class="lv"><span class="badge bgg">Requerente</span></div></div></div>
-          <div class="lrow"><div class="lb"><div class="lt">Valor almejado</div></div><div class="lr"><div class="lv green">R$ 4.856,67</div></div></div>
-          <div class="lrow"><div class="lb"><div class="lt">Custas judiciais</div></div><div class="lr"><div class="lv red">R$ 1.028,91</div></div></div>
-          <div class="lrow"><div class="lb"><div class="lt">Advogado</div><div class="ls">Abrão (Kenede Borges) - Pro bono</div></div><div class="lr"><div class="lv">—</div></div></div>
-        </div>
-        <div class="dc">
-          <div class="dct">Processo 6 - Indenizacao Latam (SP)</div>
-          <div class="lrow"><div class="lb"><div class="lt">No Processo</div><div class="ls">4016435-98.2025.8.26.0003 (SP)</div></div><div class="lr"><div class="lv"><span class="badge bgg">Requerente</span></div></div></div>
-          <div class="lrow"><div class="lb"><div class="lt">Valor almejado</div></div><div class="lr"><div class="lv green">R$ 7.850,78</div></div></div>
-          <div class="lrow"><div class="lb"><div class="lt">Honorarios</div><div class="ls">Dr. Luiz Fernando dos Santos Jr.</div></div><div class="lr"><div class="lv red">R$ 7.000</div></div></div>
-          <div class="lrow"><div class="lb"><div class="lt">Pago antecipado</div></div><div class="lr"><div class="lv red">R$ 850,78</div></div></div>
-        </div>
-      </div>
+  <div id="pg-lemb" class="page">
+    <div class="pp">
+      <div class="ph1">Alertas &#128276;</div>
+      <div class="psub">Lembretes e acoes pendentes</div>
+      <div class="dc"><div id="listLemb"></div></div>
     </div>
+  </div>
 
-    <div id="pg-inv" class="page">
-      <div class="bh"><button class="bbtn" onclick="closeSub()">&#8249;</button><div class="ph1" style="font-size:20px">Investimentos</div></div>
-      <div class="pp" style="padding-top:0">
-        <div class="hcard" style="background:linear-gradient(145deg,#120d30,#0f1120);border:1px solid rgba(123,110,246,.2)">
-          <div class="hlbl">Total</div><div class="hval yellow" id="iTotal">--</div><div class="hsub" id="iSub">--</div>
-        </div>
-        <div class="r2">
-          <div class="mc"><div class="mclbl">Acoes + Fundos</div><div class="mcval yellow">R$ 1.245,78</div></div>
-          <div class="mc"><div class="mclbl">Total geral</div><div class="mcval yellow">R$ 68.718,85</div></div>
-        </div>
-        <div class="dc">
-          <div class="dct">Acoes - LF</div>
-          <div class="lrow"><div class="lb"><div class="lt">Axia3</div><div class="ls">59 acoes | C: R$59,27</div></div><div class="lr"><div class="lv yellow">R$ 904,91</div></div></div>
-          <div class="lrow"><div class="lb"><div class="lt">Prio3</div><div class="ls">20 acoes | C: R$56,96 | V: R$64,68</div></div><div class="lr"><div class="lv" style="color:var(--t3)">—</div></div></div>
-          <div class="lrow"><div class="lb"><div class="lt">Vale3</div><div class="ls">23 acoes | C: R$81,29/R$79,41</div></div><div class="lr"><div class="lv" style="color:var(--t3)">—</div></div></div>
-          <div class="lrow"><div class="lb"><div class="lt">Petr4</div><div class="ls">40 acoes | C: R$44,61</div></div><div class="lr"><div class="lv" style="color:var(--t3)">—</div></div></div>
-          <div class="lrow"><div class="lb"><div class="lt">Raiz4</div><div class="ls">2127 acoes | C: R$0,47 | V: R$0,62</div></div><div class="lr"><div class="lv" style="color:var(--t3)">—</div></div></div>
-        </div>
-        <div class="dc">
-          <div class="dct">Fundos - LF</div>
-          <div class="lrow"><div class="lb"><div class="lt">Eletrobras FICFI</div></div><div class="lr"><div class="lv" style="color:var(--t3)">—</div></div></div>
-          <div class="lrow"><div class="lb"><div class="lt">FGTS Eletrobras</div></div><div class="lr"><div class="lv yellow">R$ 340,87</div></div></div>
-          <div class="lrow"><div class="lb"><div class="lt">Index Vale</div></div><div class="lr"><div class="lv" style="color:var(--t3)">—</div></div></div>
-          <div class="lrow"><div class="lb"><div class="lt">IMA-B5</div></div><div class="lr"><div class="lv" style="color:var(--t3)">—</div></div></div>
-          <div class="lrow"><div class="lb"><div class="lt">Tesouro Amer</div></div><div class="lr"><div class="lv" style="color:var(--t3)">—</div></div></div>
-          <div class="lrow"><div class="lb"><div class="lt">Itau Global</div></div><div class="lr"><div class="lv" style="color:var(--t3)">—</div></div></div>
-        </div>
-        <div class="dc">
-          <div class="dct">Renda Fixa - LF</div>
-          <div class="lrow"><div class="lb"><div class="lt">Nubank PF - Fundo Emergencia</div></div><div class="lr"><div class="lv" style="color:var(--t3)">—</div></div></div>
-          <div class="lrow"><div class="lb"><div class="lt">Itau - Fundo Emergencia</div></div><div class="lr"><div class="lv green">R$ 6.018,35</div></div></div>
-        </div>
-        <div class="dc">
-          <div class="dct">Distribuicao do saldo (Mai/26)</div>
-          <div class="lrow"><div class="lb"><div class="lt">Partilha</div></div><div class="lr"><div class="lv yellow">R$ 8.117,87</div></div></div>
-          <div class="lrow"><div class="lb"><div class="lt">Leo</div></div><div class="lr"><div class="lv yellow">R$ 1.014,31</div></div></div>
-          <div class="lrow"><div class="lb"><div class="lt">Cartao de credito</div></div><div class="lr"><div class="lv" style="color:var(--t3)">R$ 0</div></div></div>
-          <div class="lrow"><div class="lb"><div class="lt">Apto</div></div><div class="lr"><div class="lv yellow">R$ 40.323,58</div></div></div>
-          <div class="lrow"><div class="lb"><div class="lt">Reserva - rotativo</div></div><div class="lr"><div class="lv yellow">R$ 1.980,04</div></div></div>
-          <div class="lrow"><div class="lb"><div class="lt">Casamento</div></div><div class="lr"><div class="lv yellow">R$ 10.018,92</div></div></div>
-        </div>
-        <div class="dc"><div id="listI"></div></div>
+  <div id="pg-resumo" class="page">
+    <div class="pp">
+      <div class="ph1">Resumo</div><div class="psub">Posicao patrimonial</div>
+      <div class="hcard" style="background:linear-gradient(145deg,#1a1060,#0f1120);border:1px solid rgba(123,110,246,.2)">
+        <div class="hlbl">Saldo Patrimonial</div><div class="hval" id="rSaldo">--</div><div class="hsub" id="rSub">--</div>
       </div>
-    </div>
-    <div id="pg-emg" class="page">
-      <div class="bh"><button class="bbtn" onclick="closeSub()">&#8249;</button><div class="ph1" style="font-size:20px">Fundo Emergencia</div></div>
-      <div class="pp" style="padding-top:0">
-        <div class="hcard" style="background:linear-gradient(145deg,#062030,#0f1120);border:1px solid rgba(77,166,255,.2)">
-          <div class="hlbl">Acumulado</div><div class="hval" id="eTotal">--</div><div class="hsub" id="eSub">--</div>
-        </div>
-        <div class="dc"><div id="listE"></div></div>
+      <div class="r2">
+        <div class="mc"><div class="mclbl">Bens</div><div class="mcval green" id="rBens">--</div></div>
+        <div class="mc"><div class="mclbl">Dividas</div><div class="mcval red" id="rDiv">--</div></div>
       </div>
+      <div class="dc"><div class="dct">Fluxo por mes</div><div class="cwrap" style="height:150px"><canvas id="cR"></canvas></div></div>
+      <div class="dc" id="rMetas"></div>
     </div>
-    <div id="pg-cas" class="page">
-      <div class="bh"><button class="bbtn" onclick="closeSub()">&#8249;</button><div class="ph1" style="font-size:20px">Casamento &#128141;</div></div>
-      <div class="pp" style="padding-top:0">
-        <div class="hcard" style="background:linear-gradient(145deg,#200d40,#0f1120);border:1px solid rgba(167,139,250,.2)">
-          <div class="hlbl">Orcamento total</div><div class="hval" id="cTotal">--</div><div class="hsub" id="cSub">--</div>
-        </div>
-        <div class="dc"><div id="listC"></div></div>
+  </div>
+
+  <div id="pg-bens" class="page">
+    <div class="pp">
+      <div class="ph1">Patrimonio</div><div class="psub">Bens e ativos</div>
+      <div class="hcard" style="background:linear-gradient(145deg,#0d2040,#0f1120);border:1px solid rgba(77,166,255,.2)">
+        <div class="hlbl">Total</div><div class="hval" id="bTotal">--</div><div class="hsub" id="bSub">--</div>
+      </div>
+      <div class="dc"><div class="cwrap" style="height:190px"><canvas id="cB"></canvas></div></div>
+      <div class="dc"><div id="listB"></div></div>
+    </div>
+  </div>
+
+  <div id="pg-dividas" class="page">
+    <div class="pp">
+      <div class="ph1">Dividas</div><div class="psub">Passivos</div>
+      <div class="hcard" style="background:linear-gradient(145deg,#200d0d,#0f1120);border:1px solid rgba(255,95,87,.2)">
+        <div class="hlbl">Total devedor</div><div class="hval" id="dTotal">--</div><div class="hsub" id="dSub">--</div>
+      </div>
+      <div class="dc"><div class="cwrap" style="height:190px"><canvas id="cD"></canvas></div></div>
+      <div class="dc"><div id="listD"></div></div>
+    </div>
+  </div>
+
+  <div id="pg-mais" class="page">
+    <div class="pp">
+      <div class="ph1">Mais</div><div class="psub">Outros modulos</div>
+      <div class="tgrid">
+        <div class="tile" onclick="sub('inv')"><div class="tico">&#128200;</div><div class="tlbl">Investimentos</div><div class="tval yellow" id="tInv">--</div></div>
+        <div class="tile" onclick="sub('emg')"><div class="tico">&#128737;</div><div class="tlbl">Emergencia</div><div class="tval yellow" id="tEmg">--</div></div>
+      </div>
+      <div class="ar" style="margin-bottom:8px">
+        <div class="ai" onclick="sub('cas')"><div class="aico" style="background:rgba(167,139,250,.12)">&#128141;</div><div class="abody"><div class="atitle">Casamento</div><div class="asub" id="tCas">--</div></div><div class="aarr">&#8250;</div></div>
+        <div class="ai" onclick="sub('carro')"><div class="aico" style="background:rgba(96,165,250,.12)">&#128663;</div><div class="abody"><div class="atitle">Carro</div><div class="asub">Financiamento - 48 parcelas</div></div><div class="aarr">&#8250;</div></div>
+        <div class="ai" onclick="sub('apto')"><div class="aico" style="background:rgba(45,212,170,.12)">&#127968;</div><div class="abody"><div class="atitle">Apto Cajamar</div><div class="asub">Venda + saldos</div></div><div class="aarr">&#8250;</div></div>
+        <div class="ai" onclick="sub('proc')"><div class="aico" style="background:rgba(251,191,36,.12)">&#9878;</div><div class="abody"><div class="atitle">Processos Judiciais</div><div class="asub">6 processos</div></div><div class="aarr">&#8250;</div></div>
+      </div>
+      <div class="ar" style="margin-top:16px">
+        <div class="ai" onclick="exportData()"><div class="aico" style="background:rgba(77,166,255,.1)">&#128190;</div><div class="abody"><div class="atitle">Exportar backup</div><div class="asub">Salvar JSON</div></div><div class="aarr">&#8250;</div></div>
+        <div class="ai" onclick="document.getElementById('ifile').click()"><div class="aico" style="background:rgba(77,166,255,.1)">&#128193;</div><div class="abody"><div class="atitle">Importar backup</div><div class="asub">Restaurar dados</div></div><div class="aarr">&#8250;</div></div>
+      </div>
+      <input id="ifile" type="file" accept=".json" style="display:none" onchange="importData(event)">
+    </div>
+  </div>
+
+  <div id="pg-inv" class="page">
+    <div class="bh"><button class="bbtn" onclick="closeSub()">&#8249;</button><div class="ph1" style="font-size:20px">Investimentos</div></div>
+    <div class="pp" style="padding-top:0">
+      <div class="hcard" style="background:linear-gradient(145deg,#120d30,#0f1120);border:1px solid rgba(123,110,246,.2)">
+        <div class="hlbl">Total</div><div class="hval yellow" id="iTotal">--</div><div class="hsub" id="iSub">--</div>
+      </div>
+      <div class="dc">
+        <div class="dct">Distribuicao do saldo (Mai/26)</div>
+        <div class="lrow"><div class="lb"><div class="lt">Partilha</div></div><div class="lr"><div class="lv yellow">R$ 8.117,87</div></div></div>
+        <div class="lrow"><div class="lb"><div class="lt">Leo</div></div><div class="lr"><div class="lv yellow">R$ 1.014,31</div></div></div>
+        <div class="lrow"><div class="lb"><div class="lt">Apto (a receber)</div></div><div class="lr"><div class="lv yellow">R$ 40.323,58</div></div></div>
+        <div class="lrow"><div class="lb"><div class="lt">Reserva rotativo</div></div><div class="lr"><div class="lv yellow">R$ 1.980,04</div></div></div>
+        <div class="lrow"><div class="lb"><div class="lt">Casamento</div></div><div class="lr"><div class="lv yellow">R$ 10.018,92</div></div></div>
+        <div class="lrow"><div class="lb"><div class="lt">Cartao de credito</div></div><div class="lr"><div class="lv" style="color:var(--t3)">R$ 0</div></div></div>
+      </div>
+      <div class="dc"><div id="listI"></div></div>
+    </div>
+  </div>
+
+  <div id="pg-emg" class="page">
+    <div class="bh"><button class="bbtn" onclick="closeSub()">&#8249;</button><div class="ph1" style="font-size:20px">Fundo Emergencia</div></div>
+    <div class="pp" style="padding-top:0">
+      <div class="hcard" style="background:linear-gradient(145deg,#062030,#0f1120);border:1px solid rgba(77,166,255,.2)">
+        <div class="hlbl">Acumulado</div><div class="hval" id="eTotal">--</div><div class="hsub" id="eSub">--</div>
+      </div>
+      <div class="dc"><div id="listE"></div></div>
+    </div>
+  </div>
+
+  <div id="pg-cas" class="page">
+    <div class="bh"><button class="bbtn" onclick="closeSub()">&#8249;</button><div class="ph1" style="font-size:20px">Casamento &#128141;</div></div>
+    <div class="pp" style="padding-top:0">
+      <div class="hcard" style="background:linear-gradient(145deg,#200d40,#0f1120);border:1px solid rgba(167,139,250,.2)">
+        <div class="hlbl">Orcamento total</div><div class="hval" id="cTotal">--</div><div class="hsub" id="cSub">--</div>
+      </div>
+      <div class="dc"><div id="listC"></div></div>
+    </div>
+  </div>
+
+  <div id="pg-carro" class="page">
+    <div class="bh"><button class="bbtn" onclick="closeSub()">&#8249;</button><div class="ph1" style="font-size:20px">Carro &#128663;</div></div>
+    <div class="pp" style="padding-top:0">
+      <div class="hcard" style="background:linear-gradient(145deg,#0d2040,#0f1120);border:1px solid rgba(96,165,250,.2)">
+        <div class="hlbl">Custo total</div><div class="hval" style="color:var(--blu)">R$ 200.280,24</div><div class="hsub">Entrada + Financiamento + IPVA</div>
+      </div>
+      <div class="r2">
+        <div class="mc"><div class="mclbl">Entrada</div><div class="mcval" style="color:var(--blu)">R$ 50.000</div></div>
+        <div class="mc"><div class="mclbl">Financiado</div><div class="mcval red">R$ 145.000</div><div style="font-size:11px;color:var(--t3)">48x R$ 5.288,54</div></div>
+      </div>
+      <div class="dc">
+        <div class="dct">Parcelas</div>
+        <div class="lrow"><div class="lb"><div class="lt">Parcela 1/48</div><div class="ls">30/04/2026 - Pago pela Thays</div></div><div class="lr"><div class="lv">R$ 5.288,54</div><span class="badge bgg">Pago</span></div></div>
+        <div class="lrow"><div class="lb"><div class="lt">Parcela 2/48</div><div class="ls">08/05/2026 - Antecipacao Leandro</div></div><div class="lr"><div class="lv">R$ 5.212,30</div><span class="badge bgg">Pago</span></div></div>
+        <div class="lrow"><div class="lb"><div class="lt">Parcela 3/48</div><div class="ls">01/06/2026 - Antecipacao Leandro</div></div><div class="lr"><div class="lv">R$ 5.188,54</div><span class="badge bgg">Pago</span></div></div>
+        <div class="lrow"><div class="lb"><div class="lt" style="font-weight:800">Saldo quitacao</div></div><div class="lr"><div class="lv red">R$ 152.122,98</div></div></div>
+      </div>
+      <div class="dc">
+        <div class="dct">Avaliacao</div>
+        <div class="lrow"><div class="lb"><div class="lt">Tabela FIPE</div></div><div class="lr"><div class="lv">R$ 207.172</div></div></div>
+        <div class="lrow"><div class="lb"><div class="lt">Preco mercado</div></div><div class="lr"><div class="lv">R$ 200.000</div></div></div>
+        <div class="lrow"><div class="lb"><div class="lt">Valor venda estimado</div></div><div class="lr"><div class="lv green">R$ 195.000</div></div></div>
+        <div class="lrow"><div class="lb"><div class="lt">Ganho sobre custo</div></div><div class="lr"><div class="lv green">+ R$ 12.172</div></div></div>
+      </div>
+      <div class="dc">
+        <div class="dct">Acesso CarBank</div>
+        <div style="font-size:13px;color:var(--t2);line-height:2">Site: <span style="color:var(--accl)">carbankbrasil.com.br</span><br>CPF: 323.025.288-83<br>Senha: 9297</div>
       </div>
     </div>
   </div>
+
+  <div id="pg-apto" class="page">
+    <div class="bh"><button class="bbtn" onclick="closeSub()">&#8249;</button><div class="ph1" style="font-size:20px">Apto Cajamar &#127968;</div></div>
+    <div class="pp" style="padding-top:0">
+      <div class="hcard" style="background:linear-gradient(145deg,#064e3b,#0f1120);border:1px solid rgba(45,212,170,.2)">
+        <div class="hlbl">Saldo da operacao</div><div class="hval green">R$ 5.677,02</div><div class="hsub">Troquei Apto pelo Carro quitando financiamento Caixa</div>
+      </div>
+      <div class="dc">
+        <div class="dct">Valores</div>
+        <div class="lrow"><div class="lb"><div class="lt">Valor de venda</div></div><div class="lr"><div class="lv">R$ 220.000</div></div></div>
+        <div class="lrow"><div class="lb"><div class="lt">Recebido</div></div><div class="lr"><div class="lv green">R$ 40.000</div></div></div>
+        <div class="lrow"><div class="lb"><div class="lt">A receber</div></div><div class="lr"><div class="lv yellow">R$ 15.000</div></div></div>
+        <div class="lrow"><div class="lb"><div class="lt">A receber - Inter</div></div><div class="lr"><div class="lv yellow">R$ 165.000</div></div></div>
+        <div class="lrow"><div class="lb"><div class="lt">Financiamento Caixa (quitado)</div></div><div class="lr"><div class="lv red">R$ 49.000</div></div></div>
+        <div class="lrow"><div class="lb"><div class="lt">Comissao a pagar</div></div><div class="lr"><div class="lv red">R$ 13.200</div></div></div>
+        <div class="lrow"><div class="lb"><div class="lt">Saldo carro a pagar</div></div><div class="lr"><div class="lv red">R$ 152.122,98</div></div></div>
+      </div>
+      <div class="dc">
+        <div class="dct">Custo mensal</div>
+        <div class="lrow"><div class="lb"><div class="lt">Condominio</div></div><div class="lr"><div class="lv">R$ 532,16</div></div></div>
+        <div class="lrow"><div class="lb"><div class="lt">Parcela Caixa</div></div><div class="lr"><div class="lv">R$ 706,14</div></div></div>
+        <div class="lrow"><div class="lb"><div class="lt" style="font-weight:800">Total mensal</div></div><div class="lr"><div class="lv">R$ 1.238,30</div></div></div>
+      </div>
+    </div>
+  </div>
+
+  <div id="pg-proc" class="page">
+    <div class="bh"><button class="bbtn" onclick="closeSub()">&#8249;</button><div class="ph1" style="font-size:20px">Processos Judiciais</div></div>
+    <div class="pp" style="padding-top:0">
+      <div class="hcard" style="background:linear-gradient(145deg,#1c1a00,#0f1120);border:1px solid rgba(255,204,0,.2)">
+        <div class="hlbl">Processos ativos</div><div class="hval yellow">6 processos</div><div class="hsub">GO e SP</div>
+      </div>
+      <div class="dc">
+        <div class="dct">Proc 1 - Alimentos e guarda (GO)</div>
+        <div class="lrow"><div class="lb"><div class="lt">No</div><div class="ls">5681687-06.2025.8.09.0051</div></div><div class="lr"><span class="badge bgg">Requerente</span></div></div>
+        <div class="lrow"><div class="lb"><div class="lt">Parte contraria</div></div><div class="lr"><div class="lv">Vanessa</div></div></div>
+        <div class="lrow"><div class="lb"><div class="lt">Advogado</div></div><div class="lr"><div class="lv" style="font-size:12px">Marina Araujo</div></div></div>
+        <div class="lrow"><div class="lb"><div class="lt">Acesso projudi.tjgo.jus.br</div><div class="ls">Codigo: mt*x*phfw8cmznq7bj</div></div></div>
+      </div>
+      <div class="dc">
+        <div class="dct">Proc 2 - Agravo de instrumento (GO)</div>
+        <div class="lrow"><div class="lb"><div class="lt">No</div><div class="ls">5890810-44.2025.8.09.0051</div></div><div class="lr"><span class="badge bgg">Requerente</span></div></div>
+        <div class="lrow"><div class="lb"><div class="lt">Parte contraria</div></div><div class="lr"><div class="lv">Vanessa</div></div></div>
+      </div>
+      <div class="dc">
+        <div class="dct">Proc 3 - Cobranca de alimentos (GO)</div>
+        <div class="lrow"><div class="lb"><div class="lt">No</div><div class="ls">6036354-63.2025.8.09.0051</div></div><div class="lr"><span class="badge bgg">Requerente</span></div></div>
+        <div class="lrow"><div class="lb"><div class="lt">Valor almejado</div></div><div class="lr"><div class="lv green">R$ 5.000</div></div></div>
+        <div class="lrow"><div class="lb"><div class="lt">Honorarios Marina</div></div><div class="lr"><div class="lv">R$ 2.000 + 10% exito</div></div></div>
+        <div class="lrow"><div class="lb"><div class="lt">Acesso projudi.tjgo.jus.br</div><div class="ls">Codigo: wjc2wdujeq8nd9hbkbf</div></div></div>
+      </div>
+      <div class="dc">
+        <div class="dct">Proc 4 - Cobranca titulo - REQUERIDO (GO)</div>
+        <div class="lrow"><div class="lb"><div class="lt">No</div><div class="ls">5140903-10.2026.8.09.0051</div></div><div class="lr"><span class="badge bgr">Requerido</span></div></div>
+        <div class="lrow"><div class="lb"><div class="lt">Parte contraria</div></div><div class="lr"><div class="lv">Felix</div></div></div>
+        <div class="lrow"><div class="lb"><div class="lt">Advogado</div><div class="ls">Abrão (Kenede Borges) - Pro bono</div></div></div>
+        <div class="lrow"><div class="lb"><div class="lt">Status</div><div class="ls">Deposito judicial 18/02/2026 - embargos execucao</div></div></div>
+      </div>
+      <div class="dc">
+        <div class="dct">Proc 5 - Embargos de cobranca (GO)</div>
+        <div class="lrow"><div class="lb"><div class="lt">No</div><div class="ls">5140903-10.2026.8.09.0051</div></div><div class="lr"><span class="badge bgg">Requerente</span></div></div>
+        <div class="lrow"><div class="lb"><div class="lt">Valor almejado</div></div><div class="lr"><div class="lv green">R$ 4.856,67</div></div></div>
+        <div class="lrow"><div class="lb"><div class="lt">Custas judiciais</div></div><div class="lr"><div class="lv red">R$ 1.028,91</div></div></div>
+        <div class="lrow"><div class="lb"><div class="lt">Status</div><div class="ls">Deposito 18/02/2026 + custas 06/03/2026</div></div></div>
+      </div>
+      <div class="dc">
+        <div class="dct">Proc 6 - Indenizacao Latam (SP)</div>
+        <div class="lrow"><div class="lb"><div class="lt">No</div><div class="ls">4016435-98.2025.8.26.0003</div></div><div class="lr"><span class="badge bgg">Requerente</span></div></div>
+        <div class="lrow"><div class="lb"><div class="lt">Valor almejado</div></div><div class="lr"><div class="lv green">R$ 7.850,78</div></div></div>
+        <div class="lrow"><div class="lb"><div class="lt">Honorarios</div><div class="ls">Dr. Luiz Fernando dos Santos Jr.</div></div><div class="lr"><div class="lv red">R$ 7.000</div></div></div>
+        <div class="lrow"><div class="lb"><div class="lt">Pago antecipado</div></div><div class="lr"><div class="lv red">R$ 850,78</div></div></div>
+      </div>
+    </div>
+  </div>
+  </div>
   <nav class="nav">
     <button class="ni on" id="nav-fluxo" onclick="go('fluxo')"><span class="ic">&#128179;</span>Fluxo</button>
+    <button class="ni" id="nav-lemb" onclick="go('lemb')" style="position:relative"><span class="ic">&#128276;</span>Alertas<span id="lembBadge" style="display:none;position:absolute;top:5px;right:calc(50% - 14px);width:7px;height:7px;border-radius:50%;background:var(--red);border:2px solid var(--bg)"></span></button>
     <button class="ni" id="nav-resumo" onclick="go('resumo')"><span class="ic">&#9711;</span>Resumo</button>
-    <button class="ni" id="nav-bens" onclick="go('bens')"><span class="ic">&#127983;</span>Bens</button>
     <button class="ni" id="nav-dividas" onclick="go('dividas')"><span class="ic">&#9878;</span>Dividas</button>
     <button class="ni" id="nav-mais" onclick="go('mais')"><span class="ic">&#8943;</span>Mais</button>
   </nav>
@@ -470,130 +459,173 @@ button{font-family:inherit;cursor:pointer;border:none;background:none}
 </div>
 <div class="toast" id="toast"></div>
 <script>
-var KEY='pax_v6',_db=null;
+
+var PIN='2003',pinEntered='';
+function numpad(n){
+  if(n===-1){pinEntered='';updateDots();}
+  else if(n===-2){pinEntered=pinEntered.slice(0,-1);updateDots();}
+  else{
+    if(pinEntered.length>=4)return;
+    pinEntered+=n;updateDots();
+    if(pinEntered.length===4){
+      setTimeout(function(){
+        if(pinEntered===PIN){
+          document.getElementById('lockscreen').style.display='none';
+          document.getElementById('lockerr').textContent='';
+        } else {
+          document.querySelectorAll('.lock-dot').forEach(function(d){d.classList.add('error');});
+          document.getElementById('lockerr').textContent='Senha incorreta';
+          setTimeout(function(){
+            pinEntered='';updateDots();
+            document.querySelectorAll('.lock-dot').forEach(function(d){d.classList.remove('error');});
+          },800);
+        }
+      },200);
+    }
+  }
+}
+function updateDots(){
+  for(var i=0;i<4;i++){
+    var d=document.getElementById('d'+i);
+    if(d){d.classList.toggle('filled',i<pinEntered.length);d.classList.remove('error');}
+  }
+}
+
+var valHidden=false;
+function toggleValues(){
+  valHidden=!valHidden;
+  document.getElementById('eyebtn').textContent=valHidden?'&#128065;':'&#128584;';
+  render(curPage);renderLemb(load());
+}
+function fmtV(v){
+  if(valHidden)return'R$ *****';
+  return fmt(v);
+}
+
+var KEY='pax_v7',_db=null;
 function uid(){return Date.now().toString(36)+Math.random().toString(36).slice(2,5);}
 function mkT(m,d,op,v,c,s,desc,cat){return{id:uid(),mes:m,data:d,operacao:op,valor:v,conta:c,status:s,descricao:desc,categoria:cat||'Outros'};}
 function seed(){
   var T=[
-    ['2026-03','2026-03-06','Entrada',39611.22,'PJ Itau Nu','OK','Distribuicao'],
-    ['2026-03','2026-03-06','Entrada',6750,'PJ Itau Nu','OK','Salario Nubank PJ'],
-    ['2026-03','2026-03-06','Entrada',15250,'Ifood','OK','Salario'],
-    ['2026-03','2026-03-06','Saida',3811.13,'PJ Itau Nu','OK','Quitacao emprestimo Nubank'],
-    ['2026-03','2026-03-06','Saida',2700,'PJ Itau Nu','OK','Aluguel Goiania'],
-    ['2026-03','2026-03-06','Saida',1600,'PJ Itau Nu','OK','Personal'],
-    ['2026-03','2026-03-06','Saida',1550,'PJ Itau Nu','OK','Escola Paulo'],
-    ['2026-03','2026-03-06','Saida',1100,'PJ Itau Nu','OK','Advogada Marina 3/8'],
-    ['2026-03','2026-03-06','Saida',971,'PJ Itau Nu','OK','MEI 1/49 + Multa 1/3'],
-    ['2026-03','2026-03-06','Saida',950,'PJ Itau Nu','OK','Tenis aula + clube'],
-    ['2026-03','2026-03-06','Saida',400,'PJ Itau Nu','OK','Psicologa Leandro'],
-    ['2026-03','2026-03-06','Saida',370,'PJ Itau Nu','OK','Moacir - Transporte escolar'],
-    ['2026-03','2026-03-06','Saida',155,'PJ Itau Nu','OK','Seguro Moto'],
-    ['2026-03','2026-03-06','Saida',86.05,'PJ Itau Nu','OK','MEI DAS'],
-    ['2026-03','2026-03-06','Saida',874.18,'PJ Itau Nu','OK','IPTU Atrasado'],
-    ['2026-03','2026-03-07','Saida',5000,'PJ Itau Nu','OK','Aporte mensal'],
-    ['2026-03','2026-03-07','Saida',5000,'PJ Itau Nu','OK','Fundo de emergencia'],
-    ['2026-03','2026-03-07','Saida',3000,'PJ Itau Nu','OK','Partilha de Bens 4/5'],
-    ['2026-03','2026-03-07','Saida',3072.13,'PJ Itau Nu','OK','Fatura cartao Nubank PF+PJ'],
-    ['2026-03','2026-03-07','Saida',1000,'PJ Itau Nu','OK','TP - Alimentacao escola'],
-    ['2026-03','2026-03-07','Saida',800,'PJ Itau Nu','OK','TP - Gasolina'],
-    ['2026-03','2026-03-05','Saida',1028.91,'PJ Itau Nu','OK','Custas judiciais'],
-    ['2026-03','2026-03-30','Saida',1000,'PJ Itau Nu','OK','Leo'],
-    ['2026-03','2026-03-30','Saida',2232.40,'PJ Itau Nu','OK','Faculdade atrasada'],
-    ['2026-03','2026-03-30','Saida',110,'PJ Itau Nu','OK','Celular Leandro'],
-    ['2026-03','2026-03-08','Saida',5000,'Ifood','OK','Passagens + hospedagem SP'],
-    ['2026-03','2026-03-06','Saida',1973.64,'Ifood','OK','Faculdades'],
-    ['2026-03','2026-03-06','Saida',1700,'Ifood','OK','Monjaro'],
-    ['2026-03','2026-03-06','Saida',1167.38,'Ifood','OK','Apto Cajamar - cond + parcela'],
-    ['2026-04','2026-04-06','Entrada',39611.22,'PJ Itau Nu','OK','Distribuicao'],
-    ['2026-04','2026-04-06','Entrada',6750,'PJ Itau Nu','OK','Salario Nubank PJ'],
-    ['2026-04','2026-04-06','Entrada',45241.97,'PJ Itau Nu','OK','Venda moto'],
-    ['2026-04','2026-04-06','Entrada',15250,'Ifood','OK','Salario'],
-    ['2026-04','2026-04-06','Saida',2910,'PJ Itau Nu','OK','Aluguel Goiania'],
-    ['2026-04','2026-04-06','Saida',1600,'PJ Itau Nu','OK','Personal'],
-    ['2026-04','2026-04-06','Saida',1550,'PJ Itau Nu','OK','Escola Paulo'],
-    ['2026-04','2026-04-06','Saida',1100,'PJ Itau Nu','OK','Advogada Marina 4/8'],
-    ['2026-04','2026-04-06','Saida',1057.05,'PJ Itau Nu','OK','MEI 2/49 + Multa 2/3'],
-    ['2026-04','2026-04-06','Saida',950,'PJ Itau Nu','OK','Tenis aula + clube'],
-    ['2026-04','2026-04-06','Saida',400,'PJ Itau Nu','OK','Psicologa Leandro'],
-    ['2026-04','2026-04-06','Saida',370,'PJ Itau Nu','OK','Moacir - Transporte escolar'],
-    ['2026-04','2026-04-06','Saida',12500,'PJ Itau Nu','OK','Fundo de emergencia'],
-    ['2026-04','2026-04-06','Saida',3000,'PJ Itau Nu','OK','Partilha de Bens 5/5'],
-    ['2026-04','2026-04-06','Saida',2708.67,'PJ Itau Nu','OK','Fatura cartao Nubank PF+PJ'],
-    ['2026-04','2026-04-06','Saida',1000,'PJ Itau Nu','OK','TP - Alimentacao escola'],
-    ['2026-04','2026-04-06','Saida',400,'PJ Itau Nu','OK','TP - Gasolina'],
-    ['2026-04','2026-04-06','Saida',5000,'PJ Itau Nu','OK','Leo'],
-    ['2026-04','2026-04-10','Saida',2000,'PJ Itau Nu','OK','Advogada Marina - execucao'],
-    ['2026-04','2026-04-10','Saida',16250,'PJ Itau Nu','OK','Cartao credito 1/4'],
-    ['2026-04','2026-04-01','Saida',36503.29,'PJ Itau Nu','OK','Saidas adicionais'],
-    ['2026-04','2026-04-30','Saida',5288.54,'Ifood','OK','Parcela Carro 1/48'],
-    ['2026-04','2026-04-30','Saida',365.40,'Ifood','OK','Seguro carro'],
-    ['2026-04','2026-04-06','Saida',1973.64,'Ifood','OK','Faculdades'],
-    ['2026-04','2026-04-06','Saida',1800,'Ifood','OK','Monjaro'],
-    ['2026-04','2026-04-06','Saida',1931.41,'Ifood','OK','Apto Cajamar - cond + parcela'],
-    ['2026-04','2026-04-06','Saida',112.80,'Ifood','OK','Celular Leandro Vivo'],
-    ['2026-05','2026-05-06','Entrada',6750,'PJ Itau Nu','OK','Salario Nubank PJ'],
-    ['2026-05','2026-05-06','Entrada',17487,'PJ Itau Nu','OK','Distribuicao'],
-    ['2026-05','2026-05-06','Entrada',11000,'Ifood','OK','Aniversario'],
-    ['2026-05','2026-05-06','Entrada',15250,'Ifood','OK','Salario'],
-    ['2026-05','2026-05-06','Saida',10000,'PJ Itau Nu','OK','Casamento'],
-    ['2026-05','2026-05-06','Saida',4000,'PJ Itau Nu','OK','Fundo de emergencia'],
-    ['2026-05','2026-05-06','Saida',3000,'PJ Itau Nu','OK','Fatura cartao Nubank PF+PJ'],
-    ['2026-05','2026-05-06','Saida',2700,'PJ Itau Nu','OK','Aluguel Goiania'],
-    ['2026-05','2026-05-06','Saida',2000,'PJ Itau Nu','OK','Partilha de Bens - juros'],
-    ['2026-05','2026-05-06','Saida',1600,'PJ Itau Nu','OK','Personal'],
-    ['2026-05','2026-05-06','Saida',1100,'PJ Itau Nu','OK','Advogada Marina 5/8'],
-    ['2026-05','2026-05-06','Saida',1052,'PJ Itau Nu','','MEI 3/49 + Multa 3/3'],
-    ['2026-05','2026-05-06','Saida',1000,'PJ Itau Nu','OK','TP - Alimentacao escola'],
-    ['2026-05','2026-05-06','Saida',950,'PJ Itau Nu','OK','Tenis aula + clube'],
-    ['2026-05','2026-05-06','Saida',800,'PJ Itau Nu','OK','TP - Gasolina'],
-    ['2026-05','2026-05-06','Saida',400,'PJ Itau Nu','OK','Psicologa Leandro'],
-    ['2026-05','2026-05-06','Saida',370,'PJ Itau Nu','OK','Moacir - Transporte escolar'],
-    ['2026-05','2026-05-10','Saida',1102.50,'PJ Itau Nu','OK','Cartao credito 1/4 Dentista'],
-    ['2026-05','2026-05-06','Saida',5212.30,'Ifood','OK','Parcela Carro 2/48'],
-    ['2026-05','2026-05-06','Saida',1550,'Ifood','OK','Escola Paulo'],
-    ['2026-05','2026-05-08','Saida',986.82,'Ifood','OK','Faculdade Leandro'],
-    ['2026-05','2026-05-08','Saida',986.82,'Ifood','OK','Faculdade Thays'],
-    ['2026-05','2026-05-08','Saida',706.14,'Ifood','OK','Apto Cajamar - Parcela Caixa'],
-    ['2026-05','2026-05-08','Saida',532.16,'Ifood','OK','Apto Cajamar - Condominio'],
-    ['2026-05','2026-05-30','Saida',2300,'Ifood','','Monjaro'],
-    ['2026-05','2026-05-30','Saida',365.40,'Ifood','OK','Seguro carro'],
-    ['2026-05','2026-05-08','Saida',110,'Ifood','','Celular Leandro'],
-    ['2026-06','2026-06-06','Entrada',17487,'PJ Itau Nu','OK','Distribuicao'],
-    ['2026-06','2026-06-06','Entrada',6750,'PJ Itau Nu','','Salario Nubank PJ'],
-    ['2026-06','2026-06-06','Entrada',1340.72,'PJ Itau Nu','OK','Outras demandas'],
-    ['2026-06','2026-06-06','Entrada',15250,'Ifood','','Salario'],
-    ['2026-06','2026-06-06','Saida',2700,'PJ Itau Nu','','Aluguel 1301C'],
-    ['2026-06','2026-06-06','Saida',2000,'PJ Itau Nu','','Fatura cartao Nubank PF'],
-    ['2026-06','2026-06-06','Saida',4102.50,'PJ Itau Nu','','Fatura Itau Platinum Dentista 2/4'],
-    ['2026-06','2026-06-06','Saida',1100,'PJ Itau Nu','','Advogada Marina 6/8'],
-    ['2026-06','2026-06-06','Saida',830,'PJ Itau Nu','OK','TP - Alimentacao escola'],
-    ['2026-06','2026-06-06','Saida',1000,'PJ Itau Nu','OK','Leo'],
-    ['2026-06','2026-06-06','Saida',400,'PJ Itau Nu','OK','TP - Gasolina'],
-    ['2026-06','2026-06-06','Saida',600,'PJ Itau Nu','','Personal + Paulo Henrique'],
-    ['2026-06','2026-06-06','Saida',700,'PJ Itau Nu','','Tenis - Pelagio'],
-    ['2026-06','2026-06-06','Saida',670.16,'PJ Itau Nu','','MEI 4/49'],
-    ['2026-06','2026-06-06','Saida',404.50,'PJ Itau Nu','','Fatura Nubank PJ Computador 3/8'],
-    ['2026-06','2026-06-06','Saida',400,'PJ Itau Nu','','Psicologa Leandro'],
-    ['2026-06','2026-06-06','Saida',370,'PJ Itau Nu','','Moacir - Transporte escolar'],
-    ['2026-06','2026-06-06','Saida',200,'PJ Itau Nu','','Sem Parar'],
-    ['2026-06','2026-06-06','Saida',38.84,'PJ Itau Nu','','Fatura Mercado Livre'],
-    ['2026-06','2026-06-30','Saida',5000,'PJ Itau Nu','','Fundo Casamento Cofrinho Itau'],
-    ['2026-06','2026-06-30','Saida',2000,'PJ Itau Nu','','Fundo Emergencia Cofrinho Itau'],
-    ['2026-06','2026-06-06','Saida',2000,'PJ Itau Nu','','Viagem Ilhabela'],
-    ['2026-06','2026-06-06','Saida',5188.28,'Ifood','OK','Parcela Carro 3/48'],
-    ['2026-06','2026-06-06','Saida',1550,'Ifood','','Escola Paulo'],
-    ['2026-06','2026-06-08','Saida',2300,'Ifood','','Monjaro 2/4'],
-    ['2026-06','2026-06-08','Saida',986.82,'Ifood','OK','Faculdade Leandro'],
-    ['2026-06','2026-06-08','Saida',986.82,'Ifood','OK','Faculdade Thays'],
-    ['2026-06','2026-06-08','Saida',706.14,'Ifood','','Apto Cajamar Parcela Caixa'],
-    ['2026-06','2026-06-08','Saida',532.16,'Ifood','','Apto Cajamar Condominio'],
-    ['2026-06','2026-06-08','Saida',110,'Ifood','','Celular Leandro'],
-    ['2026-06','2026-06-20','Saida',365.40,'Ifood','','Seguro Youse'],
-    ['2026-06','2026-06-08','Saida',800,'Ifood','OK','TP - Faxineira'],
-    ['2026-06','2026-06-08','Saida',400,'Ifood','','Festas']
+    ['2026-03','2026-03-06','Entrada',39611.22,'PJ Itau Nu','OK','Distribuicao','Receita'],
+    ['2026-03','2026-03-06','Entrada',6750,'PJ Itau Nu','OK','Salario Nubank PJ','Receita'],
+    ['2026-03','2026-03-06','Entrada',15250,'Ifood','OK','Salario','Receita'],
+    ['2026-03','2026-03-06','Saida',3811.13,'PJ Itau Nu','OK','Quitacao emprestimo Nubank','Emprestimo'],
+    ['2026-03','2026-03-06','Saida',2700,'PJ Itau Nu','OK','Aluguel Goiania','Moradia'],
+    ['2026-03','2026-03-06','Saida',1600,'PJ Itau Nu','OK','Personal','Saude'],
+    ['2026-03','2026-03-06','Saida',1550,'PJ Itau Nu','OK','Escola Paulo','Educacao'],
+    ['2026-03','2026-03-06','Saida',1100,'PJ Itau Nu','OK','Advogada Marina 3/8','Juridico'],
+    ['2026-03','2026-03-06','Saida',971,'PJ Itau Nu','OK','MEI 1/49 + Multa 1/3','Impostos'],
+    ['2026-03','2026-03-06','Saida',950,'PJ Itau Nu','OK','Tenis aula + clube','Lazer'],
+    ['2026-03','2026-03-06','Saida',400,'PJ Itau Nu','OK','Psicologa Leandro','Saude'],
+    ['2026-03','2026-03-06','Saida',370,'PJ Itau Nu','OK','Moacir - Transporte escolar','Educacao'],
+    ['2026-03','2026-03-06','Saida',155,'PJ Itau Nu','OK','Seguro Moto','Veiculo'],
+    ['2026-03','2026-03-06','Saida',86.05,'PJ Itau Nu','OK','MEI DAS','Impostos'],
+    ['2026-03','2026-03-06','Saida',874.18,'PJ Itau Nu','OK','IPTU Atrasado','Impostos'],
+    ['2026-03','2026-03-07','Saida',5000,'PJ Itau Nu','OK','Aporte mensal','Investimento'],
+    ['2026-03','2026-03-07','Saida',5000,'PJ Itau Nu','OK','Fundo de emergencia','Investimento'],
+    ['2026-03','2026-03-07','Saida',3000,'PJ Itau Nu','OK','Partilha de Bens 4/5','Juridico'],
+    ['2026-03','2026-03-07','Saida',3072.13,'PJ Itau Nu','OK','Fatura cartao Nubank PF+PJ','Cartao'],
+    ['2026-03','2026-03-07','Saida',1000,'PJ Itau Nu','OK','TP - Alimentacao escola','Familia'],
+    ['2026-03','2026-03-07','Saida',800,'PJ Itau Nu','OK','TP - Gasolina','Familia'],
+    ['2026-03','2026-03-05','Saida',1028.91,'PJ Itau Nu','OK','Custas judiciais','Juridico'],
+    ['2026-03','2026-03-30','Saida',1000,'PJ Itau Nu','OK','Leo','Emprestimo'],
+    ['2026-03','2026-03-30','Saida',2232.40,'PJ Itau Nu','OK','Faculdade atrasada','Educacao'],
+    ['2026-03','2026-03-30','Saida',110,'PJ Itau Nu','OK','Celular Leandro','Tecnologia'],
+    ['2026-03','2026-03-08','Saida',5000,'Ifood','OK','Passagens + hospedagem SP','Viagem'],
+    ['2026-03','2026-03-06','Saida',1973.64,'Ifood','OK','Faculdades','Educacao'],
+    ['2026-03','2026-03-06','Saida',1700,'Ifood','OK','Monjaro','Saude'],
+    ['2026-03','2026-03-06','Saida',1167.38,'Ifood','OK','Apto Cajamar - cond + parcela','Moradia'],
+    ['2026-04','2026-04-06','Entrada',39611.22,'PJ Itau Nu','OK','Distribuicao','Receita'],
+    ['2026-04','2026-04-06','Entrada',6750,'PJ Itau Nu','OK','Salario Nubank PJ','Receita'],
+    ['2026-04','2026-04-06','Entrada',45241.97,'PJ Itau Nu','OK','Venda moto','Venda'],
+    ['2026-04','2026-04-06','Entrada',15250,'Ifood','OK','Salario','Receita'],
+    ['2026-04','2026-04-06','Saida',2910,'PJ Itau Nu','OK','Aluguel Goiania','Moradia'],
+    ['2026-04','2026-04-06','Saida',1600,'PJ Itau Nu','OK','Personal','Saude'],
+    ['2026-04','2026-04-06','Saida',1550,'PJ Itau Nu','OK','Escola Paulo','Educacao'],
+    ['2026-04','2026-04-06','Saida',1100,'PJ Itau Nu','OK','Advogada Marina 4/8','Juridico'],
+    ['2026-04','2026-04-06','Saida',1057.05,'PJ Itau Nu','OK','MEI 2/49 + Multa 2/3','Impostos'],
+    ['2026-04','2026-04-06','Saida',950,'PJ Itau Nu','OK','Tenis aula + clube','Lazer'],
+    ['2026-04','2026-04-06','Saida',400,'PJ Itau Nu','OK','Psicologa Leandro','Saude'],
+    ['2026-04','2026-04-06','Saida',370,'PJ Itau Nu','OK','Moacir - Transporte escolar','Educacao'],
+    ['2026-04','2026-04-06','Saida',12500,'PJ Itau Nu','OK','Fundo de emergencia','Investimento'],
+    ['2026-04','2026-04-06','Saida',3000,'PJ Itau Nu','OK','Partilha de Bens 5/5','Juridico'],
+    ['2026-04','2026-04-06','Saida',2708.67,'PJ Itau Nu','OK','Fatura cartao Nubank PF+PJ','Cartao'],
+    ['2026-04','2026-04-06','Saida',1000,'PJ Itau Nu','OK','TP - Alimentacao escola','Familia'],
+    ['2026-04','2026-04-06','Saida',400,'PJ Itau Nu','OK','TP - Gasolina','Familia'],
+    ['2026-04','2026-04-06','Saida',5000,'PJ Itau Nu','OK','Leo','Emprestimo'],
+    ['2026-04','2026-04-10','Saida',2000,'PJ Itau Nu','OK','Advogada Marina - execucao','Juridico'],
+    ['2026-04','2026-04-10','Saida',16250,'PJ Itau Nu','OK','Cartao credito 1/4','Cartao'],
+    ['2026-04','2026-04-01','Saida',36503.29,'PJ Itau Nu','OK','Saidas adicionais','Outros'],
+    ['2026-04','2026-04-30','Saida',5288.54,'Ifood','OK','Parcela Carro 1/48','Veiculo'],
+    ['2026-04','2026-04-30','Saida',365.40,'Ifood','OK','Seguro carro','Veiculo'],
+    ['2026-04','2026-04-06','Saida',1973.64,'Ifood','OK','Faculdades','Educacao'],
+    ['2026-04','2026-04-06','Saida',1800,'Ifood','OK','Monjaro','Saude'],
+    ['2026-04','2026-04-06','Saida',1931.41,'Ifood','OK','Apto Cajamar - cond + parcela','Moradia'],
+    ['2026-04','2026-04-06','Saida',112.80,'Ifood','OK','Celular Leandro Vivo','Tecnologia'],
+    ['2026-05','2026-05-06','Entrada',6750,'PJ Itau Nu','OK','Salario Nubank PJ','Receita'],
+    ['2026-05','2026-05-06','Entrada',17487,'PJ Itau Nu','OK','Distribuicao','Receita'],
+    ['2026-05','2026-05-06','Entrada',11000,'Ifood','OK','Aniversario','Receita'],
+    ['2026-05','2026-05-06','Entrada',15250,'Ifood','OK','Salario','Receita'],
+    ['2026-05','2026-05-06','Saida',10000,'PJ Itau Nu','OK','Casamento','Casamento'],
+    ['2026-05','2026-05-06','Saida',4000,'PJ Itau Nu','OK','Fundo de emergencia','Investimento'],
+    ['2026-05','2026-05-06','Saida',3000,'PJ Itau Nu','OK','Fatura cartao Nubank PF+PJ','Cartao'],
+    ['2026-05','2026-05-06','Saida',2700,'PJ Itau Nu','OK','Aluguel Goiania','Moradia'],
+    ['2026-05','2026-05-06','Saida',2000,'PJ Itau Nu','OK','Partilha de Bens - juros','Juridico'],
+    ['2026-05','2026-05-06','Saida',1600,'PJ Itau Nu','OK','Personal','Saude'],
+    ['2026-05','2026-05-06','Saida',1100,'PJ Itau Nu','OK','Advogada Marina 5/8','Juridico'],
+    ['2026-05','2026-05-06','Saida',1052,'PJ Itau Nu','','MEI 3/49 + Multa 3/3','Impostos'],
+    ['2026-05','2026-05-06','Saida',1000,'PJ Itau Nu','OK','TP - Alimentacao escola','Familia'],
+    ['2026-05','2026-05-06','Saida',950,'PJ Itau Nu','OK','Tenis aula + clube','Lazer'],
+    ['2026-05','2026-05-06','Saida',800,'PJ Itau Nu','OK','TP - Gasolina','Familia'],
+    ['2026-05','2026-05-06','Saida',400,'PJ Itau Nu','OK','Psicologa Leandro','Saude'],
+    ['2026-05','2026-05-06','Saida',370,'PJ Itau Nu','OK','Moacir - Transporte escolar','Educacao'],
+    ['2026-05','2026-05-10','Saida',1102.50,'PJ Itau Nu','OK','Cartao credito 1/4 Dentista','Cartao'],
+    ['2026-05','2026-05-06','Saida',5212.30,'Ifood','OK','Parcela Carro 2/48','Veiculo'],
+    ['2026-05','2026-05-06','Saida',1550,'Ifood','OK','Escola Paulo','Educacao'],
+    ['2026-05','2026-05-08','Saida',986.82,'Ifood','OK','Faculdade Leandro','Educacao'],
+    ['2026-05','2026-05-08','Saida',986.82,'Ifood','OK','Faculdade Thays','Educacao'],
+    ['2026-05','2026-05-08','Saida',706.14,'Ifood','OK','Apto Cajamar - Parcela Caixa','Moradia'],
+    ['2026-05','2026-05-08','Saida',532.16,'Ifood','OK','Apto Cajamar - Condominio','Moradia'],
+    ['2026-05','2026-05-30','Saida',2300,'Ifood','','Monjaro','Saude'],
+    ['2026-05','2026-05-30','Saida',365.40,'Ifood','OK','Seguro carro','Veiculo'],
+    ['2026-05','2026-05-08','Saida',110,'Ifood','','Celular Leandro','Tecnologia'],
+    ['2026-06','2026-06-06','Entrada',17487,'PJ Itau Nu','OK','Distribuicao','Receita'],
+    ['2026-06','2026-06-06','Entrada',6750,'PJ Itau Nu','','Salario Nubank PJ','Receita'],
+    ['2026-06','2026-06-06','Entrada',1340.72,'PJ Itau Nu','OK','Outras demandas','Receita'],
+    ['2026-06','2026-06-06','Entrada',15250,'Ifood','','Salario','Receita'],
+    ['2026-06','2026-06-06','Saida',2700,'PJ Itau Nu','','Aluguel 1301C','Moradia'],
+    ['2026-06','2026-06-06','Saida',2000,'PJ Itau Nu','','Fatura cartao Nubank PF','Cartao'],
+    ['2026-06','2026-06-06','Saida',4102.50,'PJ Itau Nu','','Fatura Itau Platinum Dentista 2/4','Cartao'],
+    ['2026-06','2026-06-06','Saida',1100,'PJ Itau Nu','','Advogada Marina 6/8','Juridico'],
+    ['2026-06','2026-06-06','Saida',830,'PJ Itau Nu','OK','TP - Alimentacao escola','Familia'],
+    ['2026-06','2026-06-06','Saida',1000,'PJ Itau Nu','OK','Leo','Emprestimo'],
+    ['2026-06','2026-06-06','Saida',400,'PJ Itau Nu','OK','TP - Gasolina','Familia'],
+    ['2026-06','2026-06-06','Saida',600,'PJ Itau Nu','','Personal + Paulo Henrique','Saude'],
+    ['2026-06','2026-06-06','Saida',700,'PJ Itau Nu','','Tenis - Pelagio','Lazer'],
+    ['2026-06','2026-06-06','Saida',670.16,'PJ Itau Nu','','MEI 4/49','Impostos'],
+    ['2026-06','2026-06-06','Saida',404.50,'PJ Itau Nu','','Fatura Nubank PJ Computador 3/8','Cartao'],
+    ['2026-06','2026-06-06','Saida',400,'PJ Itau Nu','','Psicologa Leandro','Saude'],
+    ['2026-06','2026-06-06','Saida',370,'PJ Itau Nu','','Moacir - Transporte escolar','Educacao'],
+    ['2026-06','2026-06-06','Saida',200,'PJ Itau Nu','','Sem Parar','Veiculo'],
+    ['2026-06','2026-06-06','Saida',38.84,'PJ Itau Nu','','Fatura Mercado Livre','Compras'],
+    ['2026-06','2026-06-30','Saida',5000,'PJ Itau Nu','','Fundo Casamento Cofrinho Itau','Casamento'],
+    ['2026-06','2026-06-30','Saida',2000,'PJ Itau Nu','','Fundo Emergencia Cofrinho Itau','Investimento'],
+    ['2026-06','2026-06-06','Saida',2000,'PJ Itau Nu','','Viagem Ilhabela','Viagem'],
+    ['2026-06','2026-06-06','Saida',5188.28,'Ifood','OK','Parcela Carro 3/48','Veiculo'],
+    ['2026-06','2026-06-06','Saida',1550,'Ifood','','Escola Paulo','Educacao'],
+    ['2026-06','2026-06-08','Saida',2300,'Ifood','','Monjaro 2/4','Saude'],
+    ['2026-06','2026-06-08','Saida',986.82,'Ifood','OK','Faculdade Leandro','Educacao'],
+    ['2026-06','2026-06-08','Saida',986.82,'Ifood','OK','Faculdade Thays','Educacao'],
+    ['2026-06','2026-06-08','Saida',706.14,'Ifood','','Apto Cajamar Parcela Caixa','Moradia'],
+    ['2026-06','2026-06-08','Saida',532.16,'Ifood','','Apto Cajamar Condominio','Moradia'],
+    ['2026-06','2026-06-08','Saida',110,'Ifood','','Celular Leandro','Tecnologia'],
+    ['2026-06','2026-06-20','Saida',365.40,'Ifood','','Seguro Youse','Veiculo'],
+    ['2026-06','2026-06-08','Saida',800,'Ifood','OK','TP - Faxineira','Familia'],
+    ['2026-06','2026-06-08','Saida',400,'Ifood','','Festas','Lazer']
   ];
   return {
-    fluxo:T.map(function(r){return mkT(r[0],r[1],r[2],r[3],r[4],r[5],r[6]);}),
+    fluxo:T.map(function(r){return mkT(r[0],r[1],r[2],r[3],r[4],r[5],r[6],r[7]);}),
     patrimonio:[
       {id:uid(),nome:'Apto Cajamar',valor:220000,tipo:'Imovel',dono:'LF',obs:'Particular LF'},
       {id:uid(),nome:'Carro',valor:204069,tipo:'Veiculo',dono:'LF',obs:'Adq. Abr/2026'},
@@ -618,7 +650,8 @@ function seed(){
       {id:uid(),nome:'Vale3',tipo:'Acao',qtd:'23',valorAtual:0},
       {id:uid(),nome:'Petr4',tipo:'Acao',qtd:'40',valorAtual:0},
       {id:uid(),nome:'Raiz4',tipo:'Acao',qtd:'2127',valorAtual:0},
-      {id:uid(),nome:'FGTS Eletrobras',tipo:'Fundo',qtd:'1',valorAtual:340.87}
+      {id:uid(),nome:'FGTS Eletrobras',tipo:'Fundo',qtd:'1',valorAtual:340.87},
+      {id:uid(),nome:'Itau - Fundo Emergencia',tipo:'Renda Fixa',qtd:'1',valorAtual:6018.35}
     ],
     emergencia:[
       {id:uid(),nome:'LF',acumulado:6018.35,meta:75575.94,local:'Caixinha Itau/Nubank PF'},
@@ -633,6 +666,12 @@ function seed(){
       {id:uid(),acao:'Contratar fotografo 3-4h',data:'2026-06-01',custo:2000,status:'Pendente'},
       {id:uid(),acao:'Contratar musica violao MPB',data:'2026-06-01',custo:1300,status:'Pendente'},
       {id:uid(),acao:'Decoracao arco flores',data:'2026-06-01',custo:4000,status:'Pendente'}
+    ],
+    lembretes:[
+      {id:uid(),titulo:'Deposito judicial - Processo Felix cobranca titulo',data:'2026-06-10',processo:'Proc 4 - Felix (requerido)',prioridade:'Alta',status:'Pendente',obs:'Verificar se deposito de 18/02 foi aceito nos embargos de execucao'},
+      {id:uid(),titulo:'Acompanhar Processo Latam SP',data:'2026-06-15',processo:'Proc 6 - Latam',prioridade:'Media',status:'Pendente',obs:'Dr. Luiz Fernando - checar andamento da indenizacao'},
+      {id:uid(),titulo:'Parcela carro 4/48',data:'2026-07-01',processo:'',prioridade:'Alta',status:'Pendente',obs:'Acessar carbankbrasil.com.br - CPF 323.025.288-83 senha 9297'},
+      {id:uid(),titulo:'A receber Inter - Apto Cajamar',data:'2026-06-30',processo:'',prioridade:'Alta',status:'Pendente',obs:'R$ 165.000 pendente de recebimento pelo Inter'}
     ]
   };
 }
@@ -653,7 +692,8 @@ function toast(m){var e=document.getElementById('toast');e.textContent=m;e.class
 function openMP(){
   var db=load(),hm={};db.fluxo.forEach(function(t){hm[t.mes]=1;});
   var g=document.getElementById('mgrid'),ms=[];
-  for(var i=6;i<=12;i++)ms.push('2026-'+('0'+i).slice(-2));for(var i=1;i<=12;i++)ms.push('2027-'+('0'+i).slice(-2));
+  for(var i=6;i<=12;i++)ms.push('2026-'+('0'+i).slice(-2));
+  for(var i=1;i<=12;i++)ms.push('2027-'+('0'+i).slice(-2));
   g.innerHTML=ms.map(function(m){return '<button class="mpill '+(m===curMes?'cur':hm[m]?'has':'')+'" onclick="selMes(\''+m+'\')">'+mNome(m)+'</button>';}).join('');
   document.getElementById('mpbg').classList.add('on');
 }
@@ -670,7 +710,6 @@ function go(id){
   document.getElementById('fab').style.display=['resumo','mais'].includes(id)?'none':'flex';
   render(id);
 }
-var subMap={'carro':'pg-carro','apto':'pg-apto','proc':'pg-proc','inv':'pg-inv','emg':'pg-emg','cas':'pg-cas'};
 function sub(id){
   document.querySelectorAll('.page').forEach(function(p){p.classList.remove('on');});
   document.getElementById('pg-'+id).classList.add('on');
@@ -682,8 +721,7 @@ function closeSub(){go('mais');}
 function setF(f,el){
   curF=f;
   document.querySelectorAll('.chip').forEach(function(c){c.classList.remove('on');});
-  el.classList.add('on');
-  renderFluxo(load());
+  el.classList.add('on');renderFluxo(load());
 }
 function renderFluxo(db){
   if(!db||!Array.isArray(db.fluxo))db=load();
@@ -691,7 +729,7 @@ function renderFluxo(db){
   var ent=all.filter(function(t){return t.operacao==='Entrada';}).reduce(function(s,t){return s+t.valor;},0);
   var sai=all.filter(function(t){return t.operacao==='Saida';}).reduce(function(s,t){return s+t.valor;},0);
   var saldo=ent-sai,pend=all.filter(function(t){return t.status!=='OK';}).length;
-  document.getElementById('fhero').innerHTML=
+  var fmt0=fmt;if(valHidden){fmt=fmtV;}document.getElementById('fhero').innerHTML=
     '<div class="fhl">Saldo do mes</div>'+
     '<div class="fhv '+(saldo>=0?'pos':'neg')+'">'+fmt(saldo)+'</div>'+
     '<div class="fhr">'+
@@ -700,7 +738,7 @@ function renderFluxo(db){
       (pend>0?'<div><div class="fsl">Pendentes</div><div class="fsv" style="color:var(--yel)">'+pend+'</div></div>':'')+
     '</div>';
   var contas=['Ifood','PJ Itau Nu'];
-  document.getElementById('apills').innerHTML=contas.map(function(c){
+  fmt=fmt0;document.getElementById('apills').innerHTML=contas.map(function(c){
     var ce=all.filter(function(t){return t.conta===c&&t.operacao==='Entrada';}).reduce(function(s,t){return s+t.valor;},0);
     var cs=all.filter(function(t){return t.conta===c&&t.operacao==='Saida';}).reduce(function(s,t){return s+t.valor;},0);
     var b=ce-cs,col=b>=0?'var(--grn)':'var(--red)';
@@ -719,7 +757,7 @@ function renderFluxo(db){
   else if(curF==='pend')fil=all.filter(function(t){return t.status!=='OK';});
   var list=document.getElementById('txlist');
   if(fil.length===0){
-    list.innerHTML='<div class="empty"><div class="eico">&#128179;</div><div class="etitle">'+(all.length===0?'Nenhuma transacao':'Nenhum resultado')+'</div><div class="esub">'+(all.length===0?'Toque + para adicionar':'Tente outro filtro')+'</div>'+(all.length===0?'<button onclick="resetData()" style="margin-top:16px;padding:12px 24px;border-radius:999px;background:var(--acc);color:#fff;font-size:13px;font-weight:800;border:none;cursor:pointer">Carregar dados de exemplo</button>':'')+'</div>';
+    list.innerHTML='<div class="empty"><div class="eico">&#128179;</div><div class="etitle">'+(all.length===0?'Nenhuma transacao':'Nenhum resultado')+'</div><div class="esub">'+(all.length===0?'Toque + para adicionar':'Tente outro filtro')+'</div>'+(all.length===0?'<button onclick="resetData()" style="margin-top:16px;padding:12px 24px;border-radius:999px;background:var(--acc);color:#fff;font-size:14px;font-weight:800;border:none;cursor:pointer">Carregar dados</button>':'')+'</div>';
     return;
   }
   var bd={};
@@ -728,28 +766,45 @@ function renderFluxo(db){
     if(b.valor!==a.valor)return b.valor-a.valor;
     return b.data.localeCompare(a.data);
   }).forEach(function(t){if(!bd[t.conta])bd[t.conta]=[];bd[t.conta].push(t);});
-  var dates=Object.keys(bd).sort(function(a,b){return a.localeCompare(b);});
-  list.innerHTML=dates.map(function(d){
-    
-    var items_d=bd[d];var dn_d=items_d.reduce(function(s,t){return t.operacao==='Entrada'?s+t.valor:s-t.valor;},0);return '<div class="txdh" style="margin-top:14px"><span style="font-size:13px;font-weight:800;color:var(--t1)">'+d+'</span><span style="color:'+(dn_d>=0?'var(--grn)':'var(--red)')+'">'+(dn_d>=0?'+':'')+fmt(dn_d)+'</span></div>'+
-    items_d.map(function(t){
+  var grps=Object.keys(bd).sort(function(a,b){return a.localeCompare(b);});
+  list.innerHTML='';
+  grps.forEach(function(conta){
+    var items=bd[conta];
+    var dn=items.reduce(function(s,t){return t.operacao==='Entrada'?s+t.valor:s-t.valor;},0);
+    var hdr=document.createElement('div');
+    hdr.className='txdh';hdr.style.marginTop='14px';
+    hdr.innerHTML='<span style="font-size:13px;font-weight:800;color:var(--t1)">'+conta+'</span><span style="color:'+(dn>=0?'var(--grn)':'var(--red)')+'">'+(dn>=0?'+':'')+fmt(dn)+'</span>';
+    list.appendChild(hdr);
+    items.forEach(function(t){
       var isE=t.operacao==='Entrada',isPJ=t.conta==='PJ Itau Nu';
-      var rec=t.recId?('<span style="font-size:10px;color:var(--t3)"> &#8635;'+t.recIdx+'/'+t.recTotal+'</span>'):'';
-      return '<div class="txwrap" id="w-'+t.id+'">'+
+      var rec=t.recId?(' <span style="font-size:10px;color:var(--t3)">&#8635;'+t.recIdx+'/'+t.recTotal+'</span>'):'';
+      var wrap=document.createElement('div');wrap.className='txwrap';wrap.id='w-'+t.id;
+      wrap.innerHTML=
         '<div class="txbg-ok"><span style="font-size:20px">&#10003;</span></div>'+
         '<div class="txbg-del"><span style="font-size:20px">&#10005;</span></div>'+
         '<div class="txc '+(t.status==='OK'?'ok':'pnd')+'" id="c-'+t.id+'">'+
           '<div class="txico '+(isE?'e':'s')+'">'+(isE?'&#8593;':'&#8595;')+'</div>'+
-          '<div class="txb"><div class="txd">'+t.descricao+'</div>'+
-          '<div class="txm"><span class="ctag '+(isPJ?'pj':'vl')+'">'+(isPJ?'PJ':'VL')+'</span>'+(t.categoria?'<span style="font-size:10px;color:var(--t3);background:var(--s2);padding:2px 6px;border-radius:8px">'+t.categoria+'</span>':'')+''+rec+'</div></div>'+
+          '<div class="txb">'+
+            '<div class="txd">'+t.descricao+'</div>'+
+            '<div class="txm">'+
+              '<span class="ctag '+(isPJ?'pj':'vl')+'">'+(isPJ?'PJ':'VL')+'</span>'+
+              (t.categoria?'<span style="font-size:10px;color:var(--t3);background:var(--s2);padding:2px 6px;border-radius:8px">'+t.categoria+'</span>':'')+
+              rec+
+            '</div>'+
+          '</div>'+
           '<div class="txr">'+
             '<div class="txa '+(isE?'e':'s')+'">'+(isE?'+':'-')+fmt(t.valor)+'</div>'+
-            '<button class="sbtn '+(t.status==='OK'?'ok':'pnd')+'" onclick="togOK(\''+t.id+'\')">'+(t.status==='OK'?'&#10003; OK':'&#8987; Pend.')+'</button>'+
+            '<button class="sbtn '+(t.status==='OK'?'ok':'pnd')+'" data-tid="'+t.id+'">'+
+              (t.status==='OK'?'&#10003; OK':'&#8987; Pend.')+
+            '</button>'+
           '</div>'+
-          '<button class="ebtn" onclick="editTx(\''+t.id+'\')">&#9998;</button>'+
-        '</div></div>';
-    }).join('');
-  }).join('');
+          '<button class="ebtn" data-tid="'+t.id+'" style="font-size:20px;opacity:.7;padding:6px 8px;min-width:36px;min-height:36px">&#9998;</button>'+
+        '</div>';
+      list.appendChild(wrap);
+    });
+  });
+  list.querySelectorAll('.sbtn').forEach(function(b){b.onclick=function(){togOK(this.dataset.tid);};});
+  list.querySelectorAll('.ebtn').forEach(function(b){b.onclick=function(){editTx(this.dataset.tid);};});
   setTimeout(function(){bindSwipe(fil);},0);
 }
 function bindSwipe(txs){
@@ -783,6 +838,7 @@ function delTx(id){
 }
 function editTx(id){var db=load(),t=db.fluxo.find(function(x){return x.id===id;});if(t)openTxSheet(t);}
 function openAdd(){
+  if(curPage==='lemb'){openLembSheet(null);return;}
   if(['bens','dividas','inv','emg','cas'].indexOf(curPage)>=0){openGenSheet(curPage,null);return;}
   openTxSheet(null);
 }
@@ -792,8 +848,10 @@ function openTxSheet(ex){
   var db=load(),cs={};db.fluxo.forEach(function(t){cs[t.conta]=1;});
   var cl=['Ifood','PJ Itau Nu'];Object.keys(cs).forEach(function(c){if(cl.indexOf(c)<0)cl.push(c);});
   var cc=ex?ex.conta:'Ifood';
+  var cats=['Receita','Moradia','Alimentacao','Saude','Educacao','Veiculo','Cartao','Juridico','Impostos','Investimento','Familia','Emprestimo','Casamento','Lazer','Viagem','Tecnologia','Compras','Venda','Outros'];
   document.getElementById('stitle').textContent=editId?'Editar':'Nova Transacao';
-  var recHtml='<div class="sep"></div>'+
+  var recHtml=
+    '<div class="sep"></div>'+
     '<div class="field"><label>Recorrencia</label>'+
     '<div class="rgrid">'+
       '<button class="copt on" id="rn" onclick="setRec(\'nao\',this)">Nao repete</button>'+
@@ -801,8 +859,7 @@ function openTxSheet(ex){
       '<button class="copt" id="ri" onclick="setRec(\'indef\',this)">Indeterminado</button>'+
     '</div></div>'+
     '<input type="hidden" id="frec" value="nao">'+
-    '<div id="fqtdwrap" style="display:none"><div class="field"><label>Quantas vezes (meses)?</label>'+
-    '<input id="fqtd" type="number" min="2" max="120" value="12" inputmode="numeric"></div></div>';
+    '<div id="fqtdwrap" style="display:none"><div class="field"><label>Quantas vezes (meses)?</label><input id="fqtd" type="number" min="2" max="120" value="12" inputmode="numeric"></div></div>';
   document.getElementById('sbody').innerHTML=
     '<input type="hidden" id="fop" value="'+op+'">'+
     '<div class="ttog">'+
@@ -812,13 +869,12 @@ function openTxSheet(ex){
     '<div class="awrap"><span class="apfx">R$</span>'+
     '<input class="ainp" id="fval" type="number" inputmode="decimal" placeholder="0,00" step="0.01" value="'+(ex?ex.valor:'')+'" oninput="onVI(this.value)">'+
     '</div><div class="vhint" id="vh"></div>'+
-    '<div class="field"><label>Descricao</label><input id="fdesc" type="text" placeholder="Ex: Aluguel, Distribuicao..." value="'+(ex?ex.descricao:'')+'" list="cat-suggest"></div>'+
-    '<datalist id="cat-suggest"></datalist>'+
+    '<div class="field"><label>Descricao</label><input id="fdesc" type="text" placeholder="Ex: Aluguel, Distribuicao..." value="'+(ex?ex.descricao:'')+'"></div>'+
     '<div class="field"><label>Categoria</label><select id="fcat">'+
-    ['Receita','Moradia','Alimentacao','Saude','Educacao','Veiculo','Cartao','Juridico','Impostos','Investimento','Familia','Emprestimo','Casamento','Lazer','Viagem','Tecnologia','Compras','Venda','Outros'].map(function(c){return'<option'+(ex&&ex.categoria===c?' selected':'')+'>'+c+'</option>';}).join('')+
+      cats.map(function(c){return'<option'+(ex&&ex.categoria===c?' selected':'')+'>'+c+'</option>';}).join('')+
     '</select></div>'+
     '<div class="field"><label>Conta</label><div class="cgrid" id="cgrid">'+
-      cl.map(function(c){return '<button class="copt'+(c===cc?' on':'')+'" onclick="selConta(this,\''+c+'\')">'+c+'</button>';}).join('')+
+      cl.map(function(c){return'<button class="copt'+(c===cc?' on':'')+'" onclick="selConta(this,\''+c+'\')">'+c+'</button>';}).join('')+
       '<button class="copt" onclick="addConta()">+ Nova</button>'+
     '</div><input type="hidden" id="fconta" value="'+cc+'"></div>'+
     '<div class="field"><label>Data</label><input id="fdata" type="date" value="'+(ex?ex.data:curMes+'-06')+'"></div>'+
@@ -827,8 +883,13 @@ function openTxSheet(ex){
       '<option value=""'+(!ex||ex.status!=='OK'?' selected':'')+'>Pendente</option>'+
     '</select></div>'+
     recHtml+
-    '<button class="savebtn" onclick="saveTx()">Salvar</button>'+
-    (editId?'<button class="delbtn" onclick="delTx(\''+editId+'\');closeSH()">Excluir</button>':'');
+    '<button class="savebtn" onclick="saveTx()">Salvar</button>';
+  if(editId){
+    var delB=document.createElement('button');
+    delB.className='delbtn';delB.textContent='Excluir';
+    delB.onclick=function(){var id=editId;if(confirm('Excluir?')){var db=load();db.fluxo=db.fluxo.filter(function(x){return x.id!==id;});save(db);closeSH();renderFluxo(db);toast('Removido');}};
+    document.getElementById('sbody').appendChild(delB);
+  }
   document.getElementById('sbg').classList.add('on');
   setTimeout(function(){var v=document.getElementById('fval');if(v)v.focus();},300);
 }
@@ -901,9 +962,10 @@ function openGenSheet(col,id){
   document.getElementById('stitle').textContent=(id?'Editar ':'Adicionar ')+def.t;
   document.getElementById('sbody').innerHTML=def.f.map(function(f){
     var v=data?data[f.k]:'';
-    if(f.tp==='sel')return '<div class="field"><label>'+f.l+'</label><select id="gf_'+f.k+'">'+f.o.map(function(o){return'<option'+(o===v?' selected':'')+'>'+o+'</option>';}).join('')+'</select></div>';
-    return '<div class="field"><label>'+f.l+'</label><input id="gf_'+f.k+'" type="'+(f.tp==='num'?'number':'text')+'"'+(f.tp==='num'?' step="0.01"':'')+' value="'+(v||'')+'"></div>';
-  }).join('')+'<button class="savebtn" onclick="saveGen(\''+col+'\')">Salvar</button>'+(id?'<button class="delbtn" onclick="delGen(\''+col+'\',\''+id+'\')">Excluir</button>':'');
+    if(f.tp==='sel')return'<div class="field"><label>'+f.l+'</label><select id="gf_'+f.k+'">'+f.o.map(function(o){return'<option'+(o===v?' selected':'')+'>'+o+'</option>';}).join('')+'</select></div>';
+    return'<div class="field"><label>'+f.l+'</label><input id="gf_'+f.k+'" type="'+(f.tp==='num'?'number':'text')+'"'+(f.tp==='num'?' step="0.01"':'')+' value="'+(v||'')+'"></div>';
+  }).join('')+'<button class="savebtn" onclick="saveGen(\''+col+'\')">Salvar</button>';
+  if(id){var db2=document.createElement('button');db2.className='delbtn';db2.textContent='Excluir';db2.onclick=function(){delGen(col,id);};document.getElementById('sbody').appendChild(db2);}
   document.getElementById('sbg').classList.add('on');
 }
 function saveGen(col){
@@ -920,12 +982,121 @@ function delGen(col,id){
 }
 function closeSH(){document.getElementById('sbg').classList.remove('on');editId=null;}
 function closeSBG(e){if(e.target===document.getElementById('sbg'))closeSH();}
+
+/* LEMBRETES */
+function renderLemb(db){
+  var hoje=new Date().toISOString().split('T')[0];
+  var lembs=(db||load()).lembretes||[];
+  var pend=lembs.filter(function(l){return l.status!=='Feito';});
+  var venc=pend.filter(function(l){return l.data<=hoje;});
+  var banner=document.getElementById('lembBanner');
+  var bannerTxt=document.getElementById('lembBannerText');
+  var badge=document.getElementById('lembBadge');
+  if(venc.length>0){
+    if(banner){banner.style.display='block';bannerTxt.textContent=venc.length+' urgente(s): '+venc.map(function(l){return l.titulo;}).slice(0,2).join(', ')+(venc.length>2?'...':'');}
+    if(badge)badge.style.display='block';
+  } else {
+    if(banner)banner.style.display='none';
+    if(badge)badge.style.display='none';
+  }
+  var el=document.getElementById('listLemb');
+  if(!el)return;
+  if(lembs.length===0){el.innerHTML='<div class="empty"><div class="eico">&#128276;</div><div class="etitle">Nenhum lembrete</div><div class="esub">Toque + para adicionar</div></div>';return;}
+  var priorBg=function(p){return p==='Alta'?'bgr':p==='Media'?'bgy':'bgg';};
+  el.innerHTML='';
+  lembs.slice().sort(function(a,b){
+    if(a.status==='Feito'&&b.status!=='Feito')return 1;
+    if(b.status==='Feito'&&a.status!=='Feito')return-1;
+    return a.data.localeCompare(b.data);
+  }).forEach(function(l){
+    var vencido=l.status!=='Feito'&&l.data<=hoje;
+    var div=document.createElement('div');
+    div.style.cssText='padding:14px 0;border-bottom:1px solid var(--bdr);opacity:'+(l.status==='Feito'?'.45':'1');
+    div.innerHTML=
+      '<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px">'+
+        '<div style="flex:1;min-width:0">'+
+          '<div style="font-size:15px;font-weight:700;color:'+(vencido?'var(--red)':'var(--t1)')+'">'+(vencido?'&#9888; ':'')+l.titulo+'</div>'+
+          (l.processo?'<div style="font-size:12px;color:var(--t3);margin-top:3px">&#9878; '+l.processo+'</div>':'')+
+          (l.obs?'<div style="font-size:13px;color:var(--t2);margin-top:5px;line-height:1.5">'+l.obs+'</div>':'')+
+        '</div>'+
+        '<div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px;margin-left:10px;flex-shrink:0">'+
+          '<span class="badge '+priorBg(l.prioridade)+'">'+l.prioridade+'</span>'+
+          '<span style="font-size:11px;color:'+(vencido?'var(--red)':'var(--t3)')+'">'+fmtD(l.data)+'</span>'+
+        '</div>'+
+      '</div>'+
+      '<div style="display:flex;gap:8px">'+
+        '<button class="lbtn-tog" data-lid="'+l.id+'" style="flex:1;padding:10px;border-radius:12px;border:1.5px solid '+(l.status!=='Feito'?'rgba(0,212,170,.4)':'var(--bdr)')+';background:'+(l.status!=='Feito'?'var(--grnd)':'var(--s2)')+';font-size:13px;font-weight:800;color:'+(l.status!=='Feito'?'var(--grn)':'var(--t3)')+'">'+
+          (l.status!=='Feito'?'&#10003; Concluir':'&#8635; Reabrir')+
+        '</button>'+
+        '<button class="lbtn-edit" data-lid="'+l.id+'" style="padding:10px 16px;border-radius:12px;border:1.5px solid var(--bdr);background:var(--s2);font-size:18px;color:var(--t2)">&#9998;</button>'+
+        '<button class="lbtn-del" data-lid="'+l.id+'" style="padding:10px 14px;border-radius:12px;border:1.5px solid rgba(255,95,87,.3);background:var(--redd);font-size:16px;color:var(--red)">&#10005;</button>'+
+      '</div>';
+    el.appendChild(div);
+  });
+  el.querySelectorAll('.lbtn-tog').forEach(function(b){b.onclick=function(){
+    var id=this.dataset.lid,db=load(),l=db.lembretes.find(function(x){return x.id===id;});
+    if(!l)return;l.status=l.status==='Feito'?'Pendente':'Feito';
+    save(db);renderLemb(db);toast(l.status==='Feito'?'Concluido':'Reaberto');
+  };});
+  el.querySelectorAll('.lbtn-edit').forEach(function(b){b.onclick=function(){
+    var id=this.dataset.lid,db=load(),l=db.lembretes.find(function(x){return x.id===id;});
+    if(l)openLembSheet(l);
+  };});
+  el.querySelectorAll('.lbtn-del').forEach(function(b){b.onclick=function(){
+    var id=this.dataset.lid;
+    if(!confirm('Excluir lembrete?'))return;
+    var db=load();db.lembretes=db.lembretes.filter(function(x){return x.id!==id;});
+    save(db);renderLemb(db);toast('Removido');
+  };});
+}
+function openLembSheet(ex){
+  editId=ex?ex.id:null;
+  var processos=['','Proc 1 - Alimentos/Guarda','Proc 2 - Agravo','Proc 3 - Cobranca alimentos','Proc 4 - Felix (requerido)','Proc 5 - Embargos','Proc 6 - Latam'];
+  document.getElementById('stitle').textContent=editId?'Editar Lembrete':'Novo Lembrete';
+  document.getElementById('sbody').innerHTML=
+    '<div class="field"><label>Titulo</label><input id="lt" type="text" placeholder="Ex: Verificar processo..." value="'+(ex?ex.titulo:'')+'"></div>'+
+    '<div class="field"><label>Data limite</label><input id="ld" type="date" value="'+(ex?ex.data:curMes+'-15')+'"></div>'+
+    '<div class="field"><label>Prioridade</label><select id="lp">'+
+      ['Alta','Media','Baixa'].map(function(p){return'<option'+(ex&&ex.prioridade===p?' selected':'')+'>'+p+'</option>';}).join('')+
+    '</select></div>'+
+    '<div class="field"><label>Processo relacionado</label><select id="lpr">'+
+      processos.map(function(p){return'<option'+(ex&&ex.processo===p?' selected':'')+'>'+p+'</option>';}).join('')+
+    '</select></div>'+
+    '<div class="field"><label>Ultimo status / Observacao</label>'+
+    '<textarea id="lo" rows="4" style="width:100%;background:var(--s2);border:1.5px solid var(--bdr);border-radius:12px;padding:12px;font-size:14px;color:var(--t1);font-family:inherit;outline:none;resize:none">'+(ex?ex.obs:'')+'</textarea></div>'+
+    '<div class="field"><label>Status</label><select id="ls">'+
+      ['Pendente','Feito'].map(function(s){return'<option'+(ex&&ex.status===s?' selected':'')+'>'+s+'</option>';}).join('')+
+    '</select></div>'+
+    '<button class="savebtn" onclick="saveLemb()">Salvar</button>';
+  if(editId){
+    var db2=document.createElement('button');db2.className='delbtn';db2.textContent='Excluir';
+    db2.onclick=function(){
+      var id=editId;if(!confirm('Excluir?'))return;
+      var db=load();db.lembretes=db.lembretes.filter(function(x){return x.id!==id;});
+      save(db);closeSH();renderLemb(db);toast('Removido');
+    };
+    document.getElementById('sbody').appendChild(db2);
+  }
+  document.getElementById('sbg').classList.add('on');
+  setTimeout(function(){var v=document.getElementById('lt');if(v)v.focus();},300);
+}
+function saveLemb(){
+  var db=load();if(!db.lembretes)db.lembretes=[];
+  var item={id:editId||uid(),titulo:document.getElementById('lt').value,data:document.getElementById('ld').value,
+    prioridade:document.getElementById('lp').value,processo:document.getElementById('lpr').value,
+    obs:document.getElementById('lo').value,status:document.getElementById('ls').value};
+  if(editId){var i=db.lembretes.findIndex(function(x){return x.id===editId;});if(i>=0)db.lembretes[i]=item;}
+  else db.lembretes.push(item);
+  save(db);closeSH();renderLemb(db);toast('Lembrete salvo');
+}
+
 Chart.defaults.color='#606880';Chart.defaults.borderColor='#252840';
 Chart.defaults.font.family='-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif';Chart.defaults.font.size=11;
 function dc(id){if(charts[id]){charts[id].destroy();delete charts[id];}}
 function render(id){
   var db=load();
   if(id==='fluxo')renderFluxo(db);
+  else if(id==='lemb')renderLemb(db);
   else if(id==='resumo')renderResumo(db);
   else if(id==='bens')renderBens(db);
   else if(id==='dividas')renderDividas(db);
@@ -939,8 +1110,7 @@ function renderResumo(db){
   var div=db.dividas.filter(function(d){return d.status!=='Pago';}).reduce(function(s,i){return s+i.valor;},0);
   document.getElementById('rSaldo').textContent=fmt(bens-div);
   document.getElementById('rSub').textContent='Bens '+fmt(bens)+' - Dividas '+fmt(div);
-  document.getElementById('rBens').textContent=fmt(bens);
-  document.getElementById('rDiv').textContent=fmt(div);
+  document.getElementById('rBens').textContent=fmt(bens);document.getElementById('rDiv').textContent=fmt(div);
   var ms={};db.fluxo.forEach(function(t){ms[t.mes]=1;});var meses=Object.keys(ms).sort();
   var ents=meses.map(function(m){return db.fluxo.filter(function(t){return t.mes===m&&t.operacao==='Entrada';}).reduce(function(s,t){return s+t.valor;},0);});
   var sais=meses.map(function(m){return db.fluxo.filter(function(t){return t.mes===m&&t.operacao==='Saida';}).reduce(function(s,t){return s+t.valor;},0);});
@@ -962,8 +1132,9 @@ function renderBens(db){
   dc('cB');if(db.patrimonio.length)charts['cB']=new Chart(document.getElementById('cB'),{type:'doughnut',data:{labels:db.patrimonio.map(function(p){return p.nome;}),datasets:[{data:db.patrimonio.map(function(p){return p.valor;}),backgroundColor:['#7b6ef6','#60a5fa','#fbbf24','#00d4aa','#ff5f57'],borderWidth:0}]},options:{responsive:true,maintainAspectRatio:false,cutout:'58%',plugins:{legend:{position:'bottom',labels:{boxWidth:9,padding:8}}}}});
   document.getElementById('listB').innerHTML=db.patrimonio.map(function(r){
     var ic=r.tipo==='Imovel'?'&#127968;':r.tipo==='Veiculo'?'&#128663;':'&#128187;';
-    return '<div class="lrow"><div class="lico" style="background:rgba(77,166,255,.1)">'+ic+'</div><div class="lb"><div class="lt">'+r.nome+'</div><div class="ls">'+r.tipo+' - '+r.dono+'</div></div><div class="lr"><div class="lv">'+fmt(r.valor)+'</div><button class="eb" onclick="openGenSheet(\'bens\',\''+r.id+'\')">&#9998;</button></div></div>';
-  }).join('')||'<div class="empty"><div class="eico">&#127983;</div><div class="etitle">Nenhum bem</div></div>';
+    return'<div class="lrow"><div class="lico" style="background:rgba(77,166,255,.1)">'+ic+'</div><div class="lb"><div class="lt">'+r.nome+'</div><div class="ls">'+r.tipo+' - '+r.dono+'</div></div><div class="lr"><div class="lv">'+fmt(r.valor)+'</div><button class="eb" data-bid="'+r.id+'">&#9998;</button></div></div>';
+  }).join('')||'<div class="empty"><div class="etitle">Nenhum bem</div></div>';
+  document.querySelectorAll('#listB .eb').forEach(function(b){b.onclick=function(){openGenSheet('bens',this.dataset.bid);};});
 }
 function renderDividas(db){
   var at=db.dividas.filter(function(d){return d.status!=='Pago';}),tot=at.reduce(function(s,i){return s+i.valor;},0);
@@ -972,8 +1143,9 @@ function renderDividas(db){
   if(top.length)charts['cD']=new Chart(document.getElementById('cD'),{type:'bar',data:{labels:top.map(function(d){return d.nome.split(' ').slice(0,2).join(' ');}),datasets:[{data:top.map(function(d){return d.valor;}),backgroundColor:'rgba(255,95,87,.7)',borderRadius:4}]},options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{callback:function(v){return fmtK(v);}}}}}});
   document.getElementById('listD').innerHTML=db.dividas.map(function(r){
     var cl=r.status==='Pago'?'bgg':r.status==='Aguardando'?'bga':'bgy';
-    return '<div class="lrow"><div class="lb"><div class="lt">'+r.nome+'</div><div class="ls"><span class="badge '+cl+'">'+r.status+'</span>'+(r.obs?' - '+r.obs:'')+'</div></div><div class="lr"><div class="lv '+(r.status==='Pago'?'green':'red')+'">'+fmt(r.valor)+'</div><button class="eb" onclick="openGenSheet(\'dividas\',\''+r.id+'\')">&#9998;</button></div></div>';
+    return'<div class="lrow"><div class="lb"><div class="lt">'+r.nome+'</div><div class="ls"><span class="badge '+cl+'">'+r.status+'</span>'+(r.obs?' - '+r.obs:'')+'</div></div><div class="lr"><div class="lv '+(r.status==='Pago'?'green':'red')+'">'+fmt(r.valor)+'</div><button class="eb" data-did="'+r.id+'">&#9998;</button></div></div>';
   }).join('')||'<div class="empty"><div class="etitle">Sem dividas!</div></div>';
+  document.querySelectorAll('#listD .eb').forEach(function(b){b.onclick=function(){openGenSheet('dividas',this.dataset.did);};});
 }
 function renderMais(db){
   document.getElementById('tInv').textContent=fmt(db.investimentos.reduce(function(s,i){return s+i.valorAtual;},0));
@@ -985,20 +1157,22 @@ function renderInv(db){
   var tot=db.investimentos.reduce(function(s,i){return s+i.valorAtual;},0);
   document.getElementById('iTotal').textContent=fmt(tot);document.getElementById('iSub').textContent=db.investimentos.length+' ativos';
   document.getElementById('listI').innerHTML=db.investimentos.map(function(r){
-    return '<div class="lrow"><div class="lico" style="background:rgba(123,110,246,.1)">'+(r.tipo==='Acao'?'&#128202;':'&#128188;')+'</div><div class="lb"><div class="lt">'+r.nome+'</div><div class="ls">'+r.tipo+' - '+r.qtd+'</div></div><div class="lr"><div class="lv yellow">'+(r.valorAtual>0?fmt(r.valorAtual):'--')+'</div><button class="eb" onclick="openGenSheet(\'inv\',\''+r.id+'\')">&#9998;</button></div></div>';
+    return'<div class="lrow"><div class="lico" style="background:rgba(123,110,246,.1)">'+(r.tipo==='Acao'?'&#128202;':r.tipo==='Fundo'?'&#128188;':'&#127968;')+'</div><div class="lb"><div class="lt">'+r.nome+'</div><div class="ls">'+r.tipo+' - '+r.qtd+'</div></div><div class="lr"><div class="lv yellow">'+(r.valorAtual>0?fmt(r.valorAtual):'--')+'</div><button class="eb" data-iid="'+r.id+'">&#9998;</button></div></div>';
   }).join('')||'<div class="empty"><div class="etitle">Nenhum investimento</div></div>';
+  document.querySelectorAll('#listI .eb').forEach(function(b){b.onclick=function(){openGenSheet('inv',this.dataset.iid);};});
 }
 function renderEmg(db){
   var tot=db.emergencia.reduce(function(s,e){return s+e.acumulado;},0),meta=db.emergencia.reduce(function(s,e){return s+e.meta;},0);
   document.getElementById('eTotal').textContent=fmt(tot);document.getElementById('eSub').textContent=(meta>0?(tot/meta*100).toFixed(1):0)+'% do objetivo';
   document.getElementById('listE').innerHTML=db.emergencia.map(function(r){
     var p=r.meta>0?Math.min(100,r.acumulado/r.meta*100):0;
-    return '<div style="padding:14px 0;border-bottom:1px solid var(--bdr)">'+
-      '<div style="display:flex;justify-content:space-between;margin-bottom:8px"><span style="font-weight:700">'+r.nome+'</span><button class="eb" onclick="openGenSheet(\'emg\',\''+r.id+'\')">&#9998;</button></div>'+
+    return'<div style="padding:14px 0;border-bottom:1px solid var(--bdr)">'+
+      '<div style="display:flex;justify-content:space-between;margin-bottom:8px"><span style="font-weight:700">'+r.nome+'</span><button class="eb" data-eid="'+r.id+'">&#9998;</button></div>'+
       '<div class="prow"><span>'+fmt(r.acumulado)+'</span><span style="font-weight:700;color:var(--yel)">'+p.toFixed(1)+'%</span></div>'+
       '<div class="pb" style="margin-bottom:4px"><div class="pf" style="width:'+p+'%;background:var(--yel)"></div></div>'+
       '<div style="font-size:11px;color:var(--t3)">Meta: '+fmt(r.meta)+' - '+r.local+'</div></div>';
   }).join('');
+  document.querySelectorAll('#listE .eb').forEach(function(b){b.onclick=function(){openGenSheet('emg',this.dataset.eid);};});
 }
 function renderCas(db){
   var tot=db.casamento.reduce(function(s,c){return s+c.custo;},0);
@@ -1006,11 +1180,12 @@ function renderCas(db){
   function sc(s){return s==='Concluido'?'var(--grn)':s==='Em andamento'?'var(--yel)':'var(--t3)';}
   document.getElementById('listC').innerHTML=db.casamento.map(function(r){
     var cl=r.status==='Concluido'?'bgg':r.status==='Em andamento'?'bgy':'bga';
-    return '<div class="lrow">'+
+    return'<div class="lrow">'+
       '<div style="width:10px;height:10px;border-radius:50%;background:'+sc(r.status)+';flex-shrink:0;margin-top:3px"></div>'+
       '<div class="lb"><div class="lt">'+r.acao+'</div><div class="ls">'+fmtD(r.data)+' - <span class="badge '+cl+'">'+r.status+'</span>'+(r.custo>0?' - '+fmt(r.custo):'')+'</div></div>'+
-      '<button class="eb" onclick="openGenSheet(\'cas\',\''+r.id+'\')">&#9998;</button></div>';
+      '<button class="eb" data-cid="'+r.id+'">&#9998;</button></div>';
   }).join('');
+  document.querySelectorAll('#listC .eb').forEach(function(b){b.onclick=function(){openGenSheet('cas',this.dataset.cid);};});
 }
 function exportData(){
   var a=document.createElement('a');
@@ -1023,11 +1198,12 @@ function importData(e){
   r.onload=function(ev){try{if(confirm('Substituir dados pelo backup?')){_db=JSON.parse(ev.target.result);save(_db);render(curPage);toast('Importado');}}catch(err){toast('Arquivo invalido');}};
   r.readAsText(f);e.target.value='';
 }
-function resetData(){localStorage.removeItem(KEY);_db=null;load();render('fluxo');toast('Dados de exemplo carregados');}
+function resetData(){localStorage.removeItem(KEY);_db=null;load();render('fluxo');renderLemb(load());toast('Dados de exemplo carregados');}
 (function(){
-  try{['pax_v5','pax_v4','pax_v3','pax_db_v2'].forEach(function(k){localStorage.removeItem(k);});}catch(e){}
-  load();updML();render('fluxo');
+  try{['pax_v6','pax_v5','pax_v4','pax_v3'].forEach(function(k){localStorage.removeItem(k);});}catch(e){}
+  load();updML();render('fluxo');renderLemb(load());
 })();
+
 </script>
 </body>
-</html> 
+</html>
