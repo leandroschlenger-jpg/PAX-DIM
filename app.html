@@ -228,6 +228,23 @@ button{font-family:inherit;cursor:pointer;border:none;background:none}
           <div class="tile" onclick="sub('inv')"><div class="tico">&#128200;</div><div class="tlbl">Investimentos</div><div class="tval yellow" id="tInv">--</div></div>
           <div class="tile" onclick="sub('emg')"><div class="tico">&#128737;</div><div class="tlbl">Emergencia</div><div class="tval yellow" id="tEmg">--</div></div>
         </div>
+        <div class="ar" style="margin-bottom:8px">
+          <div class="ai" onclick="sub('carro')">
+            <div class="aico" style="background:rgba(96,165,250,.12)">&#128663;</div>
+            <div class="abody"><div class="atitle">Carro</div><div class="asub">Financiamento + parcelas</div></div>
+            <div class="aarr">&#8250;</div>
+          </div>
+          <div class="ai" onclick="sub('apto')">
+            <div class="aico" style="background:rgba(45,212,191,.12)">&#127968;</div>
+            <div class="abody"><div class="atitle">Apto Cajamar</div><div class="asub">Venda + saldos</div></div>
+            <div class="aarr">&#8250;</div>
+          </div>
+          <div class="ai" onclick="sub('proc')">
+            <div class="aico" style="background:rgba(251,191,36,.12)">&#9878;</div>
+            <div class="abody"><div class="atitle">Processos Judiciais</div><div class="asub">6 processos ativos</div></div>
+            <div class="aarr">&#8250;</div>
+          </div>
+        </div>
         <div class="ar">
           <div class="ai" onclick="sub('cas')">
             <div class="aico" style="background:rgba(167,139,250,.12)">&#128141;</div>
@@ -250,11 +267,166 @@ button{font-family:inherit;cursor:pointer;border:none;background:none}
         <input id="ifile" type="file" accept=".json" style="display:none" onchange="importData(event)">
       </div>
     </div>
+    <div id="pg-carro" class="page">
+      <div class="bh"><button class="bbtn" onclick="closeSub()">&#8249;</button><div class="ph1" style="font-size:20px">Carro &#128663;</div></div>
+      <div class="pp" style="padding-top:0">
+        <div class="hcard" style="background:linear-gradient(145deg,#0d2040,#0f1120);border:1px solid rgba(96,165,250,.2)">
+          <div class="hlbl">Custo total</div><div class="hval" style="color:var(--blu)">R$ 200.280,24</div>
+          <div class="hsub">Entrada + Financiamento + IPVA</div>
+        </div>
+        <div class="r2">
+          <div class="mc"><div class="mclbl">Entrada</div><div class="mcval" style="color:var(--blu)">R$ 50.000</div></div>
+          <div class="mc"><div class="mclbl">Financiado</div><div class="mcval red">R$ 145.000</div><div style="font-size:11px;color:var(--t3)">48x R$ 5.288,54</div></div>
+        </div>
+        <div class="r2">
+          <div class="mc"><div class="mclbl">IPVA</div><div class="mcval">R$ 5.280,24</div></div>
+          <div class="mc"><div class="mclbl">Total financiamento</div><div class="mcval red">R$ 253.849,92</div></div>
+        </div>
+        <div class="dc">
+          <div class="dct">Avaliacao de mercado</div>
+          <div class="lrow"><div class="lb"><div class="lt">Tabela FIPE</div></div><div class="lr"><div class="lv">R$ 207.172</div></div></div>
+          <div class="lrow"><div class="lb"><div class="lt">Preco de mercado</div></div><div class="lr"><div class="lv">R$ 200.000</div></div></div>
+          <div class="lrow"><div class="lb"><div class="lt">Valor de venda estimado</div></div><div class="lr"><div class="lv green">R$ 195.000</div></div></div>
+          <div class="lrow"><div class="lb"><div class="lt">Ganho sobre custo</div></div><div class="lr"><div class="lv green">+ R$ 12.172</div></div></div>
+        </div>
+        <div class="dc">
+          <div class="dct">Parcelas pagas</div>
+          <div class="lrow"><div class="lb"><div class="lt">1a parcela</div><div class="ls">30/04/2026 - Pago pela Thays</div></div><div class="lr"><div class="lv">R$ 5.288,54</div></div></div>
+          <div class="lrow"><div class="lb"><div class="lt">2a parcela</div><div class="ls">08/05/2026 - Antecipacao Leandro</div></div><div class="lr"><div class="lv">R$ 5.212,30</div></div></div>
+          <div class="lrow"><div class="lb"><div class="lt">3a parcela</div><div class="ls">01/06/2026 - Antecipacao Leandro</div></div><div class="lr"><div class="lv">R$ 5.188,54</div></div></div>
+          <div class="lrow"><div class="lb"><div class="lt" style="font-weight:800">Saldo para quitacao</div></div><div class="lr"><div class="lv red">R$ 152.122,98</div></div></div>
+        </div>
+        <div class="dc">
+          <div class="dct">Acesso ao financiamento</div>
+          <div style="font-size:13px;color:var(--t2);line-height:1.8">
+            Site: <span style="color:var(--accl)">carbankbrasil.com.br</span><br>
+            CPF: 323.025.288-83<br>
+            Nova senha: 9297
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div id="pg-apto" class="page">
+      <div class="bh"><button class="bbtn" onclick="closeSub()">&#8249;</button><div class="ph1" style="font-size:20px">Apto Cajamar &#127968;</div></div>
+      <div class="pp" style="padding-top:0">
+        <div class="hcard" style="background:linear-gradient(145deg,#064e3b,#0f1120);border:1px solid rgba(45,212,170,.2)">
+          <div class="hlbl">Saldo da operacao</div><div class="hval green">R$ 5.677,02</div>
+          <div class="hsub">Troquei Apto pelo Carro, quitando financiamento Caixa</div>
+        </div>
+        <div class="dc">
+          <div class="dct">Valores da venda</div>
+          <div class="lrow"><div class="lb"><div class="lt">Valor de venda</div></div><div class="lr"><div class="lv">R$ 220.000</div></div></div>
+          <div class="lrow"><div class="lb"><div class="lt">Recebido</div></div><div class="lr"><div class="lv green">R$ 40.000</div></div></div>
+          <div class="lrow"><div class="lb"><div class="lt">A receber</div></div><div class="lr"><div class="lv yellow">R$ 15.000</div></div></div>
+          <div class="lrow"><div class="lb"><div class="lt">A receber - Inter</div></div><div class="lr"><div class="lv yellow">R$ 165.000</div></div></div>
+        </div>
+        <div class="dc">
+          <div class="dct">Saidas da operacao</div>
+          <div class="lrow"><div class="lb"><div class="lt">Financiamento Caixa (quitado)</div></div><div class="lr"><div class="lv red">R$ 49.000</div></div></div>
+          <div class="lrow"><div class="lb"><div class="lt">Comissao a pagar</div></div><div class="lr"><div class="lv red">R$ 13.200</div></div></div>
+          <div class="lrow"><div class="lb"><div class="lt">Saldo carro a pagar</div></div><div class="lr"><div class="lv red">R$ 152.122,98</div></div></div>
+        </div>
+        <div class="dc">
+          <div class="dct">Custo mensal do Apto</div>
+          <div class="lrow"><div class="lb"><div class="lt">Condominio</div></div><div class="lr"><div class="lv">R$ 532,16</div></div></div>
+          <div class="lrow"><div class="lb"><div class="lt">Parcela Caixa</div></div><div class="lr"><div class="lv">R$ 706,14</div></div></div>
+          <div class="lrow"><div class="lb"><div class="lt" style="font-weight:800">Total mensal</div></div><div class="lr"><div class="lv">R$ 1.238,30</div></div></div>
+        </div>
+      </div>
+    </div>
+
+    <div id="pg-proc" class="page">
+      <div class="bh"><button class="bbtn" onclick="closeSub()">&#8249;</button><div class="ph1" style="font-size:20px">Processos Judiciais</div></div>
+      <div class="pp" style="padding-top:0">
+        <div class="hcard" style="background:linear-gradient(145deg,#1c1a00,#0f1120);border:1px solid rgba(255,204,0,.2)">
+          <div class="hlbl">Processos ativos</div><div class="hval yellow">6 processos</div>
+          <div class="hsub">GO e SP</div>
+        </div>
+        <div class="dc">
+          <div class="dct">Processo 1 - Alimentos e guarda</div>
+          <div class="lrow"><div class="lb"><div class="lt">No Processo</div><div class="ls">5681687-06.2025.8.09.0051 (GO)</div></div><div class="lr"><div class="lv"><span class="badge bgg">Requerente</span></div></div></div>
+          <div class="lrow"><div class="lb"><div class="lt">Parte contraria</div></div><div class="lr"><div class="lv">Vanessa</div></div></div>
+          <div class="lrow"><div class="lb"><div class="lt">Advogado</div><div class="ls">Marina Araujo</div></div><div class="lr"><div class="lv">—</div></div></div>
+          <div class="lrow"><div class="lb"><div class="lt">Acesso</div><div class="ls">projudi.tjgo.jus.br</div></div><div class="lr"><div class="lv" style="font-size:11px">mt*x*phfw8cmznq7bj</div></div></div>
+        </div>
+        <div class="dc">
+          <div class="dct">Processo 2 - Agravo de instrumento</div>
+          <div class="lrow"><div class="lb"><div class="lt">No Processo</div><div class="ls">5890810-44.2025.8.09.0051 (GO)</div></div><div class="lr"><div class="lv"><span class="badge bgg">Requerente</span></div></div></div>
+          <div class="lrow"><div class="lb"><div class="lt">Parte contraria</div></div><div class="lr"><div class="lv">Vanessa</div></div></div>
+          <div class="lrow"><div class="lb"><div class="lt">Advogado</div><div class="ls">Felix ate 03/11/2025</div></div><div class="lr"><div class="lv">—</div></div></div>
+        </div>
+        <div class="dc">
+          <div class="dct">Processo 3 - Cobranca de alimentos</div>
+          <div class="lrow"><div class="lb"><div class="lt">No Processo</div><div class="ls">6036354-63.2025.8.09.0051 (GO)</div></div><div class="lr"><div class="lv"><span class="badge bgg">Requerente</span></div></div></div>
+          <div class="lrow"><div class="lb"><div class="lt">Valor almejado</div></div><div class="lr"><div class="lv green">R$ 5.000</div></div></div>
+          <div class="lrow"><div class="lb"><div class="lt">Honorarios</div><div class="ls">Marina Araujo</div></div><div class="lr"><div class="lv">R$ 2.000 + 10% exito</div></div></div>
+          <div class="lrow"><div class="lb"><div class="lt">Acesso</div><div class="ls">projudi.tjgo.jus.br</div></div><div class="lr"><div class="lv" style="font-size:11px">wjc2wdujeq8nd9hbkbf</div></div></div>
+        </div>
+        <div class="dc">
+          <div class="dct">Processo 4 - Cobranca de titulo (Requerido)</div>
+          <div class="lrow"><div class="lb"><div class="lt">No Processo</div><div class="ls">5140903-10.2026.8.09.0051 (GO)</div></div><div class="lr"><div class="lv"><span class="badge bgr">Requerido</span></div></div></div>
+          <div class="lrow"><div class="lb"><div class="lt">Parte contraria</div></div><div class="lr"><div class="lv">Felix</div></div></div>
+          <div class="lrow"><div class="lb"><div class="lt">Advogado</div><div class="ls">Abrão (Kenede Borges) - Pro bono</div></div><div class="lr"><div class="lv">—</div></div></div>
+          <div class="lrow"><div class="lb"><div class="lt">Deposito judicial</div><div class="ls">18/02/2026 - embargos execucao</div></div><div class="lr"><div class="lv">feito</div></div></div>
+        </div>
+        <div class="dc">
+          <div class="dct">Processo 5 - Embargos de cobranca</div>
+          <div class="lrow"><div class="lb"><div class="lt">No Processo</div><div class="ls">5140903-10.2026.8.09.0051 (GO)</div></div><div class="lr"><div class="lv"><span class="badge bgg">Requerente</span></div></div></div>
+          <div class="lrow"><div class="lb"><div class="lt">Valor almejado</div></div><div class="lr"><div class="lv green">R$ 4.856,67</div></div></div>
+          <div class="lrow"><div class="lb"><div class="lt">Custas judiciais</div></div><div class="lr"><div class="lv red">R$ 1.028,91</div></div></div>
+          <div class="lrow"><div class="lb"><div class="lt">Advogado</div><div class="ls">Abrão (Kenede Borges) - Pro bono</div></div><div class="lr"><div class="lv">—</div></div></div>
+        </div>
+        <div class="dc">
+          <div class="dct">Processo 6 - Indenizacao Latam (SP)</div>
+          <div class="lrow"><div class="lb"><div class="lt">No Processo</div><div class="ls">4016435-98.2025.8.26.0003 (SP)</div></div><div class="lr"><div class="lv"><span class="badge bgg">Requerente</span></div></div></div>
+          <div class="lrow"><div class="lb"><div class="lt">Valor almejado</div></div><div class="lr"><div class="lv green">R$ 7.850,78</div></div></div>
+          <div class="lrow"><div class="lb"><div class="lt">Honorarios</div><div class="ls">Dr. Luiz Fernando dos Santos Jr.</div></div><div class="lr"><div class="lv red">R$ 7.000</div></div></div>
+          <div class="lrow"><div class="lb"><div class="lt">Pago antecipado</div></div><div class="lr"><div class="lv red">R$ 850,78</div></div></div>
+        </div>
+      </div>
+    </div>
+
     <div id="pg-inv" class="page">
       <div class="bh"><button class="bbtn" onclick="closeSub()">&#8249;</button><div class="ph1" style="font-size:20px">Investimentos</div></div>
       <div class="pp" style="padding-top:0">
         <div class="hcard" style="background:linear-gradient(145deg,#120d30,#0f1120);border:1px solid rgba(123,110,246,.2)">
           <div class="hlbl">Total</div><div class="hval yellow" id="iTotal">--</div><div class="hsub" id="iSub">--</div>
+        </div>
+        <div class="r2">
+          <div class="mc"><div class="mclbl">Acoes + Fundos</div><div class="mcval yellow">R$ 1.245,78</div></div>
+          <div class="mc"><div class="mclbl">Total geral</div><div class="mcval yellow">R$ 68.718,85</div></div>
+        </div>
+        <div class="dc">
+          <div class="dct">Acoes - LF</div>
+          <div class="lrow"><div class="lb"><div class="lt">Axia3</div><div class="ls">59 acoes | C: R$59,27</div></div><div class="lr"><div class="lv yellow">R$ 904,91</div></div></div>
+          <div class="lrow"><div class="lb"><div class="lt">Prio3</div><div class="ls">20 acoes | C: R$56,96 | V: R$64,68</div></div><div class="lr"><div class="lv" style="color:var(--t3)">—</div></div></div>
+          <div class="lrow"><div class="lb"><div class="lt">Vale3</div><div class="ls">23 acoes | C: R$81,29/R$79,41</div></div><div class="lr"><div class="lv" style="color:var(--t3)">—</div></div></div>
+          <div class="lrow"><div class="lb"><div class="lt">Petr4</div><div class="ls">40 acoes | C: R$44,61</div></div><div class="lr"><div class="lv" style="color:var(--t3)">—</div></div></div>
+          <div class="lrow"><div class="lb"><div class="lt">Raiz4</div><div class="ls">2127 acoes | C: R$0,47 | V: R$0,62</div></div><div class="lr"><div class="lv" style="color:var(--t3)">—</div></div></div>
+        </div>
+        <div class="dc">
+          <div class="dct">Fundos - LF</div>
+          <div class="lrow"><div class="lb"><div class="lt">Eletrobras FICFI</div></div><div class="lr"><div class="lv" style="color:var(--t3)">—</div></div></div>
+          <div class="lrow"><div class="lb"><div class="lt">FGTS Eletrobras</div></div><div class="lr"><div class="lv yellow">R$ 340,87</div></div></div>
+          <div class="lrow"><div class="lb"><div class="lt">Index Vale</div></div><div class="lr"><div class="lv" style="color:var(--t3)">—</div></div></div>
+          <div class="lrow"><div class="lb"><div class="lt">IMA-B5</div></div><div class="lr"><div class="lv" style="color:var(--t3)">—</div></div></div>
+          <div class="lrow"><div class="lb"><div class="lt">Tesouro Amer</div></div><div class="lr"><div class="lv" style="color:var(--t3)">—</div></div></div>
+          <div class="lrow"><div class="lb"><div class="lt">Itau Global</div></div><div class="lr"><div class="lv" style="color:var(--t3)">—</div></div></div>
+        </div>
+        <div class="dc">
+          <div class="dct">Renda Fixa - LF</div>
+          <div class="lrow"><div class="lb"><div class="lt">Nubank PF - Fundo Emergencia</div></div><div class="lr"><div class="lv" style="color:var(--t3)">—</div></div></div>
+          <div class="lrow"><div class="lb"><div class="lt">Itau - Fundo Emergencia</div></div><div class="lr"><div class="lv green">R$ 6.018,35</div></div></div>
+        </div>
+        <div class="dc">
+          <div class="dct">Distribuicao do saldo (Mai/26)</div>
+          <div class="lrow"><div class="lb"><div class="lt">Partilha</div></div><div class="lr"><div class="lv yellow">R$ 8.117,87</div></div></div>
+          <div class="lrow"><div class="lb"><div class="lt">Leo</div></div><div class="lr"><div class="lv yellow">R$ 1.014,31</div></div></div>
+          <div class="lrow"><div class="lb"><div class="lt">Cartao de credito</div></div><div class="lr"><div class="lv" style="color:var(--t3)">R$ 0</div></div></div>
+          <div class="lrow"><div class="lb"><div class="lt">Apto</div></div><div class="lr"><div class="lv yellow">R$ 40.323,58</div></div></div>
+          <div class="lrow"><div class="lb"><div class="lt">Reserva - rotativo</div></div><div class="lr"><div class="lv yellow">R$ 1.980,04</div></div></div>
+          <div class="lrow"><div class="lb"><div class="lt">Casamento</div></div><div class="lr"><div class="lv yellow">R$ 10.018,92</div></div></div>
         </div>
         <div class="dc"><div id="listI"></div></div>
       </div>
@@ -498,6 +670,7 @@ function go(id){
   document.getElementById('fab').style.display=['resumo','mais'].includes(id)?'none':'flex';
   render(id);
 }
+var subMap={'carro':'pg-carro','apto':'pg-apto','proc':'pg-proc','inv':'pg-inv','emg':'pg-emg','cas':'pg-cas'};
 function sub(id){
   document.querySelectorAll('.page').forEach(function(p){p.classList.remove('on');});
   document.getElementById('pg-'+id).classList.add('on');
