@@ -20,7 +20,7 @@ button{font-family:inherit;cursor:pointer;border:none;background:none}
 .brand em{color:var(--acc);font-style:normal}
 .topbar-right{display:flex;align-items:center;gap:10px}
 .mbtn{display:flex;align-items:center;gap:6px;background:var(--s2);border:1px solid var(--bdr);border-radius:999px;padding:7px 14px;font-size:13px;font-weight:700;color:var(--t1)}
-.eyebtn{background:var(--s2);border:1px solid var(--bdr);border-radius:999px;padding:7px 12px;font-size:16px;color:var(--t3)}
+.eyebtn{background:var(--acc);border:none;border-radius:14px;padding:10px 18px;font-size:22px;color:#fff;font-weight:800;box-shadow:0 3px 12px rgba(123,110,246,.4);transition:all .15s}.eyebtn:active{transform:scale(.92)}
 .nav{flex-shrink:0;display:flex;background:rgba(15,17,32,.92);border-top:1px solid var(--bdr);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);padding:6px 0 calc(6px + env(safe-area-inset-bottom,0px))}
 .ni{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding:6px 4px;font-size:10px;font-weight:600;color:var(--t3);transition:color .2s;position:relative}
 .ni .ic{font-size:22px;line-height:1;transition:transform .2s}
@@ -491,10 +491,10 @@ function updateDots(){
   }
 }
 
-var valHidden=false;
+var valHidden=true;
 function toggleValues(){
   valHidden=!valHidden;
-  document.getElementById('eyebtn').textContent=valHidden?'&#128065;':'&#128584;';
+  document.getElementById('eyebtn').innerHTML=valHidden?'&#128584;':'&#128065;';
   render(curPage);renderLemb(load());
 }
 function fmtV(v){
@@ -785,10 +785,10 @@ function renderFluxo(db){
         '<div class="txc '+(t.status==='OK'?'ok':'pnd')+'" id="c-'+t.id+'">'+
           '<div class="txico '+(isE?'e':'s')+'">'+(isE?'&#8593;':'&#8595;')+'</div>'+
           '<div class="txb">'+
-            '<div class="txd">'+t.descricao+'</div>'+
-            '<div class="txm">'+
+            '<div style="font-size:16px;font-weight:800;color:var(--t1);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+(t.categoria||'Outros')+'</div>'+
+            '<div class="txm" style="margin-top:3px">'+
               '<span class="ctag '+(isPJ?'pj':'vl')+'">'+(isPJ?'PJ':'VL')+'</span>'+
-              (t.categoria?'<span style="font-size:10px;color:var(--t3);background:var(--s2);padding:2px 6px;border-radius:8px">'+t.categoria+'</span>':'')+
+              '<span style="font-size:12px;color:var(--t2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:140px">'+t.descricao+'</span>'+
               rec+
             '</div>'+
           '</div>'+
