@@ -211,7 +211,7 @@ button{font-family:inherit;cursor:pointer;border:none;background:none}
     <div class="lock-err" id="lockerr"></div>
   </div>
 
-  <div id="pg-fluxo" class="page on">
+  <div id="pg-fluxo" class="page">
     <div id="lembBanner" style="display:none;margin:8px 16px 0;background:rgba(255,95,87,.12);border:1px solid rgba(255,95,87,.3);border-radius:14px;padding:11px 14px;cursor:pointer" onclick="go('lemb')">
       <div style="font-size:11px;font-weight:800;color:var(--red);text-transform:uppercase;letter-spacing:.06em;margin-bottom:3px">&#9888; Alertas pendentes</div>
       <div id="lembBannerText" style="font-size:13px;color:var(--t2)"></div>
@@ -237,7 +237,7 @@ button{font-family:inherit;cursor:pointer;border:none;background:none}
     </div>
   </div>
 
-  <div id="pg-resumo" class="page">
+  <div id="pg-resumo" class="page on">
     <div class="pp">
       <div class="ph1">Resumo</div><div class="psub">Posicao patrimonial</div>
       <div class="hcard" style="background:linear-gradient(145deg,#1a1060,#0f1120);border:1px solid rgba(123,110,246,.2)">
@@ -440,9 +440,9 @@ button{font-family:inherit;cursor:pointer;border:none;background:none}
   </div>
   </div>
   <nav class="nav">
-    <button class="ni on" id="nav-fluxo" onclick="go('fluxo')"><span class="ic">&#128179;</span>Fluxo</button>
+    <button class="ni on" id="nav-resumo" onclick="go('resumo')"><span class="ic">&#9711;</span>Resumo</button>
     <button class="ni" id="nav-lemb" onclick="go('lemb')" style="position:relative"><span class="ic">&#128276;</span>Alertas<span id="lembBadge" style="display:none;position:absolute;top:5px;right:calc(50% - 14px);width:7px;height:7px;border-radius:50%;background:var(--red);border:2px solid var(--bg)"></span></button>
-    <button class="ni" id="nav-resumo" onclick="go('resumo')"><span class="ic">&#9711;</span>Resumo</button>
+    <button class="ni" id="nav-fluxo" onclick="go('fluxo')"><span class="ic">&#128179;</span>Fluxo</button>
     <button class="ni" id="nav-dividas" onclick="go('dividas')"><span class="ic">&#9878;</span>Dividas</button>
     <button class="ni" id="nav-mais" onclick="go('mais')"><span class="ic">&#8943;</span>Mais</button>
   </nav>
@@ -682,7 +682,7 @@ var fmtD=function(d){if(!d)return'--';var p=d.split('-');return p[2]+'/'+p[1];};
 var mNome=function(m){var n=['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];var p=m.split('-');return n[+p[1]-1]+'/'+p[0].slice(2);};
 var dName=function(d){return['Dom','Seg','Ter','Qua','Qui','Sex','Sab'][new Date(d+'T12:00').getDay()];};
 var fmtK=function(v){if(!v||isNaN(v))return'R$0';var a=Math.abs(v);return'R$'+(a>=1e6?(a/1e6).toFixed(1)+'M':a>=1000?Math.round(a/1000)+'k':a.toFixed(0));};
-var curPage='fluxo',curMes='2026-06',curF='all',editId=null,charts={};
+var curPage='resumo',curMes='2026-06',curF='all',editId=null,charts={};
 var tt;
 function toast(m){var e=document.getElementById('toast');e.textContent=m;e.classList.add('on');clearTimeout(tt);tt=setTimeout(function(){e.classList.remove('on');},2200);}
 function openMP(){
@@ -1155,7 +1155,10 @@ function renderResumo(db){
     '<div style="font-size:11px;color:var(--t3);margin-bottom:14px">'+fmt(ea)+' de '+fmt(em)+'</div>'+
     '<div class="prow"><span>Divida / Bens</span><span style="color:'+(dp>40?'var(--red)':'var(--grn)')+';font-weight:700">'+dp.toFixed(1)+'%</span></div>'+
     '<div class="pb"><div class="pf" style="width:'+dp+'%;background:'+(dp>40?'var(--red)':'var(--grn)')+'"></div></div>'+
-    '<div style="font-size:11px;color:var(--t3);margin-top:4px">Meta: abaixo de 40%</div>';
+    '<div style="font-size:11px;color:var(--t3);margin-top:4px">Meta: abaixo de 40%</div>'+
+    '<div style="height:1px;background:var(--bdr);margin:14px 0"></div>'+
+    '<div class="prow"><span>Investimentos + Saldos</span><span style="color:var(--yel);font-weight:700">'+fmt(db.investimentos.reduce(function(s,i){return s+i.valorAtual;},0)+8117.87+1014.31+40323.58+1980.04+10018.92)+'</span></div>'+
+    '<div style="font-size:11px;color:var(--t3)">Acoes, Fundos, Partilha, Leo, Apto, Casamento, Reserva</div>';
 }
 function renderBens(db){
   var tot=db.patrimonio.reduce(function(s,i){return s+i.valor;},0);
@@ -1179,7 +1182,9 @@ function renderDividas(db){
   document.querySelectorAll('#listD .eb').forEach(function(b){b.onclick=function(){openGenSheet('dividas',this.dataset.did);};});
 }
 function renderMais(db){
-  document.getElementById('tInv').textContent=fmt(db.investimentos.reduce(function(s,i){return s+i.valorAtual;},0));
+  var invTotal=db.investimentos.reduce(function(s,i){return s+i.valorAtual;},0);
+  var saldos=8117.87+1014.31+40323.58+1980.04+10018.92;
+  document.getElementById('tInv').textContent=fmt(invTotal+saldos);
   var ea=db.emergencia.reduce(function(s,e){return s+e.acumulado;},0),em=db.emergencia.reduce(function(s,e){return s+e.meta;},0);
   document.getElementById('tEmg').textContent=(em>0?(ea/em*100).toFixed(0):0)+'% da meta';
   document.getElementById('tCas').textContent=fmt(db.casamento.reduce(function(s,c){return s+c.custo;},0))+' planejados - 06/Set/2026';
@@ -1232,7 +1237,7 @@ function importData(e){
 function resetData(){localStorage.removeItem(KEY);_db=null;load();render('fluxo');renderLemb(load());toast('Dados de exemplo carregados');}
 (function(){
   try{['pax_v6','pax_v5','pax_v4','pax_v3'].forEach(function(k){localStorage.removeItem(k);});}catch(e){}
-  load();updML();render('fluxo');renderLemb(load());
+  load();updML();render('resumo');renderLemb(load());
 })();
 
 </script>
