@@ -1189,12 +1189,13 @@ function renderResumo(db){
   document.getElementById('rBens').textContent=fmt(bens);
   document.getElementById('rDiv').textContent=fmt(div);
 
-  // Only current year months
+  // Only current year months from June onwards
   var hoje=new Date();
   var anoAtual=hoje.getFullYear();
+  var inicioFluxo=anoAtual+'-06';
   var ms={};db.fluxo.forEach(function(t){ms[t.mes]=1;});
   var meses=[];
-  for(var i=1;i<=12;i++)meses.push(anoAtual+'-'+('0'+i).slice(-2));
+  for(var i=1;i<=12;i++){var m=anoAtual+'-'+('0'+i).slice(-2);if(m>=inicioFluxo)meses.push(m);}
 
   var ents=meses.map(function(m){return db.fluxo.filter(function(t){return t.mes===m&&t.operacao==='Entrada';}).reduce(function(s,t){return s+t.valor;},0);});
   var sais=meses.map(function(m){return db.fluxo.filter(function(t){return t.mes===m&&t.operacao==='Saida';}).reduce(function(s,t){return s+t.valor;},0);});
