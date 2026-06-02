@@ -182,7 +182,7 @@ button{font-family:inherit;cursor:pointer;border:none;background:none}
         <button class="chip" onclick="setF('ent',this)">Entradas</button>
         <button class="chip" onclick="setF('sai',this)">Saidas</button>
         <button class="chip" onclick="setF('pj',this)">PJ</button>
-        <button class="chip" onclick="setF('vl',this)">Volus</button>
+        <button class="chip" onclick="setF('vl',this)">Ifood</button>
         <button class="chip" onclick="setF('pend',this)">Pendentes</button>
       </div>
       <div class="txs" id="txlist"></div>
@@ -300,12 +300,12 @@ button{font-family:inherit;cursor:pointer;border:none;background:none}
 <script>
 var KEY='pax_v6',_db=null;
 function uid(){return Date.now().toString(36)+Math.random().toString(36).slice(2,5);}
-function mkT(m,d,op,v,c,s,desc){return{id:uid(),mes:m,data:d,operacao:op,valor:v,conta:c,status:s,descricao:desc};}
+function mkT(m,d,op,v,c,s,desc,cat){return{id:uid(),mes:m,data:d,operacao:op,valor:v,conta:c,status:s,descricao:desc,categoria:cat||'Outros'};}
 function seed(){
   var T=[
     ['2026-03','2026-03-06','Entrada',39611.22,'PJ Itau Nu','OK','Distribuicao'],
     ['2026-03','2026-03-06','Entrada',6750,'PJ Itau Nu','OK','Salario Nubank PJ'],
-    ['2026-03','2026-03-06','Entrada',15250,'Ifood/Volus','OK','Salario'],
+    ['2026-03','2026-03-06','Entrada',15250,'Ifood','OK','Salario'],
     ['2026-03','2026-03-06','Saida',3811.13,'PJ Itau Nu','OK','Quitacao emprestimo Nubank'],
     ['2026-03','2026-03-06','Saida',2700,'PJ Itau Nu','OK','Aluguel Goiania'],
     ['2026-03','2026-03-06','Saida',1600,'PJ Itau Nu','OK','Personal'],
@@ -328,14 +328,14 @@ function seed(){
     ['2026-03','2026-03-30','Saida',1000,'PJ Itau Nu','OK','Leo'],
     ['2026-03','2026-03-30','Saida',2232.40,'PJ Itau Nu','OK','Faculdade atrasada'],
     ['2026-03','2026-03-30','Saida',110,'PJ Itau Nu','OK','Celular Leandro'],
-    ['2026-03','2026-03-08','Saida',5000,'Ifood/Volus','OK','Passagens + hospedagem SP'],
-    ['2026-03','2026-03-06','Saida',1973.64,'Ifood/Volus','OK','Faculdades'],
-    ['2026-03','2026-03-06','Saida',1700,'Ifood/Volus','OK','Monjaro'],
-    ['2026-03','2026-03-06','Saida',1167.38,'Ifood/Volus','OK','Apto Cajamar - cond + parcela'],
+    ['2026-03','2026-03-08','Saida',5000,'Ifood','OK','Passagens + hospedagem SP'],
+    ['2026-03','2026-03-06','Saida',1973.64,'Ifood','OK','Faculdades'],
+    ['2026-03','2026-03-06','Saida',1700,'Ifood','OK','Monjaro'],
+    ['2026-03','2026-03-06','Saida',1167.38,'Ifood','OK','Apto Cajamar - cond + parcela'],
     ['2026-04','2026-04-06','Entrada',39611.22,'PJ Itau Nu','OK','Distribuicao'],
     ['2026-04','2026-04-06','Entrada',6750,'PJ Itau Nu','OK','Salario Nubank PJ'],
     ['2026-04','2026-04-06','Entrada',45241.97,'PJ Itau Nu','OK','Venda moto'],
-    ['2026-04','2026-04-06','Entrada',15250,'Ifood/Volus','OK','Salario'],
+    ['2026-04','2026-04-06','Entrada',15250,'Ifood','OK','Salario'],
     ['2026-04','2026-04-06','Saida',2910,'PJ Itau Nu','OK','Aluguel Goiania'],
     ['2026-04','2026-04-06','Saida',1600,'PJ Itau Nu','OK','Personal'],
     ['2026-04','2026-04-06','Saida',1550,'PJ Itau Nu','OK','Escola Paulo'],
@@ -353,16 +353,16 @@ function seed(){
     ['2026-04','2026-04-10','Saida',2000,'PJ Itau Nu','OK','Advogada Marina - execucao'],
     ['2026-04','2026-04-10','Saida',16250,'PJ Itau Nu','OK','Cartao credito 1/4'],
     ['2026-04','2026-04-01','Saida',36503.29,'PJ Itau Nu','OK','Saidas adicionais'],
-    ['2026-04','2026-04-30','Saida',5288.54,'Ifood/Volus','OK','Parcela Carro 1/48'],
-    ['2026-04','2026-04-30','Saida',365.40,'Ifood/Volus','OK','Seguro carro'],
-    ['2026-04','2026-04-06','Saida',1973.64,'Ifood/Volus','OK','Faculdades'],
-    ['2026-04','2026-04-06','Saida',1800,'Ifood/Volus','OK','Monjaro'],
-    ['2026-04','2026-04-06','Saida',1931.41,'Ifood/Volus','OK','Apto Cajamar - cond + parcela'],
-    ['2026-04','2026-04-06','Saida',112.80,'Ifood/Volus','OK','Celular Leandro Vivo'],
+    ['2026-04','2026-04-30','Saida',5288.54,'Ifood','OK','Parcela Carro 1/48'],
+    ['2026-04','2026-04-30','Saida',365.40,'Ifood','OK','Seguro carro'],
+    ['2026-04','2026-04-06','Saida',1973.64,'Ifood','OK','Faculdades'],
+    ['2026-04','2026-04-06','Saida',1800,'Ifood','OK','Monjaro'],
+    ['2026-04','2026-04-06','Saida',1931.41,'Ifood','OK','Apto Cajamar - cond + parcela'],
+    ['2026-04','2026-04-06','Saida',112.80,'Ifood','OK','Celular Leandro Vivo'],
     ['2026-05','2026-05-06','Entrada',6750,'PJ Itau Nu','OK','Salario Nubank PJ'],
     ['2026-05','2026-05-06','Entrada',17487,'PJ Itau Nu','OK','Distribuicao'],
-    ['2026-05','2026-05-06','Entrada',11000,'Ifood/Volus','OK','Aniversario'],
-    ['2026-05','2026-05-06','Entrada',15250,'Ifood/Volus','OK','Salario'],
+    ['2026-05','2026-05-06','Entrada',11000,'Ifood','OK','Aniversario'],
+    ['2026-05','2026-05-06','Entrada',15250,'Ifood','OK','Salario'],
     ['2026-05','2026-05-06','Saida',10000,'PJ Itau Nu','OK','Casamento'],
     ['2026-05','2026-05-06','Saida',4000,'PJ Itau Nu','OK','Fundo de emergencia'],
     ['2026-05','2026-05-06','Saida',3000,'PJ Itau Nu','OK','Fatura cartao Nubank PF+PJ'],
@@ -377,19 +377,19 @@ function seed(){
     ['2026-05','2026-05-06','Saida',400,'PJ Itau Nu','OK','Psicologa Leandro'],
     ['2026-05','2026-05-06','Saida',370,'PJ Itau Nu','OK','Moacir - Transporte escolar'],
     ['2026-05','2026-05-10','Saida',1102.50,'PJ Itau Nu','OK','Cartao credito 1/4 Dentista'],
-    ['2026-05','2026-05-06','Saida',5212.30,'Ifood/Volus','OK','Parcela Carro 2/48'],
-    ['2026-05','2026-05-06','Saida',1550,'Ifood/Volus','OK','Escola Paulo'],
-    ['2026-05','2026-05-08','Saida',986.82,'Ifood/Volus','OK','Faculdade Leandro'],
-    ['2026-05','2026-05-08','Saida',986.82,'Ifood/Volus','OK','Faculdade Thays'],
-    ['2026-05','2026-05-08','Saida',706.14,'Ifood/Volus','OK','Apto Cajamar - Parcela Caixa'],
-    ['2026-05','2026-05-08','Saida',532.16,'Ifood/Volus','OK','Apto Cajamar - Condominio'],
-    ['2026-05','2026-05-30','Saida',2300,'Ifood/Volus','','Monjaro'],
-    ['2026-05','2026-05-30','Saida',365.40,'Ifood/Volus','OK','Seguro carro'],
-    ['2026-05','2026-05-08','Saida',110,'Ifood/Volus','','Celular Leandro'],
+    ['2026-05','2026-05-06','Saida',5212.30,'Ifood','OK','Parcela Carro 2/48'],
+    ['2026-05','2026-05-06','Saida',1550,'Ifood','OK','Escola Paulo'],
+    ['2026-05','2026-05-08','Saida',986.82,'Ifood','OK','Faculdade Leandro'],
+    ['2026-05','2026-05-08','Saida',986.82,'Ifood','OK','Faculdade Thays'],
+    ['2026-05','2026-05-08','Saida',706.14,'Ifood','OK','Apto Cajamar - Parcela Caixa'],
+    ['2026-05','2026-05-08','Saida',532.16,'Ifood','OK','Apto Cajamar - Condominio'],
+    ['2026-05','2026-05-30','Saida',2300,'Ifood','','Monjaro'],
+    ['2026-05','2026-05-30','Saida',365.40,'Ifood','OK','Seguro carro'],
+    ['2026-05','2026-05-08','Saida',110,'Ifood','','Celular Leandro'],
     ['2026-06','2026-06-06','Entrada',17487,'PJ Itau Nu','OK','Distribuicao'],
     ['2026-06','2026-06-06','Entrada',6750,'PJ Itau Nu','','Salario Nubank PJ'],
     ['2026-06','2026-06-06','Entrada',1340.72,'PJ Itau Nu','OK','Outras demandas'],
-    ['2026-06','2026-06-06','Entrada',15250,'Ifood/Volus','','Salario'],
+    ['2026-06','2026-06-06','Entrada',15250,'Ifood','','Salario'],
     ['2026-06','2026-06-06','Saida',2700,'PJ Itau Nu','','Aluguel 1301C'],
     ['2026-06','2026-06-06','Saida',2000,'PJ Itau Nu','','Fatura cartao Nubank PF'],
     ['2026-06','2026-06-06','Saida',4102.50,'PJ Itau Nu','','Fatura Itau Platinum Dentista 2/4'],
@@ -408,17 +408,17 @@ function seed(){
     ['2026-06','2026-06-30','Saida',5000,'PJ Itau Nu','','Fundo Casamento Cofrinho Itau'],
     ['2026-06','2026-06-30','Saida',2000,'PJ Itau Nu','','Fundo Emergencia Cofrinho Itau'],
     ['2026-06','2026-06-06','Saida',2000,'PJ Itau Nu','','Viagem Ilhabela'],
-    ['2026-06','2026-06-06','Saida',5188.28,'Ifood/Volus','OK','Parcela Carro 3/48'],
-    ['2026-06','2026-06-06','Saida',1550,'Ifood/Volus','','Escola Paulo'],
-    ['2026-06','2026-06-08','Saida',2300,'Ifood/Volus','','Monjaro 2/4'],
-    ['2026-06','2026-06-08','Saida',986.82,'Ifood/Volus','OK','Faculdade Leandro'],
-    ['2026-06','2026-06-08','Saida',986.82,'Ifood/Volus','OK','Faculdade Thays'],
-    ['2026-06','2026-06-08','Saida',706.14,'Ifood/Volus','','Apto Cajamar Parcela Caixa'],
-    ['2026-06','2026-06-08','Saida',532.16,'Ifood/Volus','','Apto Cajamar Condominio'],
-    ['2026-06','2026-06-08','Saida',110,'Ifood/Volus','','Celular Leandro'],
-    ['2026-06','2026-06-20','Saida',365.40,'Ifood/Volus','','Seguro Youse'],
-    ['2026-06','2026-06-08','Saida',800,'Ifood/Volus','OK','TP - Faxineira'],
-    ['2026-06','2026-06-08','Saida',400,'Ifood/Volus','','Festas']
+    ['2026-06','2026-06-06','Saida',5188.28,'Ifood','OK','Parcela Carro 3/48'],
+    ['2026-06','2026-06-06','Saida',1550,'Ifood','','Escola Paulo'],
+    ['2026-06','2026-06-08','Saida',2300,'Ifood','','Monjaro 2/4'],
+    ['2026-06','2026-06-08','Saida',986.82,'Ifood','OK','Faculdade Leandro'],
+    ['2026-06','2026-06-08','Saida',986.82,'Ifood','OK','Faculdade Thays'],
+    ['2026-06','2026-06-08','Saida',706.14,'Ifood','','Apto Cajamar Parcela Caixa'],
+    ['2026-06','2026-06-08','Saida',532.16,'Ifood','','Apto Cajamar Condominio'],
+    ['2026-06','2026-06-08','Saida',110,'Ifood','','Celular Leandro'],
+    ['2026-06','2026-06-20','Saida',365.40,'Ifood','','Seguro Youse'],
+    ['2026-06','2026-06-08','Saida',800,'Ifood','OK','TP - Faxineira'],
+    ['2026-06','2026-06-08','Saida',400,'Ifood','','Festas']
   ];
   return {
     fluxo:T.map(function(r){return mkT(r[0],r[1],r[2],r[3],r[4],r[5],r[6]);}),
@@ -526,7 +526,7 @@ function renderFluxo(db){
       '<div><div class="fsl">Saidas</div><div class="fsv s">'+fmt(sai)+'</div></div>'+
       (pend>0?'<div><div class="fsl">Pendentes</div><div class="fsv" style="color:var(--yel)">'+pend+'</div></div>':'')+
     '</div>';
-  var contas=['PJ Itau Nu','Ifood/Volus'];
+  var contas=['Ifood','PJ Itau Nu'];
   document.getElementById('apills').innerHTML=contas.map(function(c){
     var ce=all.filter(function(t){return t.conta===c&&t.operacao==='Entrada';}).reduce(function(s,t){return s+t.valor;},0);
     var cs=all.filter(function(t){return t.conta===c&&t.operacao==='Saida';}).reduce(function(s,t){return s+t.valor;},0);
@@ -542,19 +542,24 @@ function renderFluxo(db){
   if(curF==='ent')fil=all.filter(function(t){return t.operacao==='Entrada';});
   else if(curF==='sai')fil=all.filter(function(t){return t.operacao==='Saida';});
   else if(curF==='pj')fil=all.filter(function(t){return t.conta==='PJ Itau Nu';});
-  else if(curF==='vl')fil=all.filter(function(t){return t.conta==='Ifood/Volus';});
+  else if(curF==='vl')fil=all.filter(function(t){return t.conta==='Ifood';});
   else if(curF==='pend')fil=all.filter(function(t){return t.status!=='OK';});
   var list=document.getElementById('txlist');
   if(fil.length===0){
     list.innerHTML='<div class="empty"><div class="eico">&#128179;</div><div class="etitle">'+(all.length===0?'Nenhuma transacao':'Nenhum resultado')+'</div><div class="esub">'+(all.length===0?'Toque + para adicionar':'Tente outro filtro')+'</div>'+(all.length===0?'<button onclick="resetData()" style="margin-top:16px;padding:12px 24px;border-radius:999px;background:var(--acc);color:#fff;font-size:13px;font-weight:800;border:none;cursor:pointer">Carregar dados de exemplo</button>':'')+'</div>';
     return;
   }
-  var bd={};fil.forEach(function(t){if(!bd[t.data])bd[t.data]=[];bd[t.data].push(t);});
-  var dates=Object.keys(bd).sort(function(a,b){return b.localeCompare(a);});
+  var bd={};
+  fil.slice().sort(function(a,b){
+    if(a.conta!==b.conta)return a.conta.localeCompare(b.conta);
+    if(b.valor!==a.valor)return b.valor-a.valor;
+    return b.data.localeCompare(a.data);
+  }).forEach(function(t){if(!bd[t.conta])bd[t.conta]=[];bd[t.conta].push(t);});
+  var dates=Object.keys(bd).sort(function(a,b){return a.localeCompare(b);});
   list.innerHTML=dates.map(function(d){
-    var items=bd[d],dn=items.reduce(function(s,t){return t.operacao==='Entrada'?s+t.valor:s-t.valor;},0);
-    return '<div class="txdh"><span>'+dName(d)+', '+fmtD(d)+'</span><span style="color:'+(dn>=0?'var(--grn)':'var(--red)')+'">'+(dn>=0?'+':'')+fmt(dn)+'</span></div>'+
-    items.map(function(t){
+    
+    var items_d=bd[d];var dn_d=items_d.reduce(function(s,t){return t.operacao==='Entrada'?s+t.valor:s-t.valor;},0);return '<div class="txdh" style="margin-top:14px"><span style="font-size:13px;font-weight:800;color:var(--t1)">'+d+'</span><span style="color:'+(dn>=0?'var(--grn)':'var(--red)')+'">'+(dn>=0?'+':'')+fmt(dn)+'</span></div>'+
+    items_d.map(function(t){
       var isE=t.operacao==='Entrada',isPJ=t.conta==='PJ Itau Nu';
       var rec=t.recId?('<span style="font-size:10px;color:var(--t3)"> &#8635;'+t.recIdx+'/'+t.recTotal+'</span>'):'';
       return '<div class="txwrap" id="w-'+t.id+'">'+
@@ -563,7 +568,7 @@ function renderFluxo(db){
         '<div class="txc '+(t.status==='OK'?'ok':'pnd')+'" id="c-'+t.id+'">'+
           '<div class="txico '+(isE?'e':'s')+'">'+(isE?'&#8593;':'&#8595;')+'</div>'+
           '<div class="txb"><div class="txd">'+t.descricao+'</div>'+
-          '<div class="txm"><span class="ctag '+(isPJ?'pj':'vl')+'">'+(isPJ?'PJ':'VL')+'</span>'+rec+'</div></div>'+
+          '<div class="txm"><span class="ctag '+(isPJ?'pj':'vl')+'">'+(isPJ?'PJ':'VL')+'</span>'+(t.categoria?'<span style="font-size:10px;color:var(--t3);background:var(--s2);padding:2px 6px;border-radius:8px">'+t.categoria+'</span>':'')+''+rec+'</div></div>'+
           '<div class="txr">'+
             '<div class="txa '+(isE?'e':'s')+'">'+(isE?'+':'-')+fmt(t.valor)+'</div>'+
             '<button class="sbtn '+(t.status==='OK'?'ok':'pnd')+'" onclick="togOK(\''+t.id+'\')">'+(t.status==='OK'?'&#10003; OK':'&#8987; Pend.')+'</button>'+
@@ -612,8 +617,8 @@ function openTxSheet(ex){
   editId=ex?ex.id:null;
   var op=ex?ex.operacao:'Saida';
   var db=load(),cs={};db.fluxo.forEach(function(t){cs[t.conta]=1;});
-  var cl=['PJ Itau Nu','Ifood/Volus'];Object.keys(cs).forEach(function(c){if(cl.indexOf(c)<0)cl.push(c);});
-  var cc=ex?ex.conta:'PJ Itau Nu';
+  var cl=['Ifood','PJ Itau Nu'];Object.keys(cs).forEach(function(c){if(cl.indexOf(c)<0)cl.push(c);});
+  var cc=ex?ex.conta:'Ifood';
   document.getElementById('stitle').textContent=editId?'Editar':'Nova Transacao';
   var recHtml='<div class="sep"></div>'+
     '<div class="field"><label>Recorrencia</label>'+
@@ -634,7 +639,11 @@ function openTxSheet(ex){
     '<div class="awrap"><span class="apfx">R$</span>'+
     '<input class="ainp" id="fval" type="number" inputmode="decimal" placeholder="0,00" step="0.01" value="'+(ex?ex.valor:'')+'" oninput="onVI(this.value)">'+
     '</div><div class="vhint" id="vh"></div>'+
-    '<div class="field"><label>Descricao</label><input id="fdesc" type="text" placeholder="Ex: Aluguel, Distribuicao..." value="'+(ex?ex.descricao:'')+'"></div>'+
+    '<div class="field"><label>Descricao</label><input id="fdesc" type="text" placeholder="Ex: Aluguel, Distribuicao..." value="'+(ex?ex.descricao:'')+'" list="cat-suggest"></div>'+
+    '<datalist id="cat-suggest"></datalist>'+
+    '<div class="field"><label>Categoria</label><select id="fcat">'+
+    ['Receita','Moradia','Alimentacao','Saude','Educacao','Veiculo','Cartao','Juridico','Impostos','Investimento','Familia','Emprestimo','Casamento','Lazer','Viagem','Tecnologia','Compras','Venda','Outros'].map(function(c){return'<option'+(ex&&ex.categoria===c?' selected':'')+'>'+c+'</option>';}).join('')+
+    '</select></div>'+
     '<div class="field"><label>Conta</label><div class="cgrid" id="cgrid">'+
       cl.map(function(c){return '<button class="copt'+(c===cc?' on':'')+'" onclick="selConta(this,\''+c+'\')">'+c+'</button>';}).join('')+
       '<button class="copt" onclick="addConta()">+ Nova</button>'+
@@ -680,6 +689,7 @@ function saveTx(){
   if(raw<0){op='Saida';raw=Math.abs(raw);}
   var base={mes:data.slice(0,7),data:data,operacao:op,valor:raw,
     descricao:document.getElementById('fdesc').value,
+    categoria:(document.getElementById('fcat')?document.getElementById('fcat').value:'Outros'),
     conta:document.getElementById('fconta').value,
     status:document.getElementById('fstatus').value};
   var db=load();
