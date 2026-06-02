@@ -247,7 +247,7 @@ button{font-family:inherit;cursor:pointer;border:none;background:none}
         <div class="mc"><div class="mclbl">Bens</div><div class="mcval green" id="rBens">--</div></div>
         <div class="mc"><div class="mclbl">Dividas</div><div class="mcval red" id="rDiv">--</div></div>
       </div>
-      <div class="dc"><div class="dct">Fluxo por mes</div><div class="cwrap" style="height:150px"><canvas id="cR"></canvas></div></div>
+      <div class="dc"><div class="dct">Fluxo por mes</div><div class="cwrap" style="height:220px"><canvas id="cR"></canvas></div></div>
       <div class="dc" id="rMetas"></div>
     </div>
   </div>
@@ -1154,25 +1154,111 @@ function renderResumo(db){
   var div=db.dividas.filter(function(d){return d.status!=='Pago';}).reduce(function(s,i){return s+i.valor;},0);
   document.getElementById('rSaldo').textContent=fmt(bens-div);
   document.getElementById('rSub').textContent='Bens '+fmt(bens)+' - Dividas '+fmt(div);
-  document.getElementById('rBens').textContent=fmt(bens);document.getElementById('rDiv').textContent=fmt(div);
-  var ms={};db.fluxo.forEach(function(t){ms[t.mes]=1;});var meses=Object.keys(ms).sort();
+  document.getElementById('rBens').textContent=fmt(bens);
+  document.getElementById('rDiv').textContent=fmt(div);
+
+  // Build month range: from first data month to end of current year
+  var hoje=new Date();
+  var anoAtual=hoje.getFullYear();
+  // If in first half of year, show until end of next year; otherwise end of current year
+  var anoFim=hoje.getMonth()<6?anoAtual+1:anoAtual;
+  var ms={};db.fluxo.forEach(function(t){ms[t.mes]=1;});
+  var primMes=Object.keys(ms).sort()[0]||curMes;
+  var meses=[];
+  var cur=primMes;
+  var fim=anoFim+'-12';
+  while(cur<=fim){meses.push(cur);var p=cur.split('-');var y=+p[0],m=+p[1];m++;if(m>12){m=1;y++;}cur=y+'-'+('0'+m).slice(-2);}
+
   var ents=meses.map(function(m){return db.fluxo.filter(function(t){return t.mes===m&&t.operacao==='Entrada';}).reduce(function(s,t){return s+t.valor;},0);});
   var sais=meses.map(function(m){return db.fluxo.filter(function(t){return t.mes===m&&t.operacao==='Saida';}).reduce(function(s,t){return s+t.valor;},0);});
-  dc('cR');charts['cR']=new Chart(document.getElementById('cR'),{type:'bar',data:{labels:meses.map(mNome),datasets:[{label:'Entrada',data:ents,backgroundColor:'rgba(0,212,170,.7)',borderRadius:5},{label:'Saida',data:sais,backgroundColor:'rgba(255,95,87,.7)',borderRadius:5}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{boxWidth:8,padding:12}}},scales:{y:{ticks:{callback:function(v){return fmtK(v);}}}}}});
-  var ea=db.emergencia.reduce(function(s,e){return s+e.acumulado;},0),em=db.emergencia.reduce(function(s,e){return s+e.meta;},0);
-  var ep=em>0?Math.min(100,ea/em*100):0,dp=bens>0?Math.min(100,div/bens*100):0;
-  document.getElementById('rMetas').innerHTML=
-    '<div class="dct">Indicadores</div>'+
-    '<div class="prow"><span>Fundo emergencia</span><span style="color:var(--yel);font-weight:700">'+ep.toFixed(1)+'%</span></div>'+
-    '<div class="pb" style="margin-bottom:6px"><div class="pf" style="width:'+ep+'%;background:var(--yel)"></div></div>'+
-    '<div style="font-size:11px;color:var(--t3);margin-bottom:14px">'+fmt(ea)+' de '+fmt(em)+'</div>'+
-    '<div class="prow"><span>Divida / Bens</span><span style="color:'+(dp>40?'var(--red)':'var(--grn)')+';font-weight:700">'+dp.toFixed(1)+'%</span></div>'+
-    '<div class="pb"><div class="pf" style="width:'+dp+'%;background:'+(dp>40?'var(--red)':'var(--grn)')+'"></div></div>'+
-    '<div style="font-size:11px;color:var(--t3);margin-top:4px">Meta: abaixo de 40%</div>'+
+  var saldos=meses.map(function(_,i){return ents[i]-sais[i];});
+
+  // Summary stats (only months with data)
+  var comDados=meses.filter(function(_,i){return ents[i]>0||sais[i]>0;});
+  var totalE=ents.reduce(function(s,v){return s+v;},0);
+  var totalS=sais.reduce(function(s,v){return s+v;},0);
+  var melhorIdx=saldos.reduce(function(best,v,i){return v>saldos[best]?i:best;},0);
+  var piorIdx=saldos.reduce(function(best,v,i){return v<saldos[best]?i:best;},0);
+
+  // Chart
+  dc('cR');
+  var ctx=document.getElementById('cR');
+  if(ctx){
+    charts['cR']=new Chart(ctx,{
+      type:'bar',
+      data:{
+        labels:meses.map(mNome),
+        datasets:[
+          {label:'Entradas',data:ents,backgroundColor:meses.map(function(m){return m<=curMes?'rgba(0,212,170,.8)':'rgba(0,212,170,.25)';}),borderRadius:4,order:2},
+          {label:'Saidas',data:sais,backgroundColor:meses.map(function(m){return m<=curMes?'rgba(255,95,87,.8)':'rgba(255,95,87,.25)';}),borderRadius:4,order:2},
+          {label:'Saldo',data:saldos,type:'line',borderColor:'#ffcc00',backgroundColor:'transparent',borderWidth:2,pointRadius:3,pointBackgroundColor:'#ffcc00',tension:.3,order:1}
+        ]
+      },
+      options:{
+        responsive:true,maintainAspectRatio:false,
+        plugins:{
+          legend:{position:'bottom',labels:{boxWidth:10,padding:14,font:{size:11}}},
+          tooltip:{callbacks:{label:function(c){return c.dataset.label+': '+fmt(c.raw);}}}
+        },
+        scales:{
+          x:{ticks:{font:{size:10}},grid:{display:false}},
+          y:{ticks:{callback:function(v){return fmtK(v);}},grid:{color:'rgba(255,255,255,.05)'}}
+        }
+      }
+    });
+  }
+
+  // Summary cards
+  var rMetas=document.getElementById('rMetas');
+  rMetas.innerHTML=
+    '<div class="dct">Fluxo acumulado</div>'+
+    '<div class="r2" style="margin-bottom:0">'+
+      '<div style="background:rgba(0,212,170,.08);border:1px solid rgba(0,212,170,.2);border-radius:14px;padding:12px;text-align:center">'+
+        '<div style="font-size:10px;font-weight:700;text-transform:uppercase;color:var(--grn);margin-bottom:4px">Total Entradas</div>'+
+        '<div style="font-size:16px;font-weight:800;color:var(--grn)">'+fmt(totalE)+'</div>'+
+      '</div>'+
+      '<div style="background:rgba(255,95,87,.08);border:1px solid rgba(255,95,87,.2);border-radius:14px;padding:12px;text-align:center">'+
+        '<div style="font-size:10px;font-weight:700;text-transform:uppercase;color:var(--red);margin-bottom:4px">Total Saidas</div>'+
+        '<div style="font-size:16px;font-weight:800;color:var(--red)">'+fmt(totalS)+'</div>'+
+      '</div>'+
+    '</div>'+
+    '<div style="background:rgba(255,204,0,.08);border:1px solid rgba(255,204,0,.2);border-radius:14px;padding:12px;text-align:center;margin:10px 0">'+
+      '<div style="font-size:10px;font-weight:700;text-transform:uppercase;color:var(--yel);margin-bottom:4px">Saldo Liquido</div>'+
+      '<div style="font-size:20px;font-weight:800;color:'+(totalE-totalS>=0?'var(--grn)':'var(--red)')+'">'+fmt(totalE-totalS)+'</div>'+
+    '</div>'+
+    (comDados.length>0?
+      '<div class="r2" style="margin-bottom:0">'+
+        '<div style="background:var(--s2);border:1px solid var(--bdr);border-radius:14px;padding:12px;text-align:center">'+
+          '<div style="font-size:10px;font-weight:700;text-transform:uppercase;color:var(--t3);margin-bottom:4px">Melhor mes</div>'+
+          '<div style="font-size:14px;font-weight:800;color:var(--grn)">'+mNome(meses[melhorIdx])+'</div>'+
+          '<div style="font-size:12px;color:var(--t3)">'+fmt(saldos[melhorIdx])+'</div>'+
+        '</div>'+
+        '<div style="background:var(--s2);border:1px solid var(--bdr);border-radius:14px;padding:12px;text-align:center">'+
+          '<div style="font-size:10px;font-weight:700;text-transform:uppercase;color:var(--t3);margin-bottom:4px">Pior mes</div>'+
+          '<div style="font-size:14px;font-weight:800;color:var(--red)">'+mNome(meses[piorIdx])+'</div>'+
+          '<div style="font-size:12px;color:var(--t3)">'+fmt(saldos[piorIdx])+'</div>'+
+        '</div>'+
+      '</div>':'')+
+    '<div style="height:1px;background:var(--bdr);margin:14px 0"></div>'+
+    '<div class="prow"><span>Fundo emergencia</span><span style="color:var(--yel);font-weight:700">'+
+      (function(){var ea=db.emergencia.reduce(function(s,e){return s+e.acumulado;},0),em=db.emergencia.reduce(function(s,e){return s+e.meta;},0);return(em>0?Math.min(100,ea/em*100):0).toFixed(1)+'%';})()
+    +'</span></div>'+
+    '<div class="pb" style="margin-bottom:6px"><div class="pf" style="width:'+
+      (function(){var ea=db.emergencia.reduce(function(s,e){return s+e.acumulado;},0),em=db.emergencia.reduce(function(s,e){return s+e.meta;},0);return(em>0?Math.min(100,ea/em*100):0);})()+
+    '%;background:var(--yel)"></div></div>'+
+    '<div style="font-size:11px;color:var(--t3);margin-bottom:14px">'+
+      fmt(db.emergencia.reduce(function(s,e){return s+e.acumulado;},0))+' de '+fmt(db.emergencia.reduce(function(s,e){return s+e.meta;},0))+
+    '</div>'+
+    (function(){var bens2=db.patrimonio.reduce(function(s,i){return s+i.valor;},0),div2=db.dividas.filter(function(d){return d.status!=='Pago';}).reduce(function(s,i){return s+i.valor;},0),dp=bens2>0?Math.min(100,div2/bens2*100):0;
+      return '<div class="prow"><span>Divida / Bens</span><span style="color:'+(dp>40?'var(--red)':'var(--grn)')+';font-weight:700">'+dp.toFixed(1)+'%</span></div>'+
+        '<div class="pb"><div class="pf" style="width:'+dp+'%;background:'+(dp>40?'var(--red)':'var(--grn)')+'"></div></div>'+
+        '<div style="font-size:11px;color:var(--t3);margin-top:4px">Meta: abaixo de 40%</div>';
+    })()+
     '<div style="height:1px;background:var(--bdr);margin:14px 0"></div>'+
     '<div class="prow"><span>Investimentos + Saldos</span><span style="color:var(--yel);font-weight:700">'+fmt(db.investimentos.reduce(function(s,i){return s+i.valorAtual;},0)+8117.87+1014.31+40323.58+1980.04+10018.92)+'</span></div>'+
     '<div style="font-size:11px;color:var(--t3)">Acoes, Fundos, Partilha, Leo, Apto, Casamento, Reserva</div>';
 }
+
 function renderBens(db){
   var tot=db.patrimonio.reduce(function(s,i){return s+i.valor;},0);
   document.getElementById('bTotal').textContent=fmt(tot);document.getElementById('bSub').textContent=db.patrimonio.length+' itens';
