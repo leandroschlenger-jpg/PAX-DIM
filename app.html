@@ -497,10 +497,6 @@ function toggleValues(){
   document.getElementById('eyebtn').innerHTML=valHidden?'&#128584;':'&#128065;';
   render(curPage);renderLemb(load());
 }
-function fmtV(v){
-  if(valHidden)return'R$ *****';
-  return fmt(v);
-}
 
 var KEY='pax_v7',_db=null;
 function uid(){return Date.now().toString(36)+Math.random().toString(36).slice(2,5);}
@@ -681,7 +677,7 @@ function load(){
   _db=seed();save(_db);return _db;
 }
 function save(db){_db=db;try{localStorage.setItem(KEY,JSON.stringify(db));}catch(e){}}
-var fmt=function(v){return(v==null||isNaN(v))?'--':'R$ '+Number(v).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});};
+var fmt=function(v){if(valHidden)return'R$ *****';return(v==null||isNaN(v))?'--':'R$ '+Number(v).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});};
 var fmtD=function(d){if(!d)return'--';var p=d.split('-');return p[2]+'/'+p[1];};
 var mNome=function(m){var n=['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];var p=m.split('-');return n[+p[1]-1]+'/'+p[0].slice(2);};
 var dName=function(d){return['Dom','Seg','Ter','Qua','Qui','Sex','Sab'][new Date(d+'T12:00').getDay()];};
@@ -729,7 +725,7 @@ function renderFluxo(db){
   var ent=all.filter(function(t){return t.operacao==='Entrada';}).reduce(function(s,t){return s+t.valor;},0);
   var sai=all.filter(function(t){return t.operacao==='Saida';}).reduce(function(s,t){return s+t.valor;},0);
   var saldo=ent-sai,pend=all.filter(function(t){return t.status!=='OK';}).length;
-  var fmt0=fmt;if(valHidden){fmt=fmtV;}document.getElementById('fhero').innerHTML=
+  document.getElementById('fhero').innerHTML=
     '<div class="fhl">Saldo do mes</div>'+
     '<div class="fhv '+(saldo>=0?'pos':'neg')+'">'+fmt(saldo)+'</div>'+
     '<div class="fhr">'+
@@ -738,7 +734,7 @@ function renderFluxo(db){
       (pend>0?'<div><div class="fsl">Pendentes</div><div class="fsv" style="color:var(--yel)">'+pend+'</div></div>':'')+
     '</div>';
   var contas=['Ifood','PJ Itau Nu'];
-  fmt=fmt0;document.getElementById('apills').innerHTML=contas.map(function(c){
+  document.getElementById('apills').innerHTML=contas.map(function(c){
     var ce=all.filter(function(t){return t.conta===c&&t.operacao==='Entrada';}).reduce(function(s,t){return s+t.valor;},0);
     var cs=all.filter(function(t){return t.conta===c&&t.operacao==='Saida';}).reduce(function(s,t){return s+t.valor;},0);
     var b=ce-cs,col=b>=0?'var(--grn)':'var(--red)';
