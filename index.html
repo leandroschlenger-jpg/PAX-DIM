@@ -933,9 +933,24 @@ function saveTx(){
     status:fstatusEl.value};
   var db=load();
   if(editId){
+    // Atualiza o lancamento atual
     var i=db.fluxo.findIndex(function(x){return x.id===editId;});
     if(i>=0)db.fluxo[i]=Object.assign({},base,{id:editId});
-    toast('Atualizado');
+    // Se mudou recorrencia, cria proximos lancamentos
+    var reEl=document.getElementById('frec'),rec=reEl?reEl.value:'nao',vezes=0;
+    if(rec==='fixa'){vezes=Math.max(0,parseInt((document.getElementById('fqtd')||{}).value||'0')-1);}
+    else if(rec==='indef'){vezes=119;}
+    if(vezes>0){
+      var rid=uid();
+      for(var j=1;j<=vezes;j++){
+        var d=addMes(base.data,j);
+        var e=Object.assign({},base,{id:uid(),data:d,mes:d.slice(0,7),recId:rid,recIdx:j+1,recTotal:rec==='indef'?'?':vezes+1});
+        db.fluxo.push(e);
+      }
+      toast('Atualizado + '+vezes+' repeticoes criadas');
+    } else {
+      toast('Atualizado');
+    }
   } else {
     var re=document.getElementById('frec'),rec=re?re.value:'nao',vezes=1;
     if(rec==='fixa')vezes=Math.max(1,parseInt(document.getElementById('fqtd').value)||1);
