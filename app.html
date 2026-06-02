@@ -481,7 +481,7 @@ function toast(m){var e=document.getElementById('toast');e.textContent=m;e.class
 function openMP(){
   var db=load(),hm={};db.fluxo.forEach(function(t){hm[t.mes]=1;});
   var g=document.getElementById('mgrid'),ms=[];
-  for(var i=1;i<=12;i++)ms.push('2026-'+('0'+i).slice(-2));
+  for(var i=6;i<=12;i++)ms.push('2026-'+('0'+i).slice(-2));for(var i=1;i<=12;i++)ms.push('2027-'+('0'+i).slice(-2));
   g.innerHTML=ms.map(function(m){return '<button class="mpill '+(m===curMes?'cur':hm[m]?'has':'')+'" onclick="selMes(\''+m+'\')">'+mNome(m)+'</button>';}).join('');
   document.getElementById('mpbg').classList.add('on');
 }
@@ -615,8 +615,7 @@ function openTxSheet(ex){
   var cl=['PJ Itau Nu','Ifood/Volus'];Object.keys(cs).forEach(function(c){if(cl.indexOf(c)<0)cl.push(c);});
   var cc=ex?ex.conta:'PJ Itau Nu';
   document.getElementById('stitle').textContent=editId?'Editar':'Nova Transacao';
-  var recHtml=editId?'':
-    '<div class="sep"></div>'+
+  var recHtml='<div class="sep"></div>'+
     '<div class="field"><label>Recorrencia</label>'+
     '<div class="rgrid">'+
       '<button class="copt on" id="rn" onclick="setRec(\'nao\',this)">Nao repete</button>'+
