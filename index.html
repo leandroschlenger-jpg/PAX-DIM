@@ -218,6 +218,10 @@ button{font-family:inherit;cursor:pointer;border:none;background:none}
     </div>
     <div class="fhero" id="fhero"></div>
     <div class="apills" id="apills"></div>
+    <div id="fechadoBanner" style="display:none;margin:8px 16px 0;background:rgba(96,165,250,.1);border:1px solid rgba(96,165,250,.3);border-radius:12px;padding:10px 14px;font-size:13px;font-weight:700;color:var(--blu)">&#128274; Mes fechado — lancamentos bloqueados para edicao</div>
+    <div style="display:flex;justify-content:flex-end;padding:8px 16px 0">
+      <button id="btnFecharMes" onclick="fecharMes()" style="padding:6px 14px;border-radius:20px;font-size:12px;font-weight:700;border:1px solid var(--bdr);background:var(--s2);color:var(--t3)">&#128274; Fechar mes</button>
+    </div>
     <div class="fbar">
       <button class="chip on" onclick="setF('all',this)">Todos</button>
       <button class="chip" onclick="setF('ent',this)">Entradas</button>
@@ -663,6 +667,7 @@ function seed(){
       {id:uid(),acao:'Contratar musica violao MPB',data:'2026-06-01',custo:1300,status:'Pendente'},
       {id:uid(),acao:'Decoracao arco flores',data:'2026-06-01',custo:4000,status:'Pendente'}
     ],
+    mesesFechados:[],
     carro:{
       codigoFipe:'',valorFinanciado:145000,totalParcelas:48,
       parcelas:[
@@ -733,6 +738,11 @@ function renderFluxo(db){
   var ent=all.filter(function(t){return t.operacao==='Entrada';}).reduce(function(s,t){return s+t.valor;},0);
   var sai=all.filter(function(t){return t.operacao==='Saida';}).reduce(function(s,t){return s+t.valor;},0);
   var saldo=ent-sai,pend=all.filter(function(t){return t.status!=='OK';}).length;
+  var fechado=isMesFechado(curMes);
+  var banner=document.getElementById('fechadoBanner');
+  var btnF=document.getElementById('btnFecharMes');
+  if(banner)banner.style.display=fechado?'block':'none';
+  if(btnF){btnF.style.display=fechado?'none':'block';btnF.style.color=fechado?'var(--blu)':'var(--t3)';}
   document.getElementById('fhero').innerHTML=
     '<div class="fhl">Saldo do mes</div>'+
     '<div class="fhv '+(saldo>=0?'pos':'neg')+'">'+fmt(saldo)+'</div>'+
@@ -832,17 +842,39 @@ function bindSwipe(txs){
     });
   });
 }
+function isMesFechado(mes){var db=load();return(db.mesesFechados||[]).indexOf(mes)>=0;}
+function fecharMes(){
+  var db=load();
+  if((db.mesesFechados||[]).indexOf(curMes)>=0){toast('Mes ja fechado');return;}
+  var all=db.fluxo.filter(function(t){return t.mes===curMes;});
+  if(all.length===0){toast('Nenhum lancamento neste mes');return;}
+  var pend=all.filter(function(t){return t.status!=='OK';}).length;
+  var msg='Fechar '+mNome(curMes)+'?'+(pend>0?' Ainda ha '+pend+' lancamento(s) pendente(s).':' Todos os lancamentos estao confirmados.')+'\n\nApos fechar, nenhum lancamento sera alterado.';
+  if(!confirm(msg))return;
+  if(!db.mesesFechados)db.mesesFechados=[];
+  db.mesesFechados.push(curMes);
+  save(db);renderFluxo(db);toast(mNome(curMes)+' fechado com sucesso');
+}
 function togOK(id){
   var db=load(),t=db.fluxo.find(function(x){return x.id===id;});
-  if(!t)return;t.status=t.status==='OK'?'':'OK';
+  if(!t)return;
+  if(isMesFechado(t.mes)){toast('Mes fechado - nao e possivel alterar');return;}
+  t.status=t.status==='OK'?'':'OK';
   save(db);toast(t.status==='OK'?'Confirmado':'Pendente');renderFluxo(db);
 }
 function delTx(id){
+  var db=load(),t=db.fluxo.find(function(x){return x.id===id;});
+  if(t&&isMesFechado(t.mes)){toast('Mes fechado - nao e possivel excluir');return;}
   if(!confirm('Excluir transacao?'))return;
-  var db=load();db.fluxo=db.fluxo.filter(function(x){return x.id!==id;});
+  db.fluxo=db.fluxo.filter(function(x){return x.id!==id;});
   save(db);toast('Removido');renderFluxo(db);
 }
-function editTx(id){var db=load(),t=db.fluxo.find(function(x){return x.id===id;});if(t)openTxSheet(t);}
+function editTx(id){
+  var db=load(),t=db.fluxo.find(function(x){return x.id===id;});
+  if(!t)return;
+  if(isMesFechado(t.mes)){toast('Mes fechado - nao e possivel editar');return;}
+  openTxSheet(t);
+}
 function openAdd(){
   if(curPage==='lemb'){openLembSheet(null);return;}
   if(['bens','dividas','inv','emg','cas'].indexOf(curPage)>=0){openGenSheet(curPage,null);return;}
@@ -1256,7 +1288,34 @@ function renderResumo(db){
     })()+
     '<div style="height:1px;background:var(--bdr);margin:14px 0"></div>'+
     '<div class="prow"><span>Investimentos + Saldos</span><span style="color:var(--yel);font-weight:700">'+fmt(db.investimentos.reduce(function(s,i){return s+i.valorAtual;},0)+8117.87+1014.31+40323.58+1980.04+10018.92)+'</span></div>'+
-    '<div style="font-size:11px;color:var(--t3)">Acoes, Fundos, Partilha, Leo, Apto, Casamento, Reserva</div>';
+    '<div style="font-size:11px;color:var(--t3);margin-bottom:14px">Acoes, Fundos, Partilha, Leo, Apto, Casamento, Reserva</div>'+
+    (function(){
+      // Month-over-month arrows for last 2 months with data
+      var meses2=Object.keys(ms).sort();
+      if(meses2.length<2)return'';
+      var mA=meses2[meses2.length-1],mB=meses2[meses2.length-2];
+      function calcSaldo(m){var e=db.fluxo.filter(function(t){return t.mes===m&&t.operacao==='Entrada';}).reduce(function(s,t){return s+t.valor;},0);var s=db.fluxo.filter(function(t){return t.mes===m&&t.operacao==='Saida';}).reduce(function(s,t){return s+t.valor;},0);return e-s;}
+      function calcEnt(m){return db.fluxo.filter(function(t){return t.mes===m&&t.operacao==='Entrada';}).reduce(function(s,t){return s+t.valor;},0);}
+      function calcSai(m){return db.fluxo.filter(function(t){return t.mes===m&&t.operacao==='Saida';}).reduce(function(s,t){return s+t.valor;},0);}
+      function arrow(a,b,inv){var d=a-b;if(Math.abs(d)<1)return'<span style="color:var(--t3)">&#8594;</span>';if(inv)d=-d;return d>0?'<span style="color:var(--grn)">&#8679;</span>':'<span style="color:var(--red)">&#8681;</span>';}
+      var rows=[
+        {l:'Entradas',a:calcEnt(mA),b:calcEnt(mB),inv:false},
+        {l:'Saidas',a:calcSai(mA),b:calcSai(mB),inv:true},
+        {l:'Saldo liquido',a:calcSaldo(mA),b:calcSaldo(mB),inv:false}
+      ];
+      return '<div style="height:1px;background:var(--bdr);margin:0 0 12px 0"></div>'+
+        '<div style="font-size:11px;font-weight:700;text-transform:uppercase;color:var(--t3);margin-bottom:8px">'+mNome(mB)+' vs '+mNome(mA)+'</div>'+
+        rows.map(function(r){
+          var diff=r.a-r.b,pct=r.b!==0?(diff/Math.abs(r.b)*100):0;
+          return'<div style="display:flex;align-items:center;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--bdr)">'+
+            '<span style="font-size:13px;color:var(--t2)">'+r.l+'</span>'+
+            '<div style="display:flex;align-items:center;gap:8px">'+
+              '<span style="font-size:12px;color:var(--t3)">'+(pct>=0?'+':'')+pct.toFixed(0)+'%</span>'+
+              arrow(r.a,r.b,r.inv)+
+            '</div>'+
+          '</div>';
+        }).join('');
+    })();
 }
 
 function renderBens(db){
