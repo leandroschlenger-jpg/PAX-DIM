@@ -500,7 +500,7 @@ function toggleValues(){
 
 var KEY='pax_v7',_db=null;
 function uid(){return Date.now().toString(36)+Math.random().toString(36).slice(2,5);}
-function mkT(m,d,op,v,c,s,desc,cat){return{id:uid(),mes:m,data:d,operacao:op,valor:v,conta:c,status:s,descricao:desc,categoria:cat||'Outros'};}
+function mkT(m,d,op,v,c,s,desc,cat,forma){return{id:uid(),mes:m,data:d,operacao:op,valor:v,conta:c,status:s,descricao:desc,categoria:cat||'Outros',forma:forma||''};}
 function seed(){
   var T=[
     ['2026-03','2026-03-06','Entrada',39611.22,'PJ Itau Nu','OK','Distribuicao','Receita'],
@@ -881,6 +881,9 @@ function openTxSheet(ex){
       '<option value="OK"'+(ex&&ex.status==='OK'?' selected':'')+'>OK - Confirmado</option>'+
       '<option value=""'+(!ex||ex.status!=='OK'?' selected':'')+'>Pendente</option>'+
     '</select></div>'+
+    '<div class="field"><label>Forma de quitacao</label><select id="fforma">'+
+      ['','PIX','Boleto','Cartao de credito','Cartao de debito','Transferencia','Dinheiro'].map(function(f){return'<option value="'+f+'"'+(ex&&ex.forma===f?' selected':'')+'>'+( f||'Nao informado')+'</option>';}).join('')+
+    '</select></div>'+
     recHtml+
     '<button class="savebtn" onclick="saveTx()">Salvar</button>';
   if(editId){
@@ -933,7 +936,8 @@ function saveTx(){
     descricao:fdescEl.value||'Sem descricao',
     categoria:(document.getElementById('fcat')?document.getElementById('fcat').value:'Outros'),
     conta:fcontaEl.value||'PJ Itau Nu',
-    status:fstatusEl.value};
+    status:fstatusEl.value,
+    forma:(document.getElementById('fforma')?document.getElementById('fforma').value:'')};
   var db=load();
   if(editId){
     var reEl=document.getElementById('frec'),rec=reEl?reEl.value:'nao';
