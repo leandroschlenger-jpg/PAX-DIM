@@ -1189,17 +1189,12 @@ function renderResumo(db){
   document.getElementById('rBens').textContent=fmt(bens);
   document.getElementById('rDiv').textContent=fmt(div);
 
-  // Build month range: from first data month to end of current year
+  // Only current year months
   var hoje=new Date();
   var anoAtual=hoje.getFullYear();
-  // If in first half of year, show until end of next year; otherwise end of current year
-  var anoFim=hoje.getMonth()<6?anoAtual+1:anoAtual;
   var ms={};db.fluxo.forEach(function(t){ms[t.mes]=1;});
-  var primMes=Object.keys(ms).sort()[0]||curMes;
   var meses=[];
-  var cur=primMes;
-  var fim=anoFim+'-12';
-  while(cur<=fim){meses.push(cur);var p=cur.split('-');var y=+p[0],m=+p[1];m++;if(m>12){m=1;y++;}cur=y+'-'+('0'+m).slice(-2);}
+  for(var i=1;i<=12;i++)meses.push(anoAtual+'-'+('0'+i).slice(-2));
 
   var ents=meses.map(function(m){return db.fluxo.filter(function(t){return t.mes===m&&t.operacao==='Entrada';}).reduce(function(s,t){return s+t.valor;},0);});
   var sais=meses.map(function(m){return db.fluxo.filter(function(t){return t.mes===m&&t.operacao==='Saida';}).reduce(function(s,t){return s+t.valor;},0);});
