@@ -338,32 +338,32 @@ button{font-family:inherit;cursor:pointer;border:none;background:none}
     <div class="bh"><button class="bbtn" onclick="closeSub()">&#8249;</button><div class="ph1" style="font-size:20px">Carro &#128663;</div></div>
     <div class="pp" style="padding-top:0">
       <div class="hcard" style="background:linear-gradient(145deg,#0d2040,#0f1120);border:1px solid rgba(96,165,250,.2)">
-        <div class="hlbl">Custo total</div><div class="hval" style="color:var(--blu)">R$ 200.280,24</div><div class="hsub">Entrada + Financiamento + IPVA</div>
+        <div class="hlbl">Saldo devedor</div><div class="hval red" id="carroSaldo">--</div>
+        <div class="hsub" id="carroSub">--</div>
       </div>
       <div class="r2">
-        <div class="mc"><div class="mclbl">Entrada</div><div class="mcval" style="color:var(--blu)">R$ 50.000</div></div>
-        <div class="mc"><div class="mclbl">Financiado</div><div class="mcval red">R$ 145.000</div><div style="font-size:11px;color:var(--t3)">48x R$ 5.288,54</div></div>
+        <div class="mc"><div class="mclbl">Total pago</div><div class="mcval green" id="carroPago">--</div></div>
+        <div class="mc"><div class="mclbl">Parcelas</div><div class="mcval" id="carroQtd">--</div></div>
       </div>
       <div class="dc">
-        <div class="dct">Parcelas</div>
-        <div class="lrow"><div class="lb"><div class="lt">Parcela 1/48</div><div class="ls">30/04/2026 - Pago pela Thays</div></div><div class="lr"><div class="lv">R$ 5.288,54</div><span class="badge bgg">Pago</span></div></div>
-        <div class="lrow"><div class="lb"><div class="lt">Parcela 2/48</div><div class="ls">08/05/2026 - Antecipacao Leandro</div></div><div class="lr"><div class="lv">R$ 5.212,30</div><span class="badge bgg">Pago</span></div></div>
-        <div class="lrow"><div class="lb"><div class="lt">Parcela 3/48</div><div class="ls">01/06/2026 - Antecipacao Leandro</div></div><div class="lr"><div class="lv">R$ 5.188,54</div><span class="badge bgg">Pago</span></div></div>
-        <div class="lrow"><div class="lb"><div class="lt" style="font-weight:800">Saldo quitacao</div></div><div class="lr"><div class="lv red">R$ 152.122,98</div></div></div>
+        <div class="dct" style="display:flex;justify-content:space-between;align-items:center">
+          <span>Parcelas pagas</span>
+          <button onclick="openCarroParcela(null)" style="padding:6px 14px;border-radius:20px;background:var(--acc);color:#fff;font-size:12px;font-weight:700;border:none">+ Adicionar</button>
+        </div>
+        <div id="listParcelas"></div>
       </div>
       <div class="dc">
-        <div class="dct">Avaliacao</div>
-        <div class="lrow"><div class="lb"><div class="lt">Tabela FIPE</div></div><div class="lr"><div class="lv">R$ 207.172</div></div></div>
-        <div class="lrow"><div class="lb"><div class="lt">Preco mercado</div></div><div class="lr"><div class="lv">R$ 200.000</div></div></div>
-        <div class="lrow"><div class="lb"><div class="lt">Valor venda estimado</div></div><div class="lr"><div class="lv green">R$ 195.000</div></div></div>
-        <div class="lrow"><div class="lb"><div class="lt">Ganho sobre custo</div></div><div class="lr"><div class="lv green">+ R$ 12.172</div></div></div>
+        <div class="dct" style="display:flex;justify-content:space-between;align-items:center">
+          <span>Tabela FIPE</span>
+          <button onclick="consultarFIPE()" id="fipeBtn" style="padding:6px 14px;border-radius:20px;background:var(--s2);color:var(--accl);font-size:12px;font-weight:700;border:1px solid var(--acc)">&#128270; Consultar</button>
+        </div>
+        <div id="fipeResult" style="margin-top:8px;font-size:13px;color:var(--t2)">Toque em Consultar para buscar valor atual</div>
       </div>
       <div class="dc">
         <div class="dct">Acesso CarBank</div>
         <div style="font-size:13px;color:var(--t2);line-height:2">Site: <span style="color:var(--accl)">carbankbrasil.com.br</span><br>CPF: 323.025.288-83<br>Senha: 9297</div>
       </div>
-    </div>
-  </div>
+    </div>  </div>
 
   <div id="pg-apto" class="page">
     <div class="bh"><button class="bbtn" onclick="closeSub()">&#8249;</button><div class="ph1" style="font-size:20px">Apto Cajamar &#127968;</div></div>
@@ -663,6 +663,14 @@ function seed(){
       {id:uid(),acao:'Contratar musica violao MPB',data:'2026-06-01',custo:1300,status:'Pendente'},
       {id:uid(),acao:'Decoracao arco flores',data:'2026-06-01',custo:4000,status:'Pendente'}
     ],
+    carro:{
+      codigoFipe:'',valorFinanciado:145000,totalParcelas:48,
+      parcelas:[
+        {id:uid(),num:1,valor:5288.54,data:'2026-04-30',status:'Pago',obs:'Pago pela Thays'},
+        {id:uid(),num:2,valor:5212.30,data:'2026-05-08',status:'Pago',obs:'Antecipacao Leandro'},
+        {id:uid(),num:3,valor:5188.54,data:'2026-06-01',status:'Pago',obs:'Antecipacao Leandro'}
+      ]
+    },
     lembretes:[
       {id:uid(),titulo:'Deposito judicial - Processo Felix cobranca titulo',data:'2026-06-10',processo:'Proc 4 - Felix (requerido)',prioridade:'Alta',status:'Pendente',obs:'Verificar se deposito de 18/02 foi aceito nos embargos de execucao'},
       {id:uid(),titulo:'Acompanhar Processo Latam SP',data:'2026-06-15',processo:'Proc 6 - Latam',prioridade:'Media',status:'Pendente',obs:'Dr. Luiz Fernando - checar andamento da indenizacao'},
@@ -795,12 +803,14 @@ function renderFluxo(db){
             '</button>'+
           '</div>'+
           '<button class="ebtn" data-tid="'+t.id+'" style="font-size:20px;opacity:.7;padding:6px 8px;min-width:36px;min-height:36px">&#9998;</button>'+
+          (t.obs?'<button class="obs-btn" data-tid="'+t.id+'" style="font-size:20px;padding:6px 8px;min-width:36px;min-height:36px;color:var(--yel);opacity:.8">&#128203;</button>':'')+
         '</div>';
       list.appendChild(wrap);
     });
   });
   list.querySelectorAll('.sbtn').forEach(function(b){b.onclick=function(){togOK(this.dataset.tid);};});
   list.querySelectorAll('.ebtn').forEach(function(b){b.onclick=function(){editTx(this.dataset.tid);};});
+  list.querySelectorAll('.obs-btn').forEach(function(b){b.onclick=function(){showObs(this.dataset.tid);};});
   setTimeout(function(){bindSwipe(fil);},0);
 }
 function bindSwipe(txs){
@@ -881,6 +891,8 @@ function openTxSheet(ex){
       '<option value="OK"'+(ex&&ex.status==='OK'?' selected':'')+'>OK - Confirmado</option>'+
       '<option value=""'+(!ex||ex.status!=='OK'?' selected':'')+'>Pendente</option>'+
     '</select></div>'+
+    '<div class="field"><label>Observacoes de pagamento</label>'+
+    '<textarea id="fobs" rows="3" style="width:100%;background:var(--s2);border:1.5px solid var(--bdr);border-radius:12px;padding:12px;font-size:14px;color:var(--t1);font-family:inherit;outline:none;resize:none" placeholder="Chave PIX, site/login/senha do boleto...">'+(ex&&ex.obs?ex.obs:'')+'</textarea></div>'+
     '<div class="field"><label>Forma de quitacao</label><select id="fforma">'+
       ['','PIX','Boleto','Cartao de credito','Cartao de debito','Transferencia','Dinheiro'].map(function(f){return'<option value="'+f+'"'+(ex&&ex.forma===f?' selected':'')+'>'+( f||'Nao informado')+'</option>';}).join('')+
     '</select></div>'+
@@ -1135,6 +1147,7 @@ function render(id){
   else if(id==='inv')renderInv(db);
   else if(id==='emg')renderEmg(db);
   else if(id==='cas')renderCas(db);
+  else if(id==='carro')renderCarro();
 }
 function renderResumo(db){
   var bens=db.patrimonio.reduce(function(s,i){return s+i.valor;},0);
@@ -1222,6 +1235,113 @@ function renderCas(db){
       '<button class="eb" data-cid="'+r.id+'">&#9998;</button></div>';
   }).join('');
   document.querySelectorAll('#listC .eb').forEach(function(b){b.onclick=function(){openGenSheet('cas',this.dataset.cid);};});
+}
+function showObs(id){
+  var db=load(),t=db.fluxo.find(function(x){return x.id===id;});if(!t)return;
+  document.getElementById('stitle').textContent='Observacoes';
+  document.getElementById('sbody').innerHTML=
+    '<div style="font-size:15px;font-weight:700;margin-bottom:12px;color:var(--t1)">'+t.categoria+(t.descricao?' - '+t.descricao:'')+'</div>'+
+    '<textarea id="obsEdit" rows="8" style="width:100%;background:var(--s2);border:1.5px solid var(--bdr);border-radius:12px;padding:14px;font-size:14px;color:var(--t1);font-family:inherit;outline:none;resize:none" placeholder="Chave PIX, site/login/senha do boleto...">'+( t.obs||'')+'</textarea>';
+  var sav=document.createElement('button');sav.className='savebtn';sav.style.marginTop='12px';sav.textContent='Salvar';
+  sav.onclick=function(){
+    t.obs=document.getElementById('obsEdit').value;
+    save(db);closeSH();renderFluxo(db);toast('Observacao salva');
+  };
+  document.getElementById('sbody').appendChild(sav);
+  document.getElementById('sbg').classList.add('on');
+  setTimeout(function(){var el=document.getElementById('obsEdit');if(el)el.focus();},300);
+}
+function renderCarro(){
+  var db=load(),c=db.carro||{parcelas:[]};
+  var parc=c.parcelas||[];
+  var totalPago=parc.filter(function(p){return p.status==='Pago';}).reduce(function(s,p){return s+p.valor;},0);
+  var saldo=Math.max(0,(c.valorFinanciado||145000)-totalPago);
+  document.getElementById('carroSaldo').textContent=fmt(saldo);
+  document.getElementById('carroSub').textContent='Financiado '+fmt(c.valorFinanciado||145000)+' - '+parc.length+'/'+(c.totalParcelas||48)+' pagas';
+  document.getElementById('carroPago').textContent=fmt(totalPago);
+  document.getElementById('carroQtd').textContent=parc.length+' / '+(c.totalParcelas||48);
+  var el=document.getElementById('listParcelas');
+  if(!el)return;
+  el.innerHTML='';
+  if(parc.length===0){el.innerHTML='<div class="empty" style="padding:20px 0"><div class="etitle">Nenhuma parcela registrada</div></div>';return;}
+  parc.slice().sort(function(a,b){return a.num-b.num;}).forEach(function(p){
+    var div=document.createElement('div');div.className='lrow';
+    div.innerHTML=
+      '<div class="lb"><div class="lt">Parcela '+p.num+'/'+(c.totalParcelas||48)+'</div>'+
+      '<div class="ls">'+fmtD(p.data)+(p.obs?' - '+p.obs:'')+'</div></div>'+
+      '<div class="lr"><div class="lv">'+fmt(p.valor)+'</div>'+
+      '<span class="badge '+(p.status==='Pago'?'bgg':'bgy')+'">'+p.status+'</span>'+
+      '<div style="display:flex;gap:4px;margin-top:4px">'+
+        '<button class="ep-btn eb" data-pid="'+p.id+'">&#9998;</button>'+
+        '<button class="dp-btn eb" data-pid="'+p.id+'" style="color:var(--red)">&#10005;</button>'+
+      '</div></div>';
+    el.appendChild(div);
+  });
+  el.querySelectorAll('.ep-btn').forEach(function(b){b.onclick=function(){openCarroParcela(this.dataset.pid);};});
+  el.querySelectorAll('.dp-btn').forEach(function(b){b.onclick=function(){
+    var pid=this.dataset.pid;if(!confirm('Excluir parcela?'))return;
+    var db=load();db.carro.parcelas=db.carro.parcelas.filter(function(x){return x.id!==pid;});
+    save(db);renderCarro();toast('Removida');
+  };});
+}
+function openCarroParcela(pid){
+  var db=load(),c=db.carro||{},p=pid?(c.parcelas||[]).find(function(x){return x.id===pid;}):null;
+  var nextNum=p?p.num:((c.parcelas||[]).length+1);
+  document.getElementById('stitle').textContent=p?'Editar Parcela':'Nova Parcela';
+  document.getElementById('sbody').innerHTML=
+    '<div class="field"><label>Numero da parcela</label><input id="cpnum" type="number" value="'+nextNum+'" inputmode="numeric"></div>'+
+    '<div class="field"><label>Valor (R$)</label><input id="cpval" type="number" step="0.01" value="'+(p?p.valor:5288.54)+'" inputmode="decimal"></div>'+
+    '<div class="field"><label>Data do pagamento</label><input id="cpdata" type="date" value="'+(p?p.data:curMes+'-01')+'"></div>'+
+    '<div class="field"><label>Status</label><select id="cpstatus"><option'+((!p||p.status==='Pago')?' selected':'')+'>Pago</option><option'+(p&&p.status==='Pendente'?' selected':'')+'>Pendente</option></select></div>'+
+    '<div class="field"><label>Obs.</label><input id="cpobs" type="text" placeholder="Ex: Antecipacao..." value="'+(p&&p.obs?p.obs:'')+'" ></div>';
+  var sav=document.createElement('button');sav.className='savebtn';sav.textContent='Salvar';
+  sav.onclick=function(){saveCarroParcela(pid);};
+  document.getElementById('sbody').appendChild(sav);
+  if(pid){
+    var del=document.createElement('button');del.className='delbtn';del.textContent='Excluir';
+    del.onclick=function(){delCarroParcela(pid);};
+    document.getElementById('sbody').appendChild(del);
+  }
+  document.getElementById('sbg').classList.add('on');
+}
+function saveCarroParcela(pid){
+  var db=load();if(!db.carro)db.carro={parcelas:[]};if(!db.carro.parcelas)db.carro.parcelas=[];
+  var item={id:pid||uid(),
+    num:parseInt(document.getElementById('cpnum').value)||1,
+    valor:parseFloat(document.getElementById('cpval').value)||0,
+    data:document.getElementById('cpdata').value,
+    status:document.getElementById('cpstatus').value,
+    obs:document.getElementById('cpobs').value};
+  if(pid){var i=db.carro.parcelas.findIndex(function(x){return x.id===pid;});if(i>=0)db.carro.parcelas[i]=item;}
+  else db.carro.parcelas.push(item);
+  save(db);closeSH();renderCarro();toast('Parcela salva');
+}
+function delCarroParcela(pid){
+  if(!confirm('Excluir?'))return;
+  var db=load();db.carro.parcelas=db.carro.parcelas.filter(function(x){return x.id!==pid;});
+  save(db);closeSH();renderCarro();toast('Removida');
+}
+function consultarFIPE(){
+  var btn=document.getElementById('fipeBtn'),res=document.getElementById('fipeResult');
+  if(!btn||!res)return;
+  btn.textContent='Consultando...';btn.disabled=true;
+  res.textContent='Buscando na tabela FIPE...';
+  fetch('https://parallelum.com.br/fipe/api/v1/carros/marcas/56/modelos/10929/anos')
+    .then(function(r){return r.json();})
+    .then(function(anos){
+      var ano=anos[0]&&anos[0].codigo?anos[0].codigo:'2024-1';
+      return fetch('https://parallelum.com.br/fipe/api/v1/carros/marcas/56/modelos/10929/anos/'+ano+'/valor');
+    })
+    .then(function(r){return r.json();})
+    .then(function(d){
+      res.innerHTML='<div style="font-size:20px;font-weight:800;color:var(--yel);margin-bottom:6px">'+d.Valor+'</div>'+
+        '<div style="font-size:12px;color:var(--t3)">'+d.Marca+' '+d.Modelo+' '+d.AnoModelo+'<br>Ref: '+d.MesReferencia+'</div>';
+      btn.textContent='&#128270; Atualizar';btn.disabled=false;
+    })
+    .catch(function(){
+      res.innerHTML='<div style="font-size:13px;color:var(--t3)">Nao foi possivel consultar a FIPE agora. Tente novamente.</div>';
+      btn.textContent='&#128270; Consultar';btn.disabled=false;
+    });
 }
 function exportData(){
   var a=document.createElement('a');
