@@ -846,16 +846,19 @@ function openTxSheet(ex){
   var cc=ex?ex.conta:'Ifood';
   var cats=['Receita','Moradia','Alimentacao','Saude','Educacao','Veiculo','Cartao','Juridico','Impostos','Investimento','Familia','Emprestimo','Casamento','Lazer','Viagem','Tecnologia','Compras','Venda','Outros'];
   document.getElementById('stitle').textContent=editId?'Editar':'Nova Transacao';
+  var curRec='nao',curQtd=12;
+  if(ex&&ex.recId){curRec=ex.recTotal==='?'?'indef':'fixa';curQtd=ex.recTotal==='?'?12:Number(ex.recTotal)||12;}
   var recHtml=
     '<div class="sep"></div>'+
     '<div class="field"><label>Recorrencia</label>'+
+    (ex&&ex.recId?'<div style="font-size:11px;color:var(--t3);margin-bottom:8px">Lancamento '+ex.recIdx+' de '+ex.recTotal+'</div>':'')+
     '<div class="rgrid">'+
-      '<button class="copt on" id="rn" onclick="setRec(\'nao\',this)">Nao repete</button>'+
-      '<button class="copt" id="rf" onclick="setRec(\'fixa\',this)">Qtd. fixa</button>'+
-      '<button class="copt" id="ri" onclick="setRec(\'indef\',this)">Indeterminado</button>'+
+      '<button class="copt'+(curRec==='nao'?' on':'')+'" id="rn" onclick="setRec(\'nao\',this)">Nao repete</button>'+
+      '<button class="copt'+(curRec==='fixa'?' on':'')+'" id="rf" onclick="setRec(\'fixa\',this)">Qtd. fixa</button>'+
+      '<button class="copt'+(curRec==='indef'?' on':'')+'" id="ri" onclick="setRec(\'indef\',this)">Indeterminado</button>'+
     '</div></div>'+
-    '<input type="hidden" id="frec" value="nao">'+
-    '<div id="fqtdwrap" style="display:none"><div class="field"><label>Quantas vezes (meses)?</label><input id="fqtd" type="number" min="2" max="120" value="12" inputmode="numeric"></div></div>';
+    '<input type="hidden" id="frec" value="'+curRec+'">'+
+    '<div id="fqtdwrap" style="display:'+(curRec==='fixa'?'block':'none')+'"><div class="field"><label>Quantas vezes?</label><input id="fqtd" type="number" min="2" max="120" value="'+curQtd+'" inputmode="numeric"></div></div>';
   document.getElementById('sbody').innerHTML=
     '<input type="hidden" id="fop" value="'+op+'">'+
     '<div class="ttog">'+
