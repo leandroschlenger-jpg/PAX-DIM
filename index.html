@@ -731,7 +731,7 @@ function renderFluxo(db){
   var dates=Object.keys(bd).sort(function(a,b){return a.localeCompare(b);});
   list.innerHTML=dates.map(function(d){
     
-    var items_d=bd[d];var dn_d=items_d.reduce(function(s,t){return t.operacao==='Entrada'?s+t.valor:s-t.valor;},0);return '<div class="txdh" style="margin-top:14px"><span style="font-size:13px;font-weight:800;color:var(--t1)">'+d+'</span><span style="color:'+(dn>=0?'var(--grn)':'var(--red)')+'">'+(dn>=0?'+':'')+fmt(dn)+'</span></div>'+
+    var items_d=bd[d];var dn_d=items_d.reduce(function(s,t){return t.operacao==='Entrada'?s+t.valor:s-t.valor;},0);return '<div class="txdh" style="margin-top:14px"><span style="font-size:13px;font-weight:800;color:var(--t1)">'+d+'</span><span style="color:'+(dn_d>=0?'var(--grn)':'var(--red)')+'">'+(dn_d>=0?'+':'')+fmt(dn_d)+'</span></div>'+
     items_d.map(function(t){
       var isE=t.operacao==='Entrada',isPJ=t.conta==='PJ Itau Nu';
       var rec=t.recId?('<span style="font-size:10px;color:var(--t3)"> &#8635;'+t.recIdx+'/'+t.recTotal+'</span>'):'';
