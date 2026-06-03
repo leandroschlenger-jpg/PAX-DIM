@@ -363,9 +363,16 @@ button{font-family:inherit;cursor:pointer;border:none;background:none}
       <div class="dc">
         <div class="dct" style="display:flex;justify-content:space-between;align-items:center">
           <span>Tabela FIPE</span>
-          <button onclick="consultarFIPE()" id="fipeBtn" style="padding:6px 14px;border-radius:20px;background:var(--s2);color:var(--accl);font-size:12px;font-weight:700;border:1px solid var(--acc)">&#128270; Consultar</button>
+          <button onclick="editarFIPE()" style="padding:6px 14px;border-radius:20px;background:var(--s2);color:var(--accl);font-size:12px;font-weight:700;border:1px solid var(--acc)">&#9998; Atualizar</button>
         </div>
-        <div id="fipeResult" style="margin-top:8px;font-size:13px;color:var(--t2)">Toque em Consultar para buscar valor atual</div>
+        <div id="fipeResult" style="margin-top:8px"></div>
+        <a href="https://veiculos.fipe.org.br/" target="_blank" style="display:flex;align-items:center;gap:6px;margin-top:10px;padding:10px 12px;background:rgba(123,110,246,.08);border:1px solid rgba(123,110,246,.2);border-radius:12px;text-decoration:none">
+          <span style="font-size:18px">&#128279;</span>
+          <div>
+            <div style="font-size:13px;font-weight:700;color:var(--accl)">Consultar FIPE agora</div>
+            <div style="font-size:11px;color:var(--t3)">Jeep Compass 2025 Blackwalk - veiculos.fipe.org.br</div>
+          </div>
+        </a>
       </div>
       <div class="dc">
         <div class="dct">Acesso CarBank</div>
@@ -1454,6 +1461,17 @@ function renderCarro(){
   document.getElementById('carroSub').textContent=subTxt;
   document.getElementById('carroPago').textContent=fmt(totalPago);
   document.getElementById('carroQtd').textContent=parc.length+' / '+(c.totalParcelas||48);
+  // Show saved FIPE value
+  var fipeEl=document.getElementById('fipeResult');
+  if(fipeEl){
+    if(c.valorFipe){
+      fipeEl.innerHTML=
+        '<div style="font-size:22px;font-weight:800;color:var(--yel)">'+fmt(c.valorFipe)+'</div>'+
+        '<div style="font-size:11px;color:var(--t3);margin-top:3px">Jeep Compass 2025 Blackwalk'+(c.valorFipeData?' | Ref: '+fmtD(c.valorFipeData):' | Toque em Atualizar para registrar')+'</div>';
+    } else {
+      fipeEl.innerHTML='<div style="font-size:13px;color:var(--t3)">Toque em Atualizar para registrar o valor FIPE</div>';
+    }
+  }
   var el=document.getElementById('listParcelas');
   if(!el)return;
   el.innerHTML='';
@@ -1534,6 +1552,24 @@ function delCarroParcela(pid){
   if(!confirm('Excluir?'))return;
   var db=load();db.carro.parcelas=db.carro.parcelas.filter(function(x){return x.id!==pid;});
   save(db);closeSH();renderCarro();toast('Removida');
+}
+function editarFIPE(){
+  var db=load(),c=db.carro||{};
+  document.getElementById('stitle').textContent='Valor FIPE';
+  document.getElementById('sbody').innerHTML=
+    '<div style="font-size:13px;color:var(--t2);margin-bottom:16px">Consulte em <strong style="color:var(--accl)">veiculos.fipe.org.br</strong> e informe o valor atual do seu Jeep Compass 2025 Blackwalk.</div>'+
+    '<div class="field"><label>Valor FIPE (R$)</label>'+
+    '<input id="cfipe" type="number" step="0.01" inputmode="decimal" value="'+(c.valorFipe||207172)+'" style="font-size:20px;font-weight:800"></div>'+
+    '<div class="field"><label>Data de consulta</label><input id="cfdata" type="date" value="'+new Date().toISOString().split('T')[0]+'"></div>';
+  var sav=document.createElement('button');sav.className='savebtn';sav.textContent='Salvar valor FIPE';
+  sav.onclick=function(){
+    var db=load();if(!db.carro)db.carro={};
+    db.carro.valorFipe=parseFloat(document.getElementById('cfipe').value)||0;
+    db.carro.valorFipeData=document.getElementById('cfdata').value;
+    save(db);closeSH();renderCarro();toast('FIPE atualizada');
+  };
+  document.getElementById('sbody').appendChild(sav);
+  document.getElementById('sbg').classList.add('on');
 }
 function consultarFIPE(){
   var btn=document.getElementById('fipeBtn'),res=document.getElementById('fipeResult');
