@@ -292,6 +292,7 @@ button{font-family:inherit;cursor:pointer;border:none;background:none}
         <div class="ai" onclick="sub('proc')"><div class="aico" style="background:rgba(251,191,36,.12)">&#9878;</div><div class="abody"><div class="atitle">Processos Judiciais</div><div class="asub">6 processos</div></div><div class="aarr">&#8250;</div></div>
       </div>
       <div class="ar" style="margin-top:16px">
+        <div class="ai" onclick="limparDuplicatas()"><div class="aico" style="background:rgba(255,204,0,.1)">&#129529;</div><div class="abody"><div class="atitle">Limpar duplicatas</div><div class="asub">Remove lancamentos duplicados</div></div><div class="aarr">&#8250;</div></div>
         <div class="ai" onclick="exportData()"><div class="aico" style="background:rgba(77,166,255,.1)">&#128190;</div><div class="abody"><div class="atitle">Exportar backup</div><div class="asub">Salvar JSON</div></div><div class="aarr">&#8250;</div></div>
         <div class="ai" onclick="document.getElementById('ifile').click()"><div class="aico" style="background:rgba(77,166,255,.1)">&#128193;</div><div class="abody"><div class="atitle">Importar backup</div><div class="asub">Restaurar dados</div></div><div class="aarr">&#8250;</div></div>
       </div>
@@ -1518,6 +1519,59 @@ function consultarFIPE(){
       res.innerHTML='<div style="font-size:13px;color:var(--t3)">Nao foi possivel consultar a FIPE agora. Tente novamente.</div>';
       btn.textContent='&#128270; Consultar';btn.disabled=false;
     });
+}
+function limparDuplicatas(){
+  var db=load();
+  var antes=db.fluxo.length;
+
+  // 1. Para cada descricao+mes, se houver multiplos grupos recorrentes, manter apenas o mais recente
+  // Agrupar por descricao
+  var grupos={};
+  db.fluxo.forEach(function(t){
+    if(t.recId){
+      var key=t.descricao+'|'+t.conta;
+      if(!grupos[key])grupos[key]=[];
+      if(grupos[key].indexOf(t.recId)<0)grupos[key].push(t.recId);
+    }
+  });
+
+  // Para cada descricao com multiplos grupos, manter apenas o grupo com mais entradas (o mais completo)
+  var remover=[];
+  Object.keys(grupos).forEach(function(key){
+    var rids=grupos[key];
+    if(rids.length>1){
+      // Contar quantos lancamentos cada grupo tem
+      var contagens=rids.map(function(rid){
+        return{rid:rid,n:db.fluxo.filter(function(t){return t.recId===rid;}).length};
+      });
+      // Ordenar por quantidade desc, manter o maior
+      contagens.sort(function(a,b){return b.n-a.n;});
+      // Remover todos exceto o primeiro (maior)
+      for(var i=1;i<contagens.length;i++)remover.push(contagens[i].rid);
+    }
+  });
+
+  // 2. Remover transacoes nao-recorrentes duplicadas (mesmo desc+mes+conta+valor)
+  var vistos={};
+  var idsRemover=[];
+  db.fluxo.forEach(function(t){
+    if(t.recId)return; // ja tratado acima
+    var key=t.descricao+'|'+t.mes+'|'+t.conta+'|'+t.valor;
+    if(vistos[key]){idsRemover.push(t.id);}
+    else{vistos[key]=true;}
+  });
+
+  if(remover.length===0&&idsRemover.length===0){toast('Nenhuma duplicata encontrada');return;}
+
+  db.fluxo=db.fluxo.filter(function(t){
+    if(t.recId&&remover.indexOf(t.recId)>=0)return false;
+    if(idsRemover.indexOf(t.id)>=0)return false;
+    return true;
+  });
+
+  var removidos=antes-db.fluxo.length;
+  save(db);render(curPage);
+  toast(removidos+' lancamentos duplicados removidos');
 }
 function exportData(){
   var a=document.createElement('a');
