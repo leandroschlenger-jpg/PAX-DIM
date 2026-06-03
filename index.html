@@ -951,6 +951,25 @@ function openTxSheet(ex){
     delB.className='delbtn';delB.textContent='Excluir';
     delB.onclick=function(){var id=editId;if(confirm('Excluir?')){var db=load();db.fluxo=db.fluxo.filter(function(x){return x.id!==id;});save(db);closeSH();renderFluxo(db);toast('Removido');}};
     document.getElementById('sbody').appendChild(delB);
+    // If part of a recurrence group, offer to delete entire group
+    var orig2=_db&&_db.fluxo.find(function(x){return x.id===editId;});
+    if(orig2&&orig2.recId){
+      var grpB=document.createElement('button');
+      grpB.className='delbtn';
+      grpB.style.marginTop='6px';
+      grpB.style.background='rgba(255,95,87,.06)';
+      grpB.style.fontSize='13px';
+      grpB.textContent='Excluir TODOS os '+orig2.recTotal+' lancamentos do grupo';
+      grpB.onclick=function(){
+        var rid=orig2.recId;
+        var db=load();
+        var n=db.fluxo.filter(function(x){return x.recId===rid;}).length;
+        if(!confirm('Excluir todos os '+n+' lancamentos deste grupo recorrente?'))return;
+        db.fluxo=db.fluxo.filter(function(x){return x.recId!==rid;});
+        save(db);closeSH();renderFluxo(db);toast(n+' lancamentos removidos');
+      };
+      document.getElementById('sbody').appendChild(grpB);
+    }
   }
   document.getElementById('sbg').classList.add('on');
   setTimeout(function(){var v=document.getElementById('fval');if(v)v.focus();},300);
