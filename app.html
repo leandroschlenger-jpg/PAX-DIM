@@ -1462,10 +1462,21 @@ function renderCarro(){
   var c=db.carro||{parcelas:[]};
   var parc=c.parcelas||[];
   var totalPago=parc.filter(function(p){return p.status==='Pago';}).reduce(function(s,p){return s+p.valor;},0);
-  var saldo=Math.max(0,(c.valorFinanciado||145000)-totalPago);
-  document.getElementById('carroSaldo').textContent=fmt(saldo);
-  var subTxt='Financiado '+fmt(c.valorFinanciado||145000)+' - '+parc.length+'/'+(c.totalParcelas||48)+' pagas';
-  if(c.saldoData)subTxt+=' | Atualizado '+fmtD(c.saldoData);
+  // Saldo = valor digitado pelo banco - parcelas pagas APOS a data de referencia
+  var saldoBase=c.saldoDevedor||0;
+  var dataRef=c.saldoData||'2000-01-01';
+  var pagosDepois=parc.filter(function(p){return p.status==='Pago'&&p.data>dataRef;});
+  var abatimento=pagosDepois.reduce(function(s,p){return s+p.valor;},0);
+  var saldoAtual=saldoBase>0?Math.max(0,saldoBase-abatimento):Math.max(0,(c.valorFinanciado||145000)-totalPago);
+  document.getElementById('carroSaldo').textContent=fmt(saldoAtual);
+  var subTxt='';
+  if(saldoBase>0){
+    subTxt='Base: '+fmt(saldoBase);
+    if(abatimento>0)subTxt+=' - Abatido: '+fmt(abatimento);
+    if(c.saldoData)subTxt+=' | Ref: '+fmtD(c.saldoData);
+  } else {
+    subTxt='Financiado '+fmt(c.valorFinanciado||145000)+' - '+parc.length+'/'+(c.totalParcelas||48)+' pagas';
+  }
   document.getElementById('carroSub').textContent=subTxt;
   document.getElementById('carroPago').textContent=fmt(totalPago);
   document.getElementById('carroQtd').textContent=parc.length+' / '+(c.totalParcelas||48);
