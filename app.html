@@ -346,6 +346,9 @@ button{font-family:inherit;cursor:pointer;border:none;background:none}
         <div class="hlbl">Saldo devedor</div><div class="hval red" id="carroSaldo">--</div>
         <div class="hsub" id="carroSub">--</div>
       </div>
+      <div style="margin:-4px 0 12px;text-align:right">
+        <button onclick="editarSaldoCarro()" style="padding:5px 12px;border-radius:20px;font-size:11px;font-weight:700;border:1px solid var(--bdr);background:var(--s2);color:var(--t3)">&#9998; Atualizar saldo devedor</button>
+      </div>
       <div class="r2">
         <div class="mc"><div class="mclbl">Total pago</div><div class="mcval green" id="carroPago">--</div></div>
         <div class="mc"><div class="mclbl">Parcelas</div><div class="mcval" id="carroQtd">--</div></div>
@@ -1433,6 +1436,7 @@ function renderCarro(){
   // Ensure carro data exists with payment history
   if(!db.carro||!db.carro.parcelas||db.carro.parcelas.length===0){
     if(!db.carro)db.carro={codigoFipe:'',valorFinanciado:145000,totalParcelas:48};
+    if(!db.carro.saldoDevedor)db.carro.saldoDevedor=152122.98;
     db.carro.parcelas=[
       {id:uid(),num:1,valor:5288.54,data:'2026-04-30',status:'Pago',obs:'Pago pela Thays'},
       {id:uid(),num:2,valor:5212.30,data:'2026-05-08',status:'Pago',obs:'Antecipacao Leandro'},
@@ -1445,7 +1449,9 @@ function renderCarro(){
   var totalPago=parc.filter(function(p){return p.status==='Pago';}).reduce(function(s,p){return s+p.valor;},0);
   var saldo=Math.max(0,(c.valorFinanciado||145000)-totalPago);
   document.getElementById('carroSaldo').textContent=fmt(saldo);
-  document.getElementById('carroSub').textContent='Financiado '+fmt(c.valorFinanciado||145000)+' - '+parc.length+'/'+(c.totalParcelas||48)+' pagas';
+  var subTxt='Financiado '+fmt(c.valorFinanciado||145000)+' - '+parc.length+'/'+(c.totalParcelas||48)+' pagas';
+  if(c.saldoData)subTxt+=' | Atualizado '+fmtD(c.saldoData);
+  document.getElementById('carroSub').textContent=subTxt;
   document.getElementById('carroPago').textContent=fmt(totalPago);
   document.getElementById('carroQtd').textContent=parc.length+' / '+(c.totalParcelas||48);
   var el=document.getElementById('listParcelas');
@@ -1471,6 +1477,26 @@ function renderCarro(){
     var db=load();db.carro.parcelas=db.carro.parcelas.filter(function(x){return x.id!==pid;});
     save(db);renderCarro();toast('Removida');
   };});
+}
+function editarSaldoCarro(){
+  var db=load(),c=db.carro||{};
+  document.getElementById('stitle').textContent='Saldo Devedor';
+  document.getElementById('sbody').innerHTML=
+    '<div style="font-size:13px;color:var(--t2);margin-bottom:16px">Informe o saldo atual conforme o banco (CarBank).</div>'+
+    '<div class="field"><label>Saldo devedor atual (R$)</label>'+
+    '<input id="csaldo" type="number" step="0.01" inputmode="decimal" value="'+(c.saldoDevedor||152122.98)+'" style="font-size:20px;font-weight:800"></div>'+
+    '<div class="field"><label>Data de referencia</label><input id="csdata" type="date" value="'+new Date().toISOString().split('T')[0]+'"></div>'+
+    '<div class="field"><label>Obs.</label><input id="csobs" type="text" placeholder="Ex: Consultado no site CarBank" value=""></div>';
+  var sav=document.createElement('button');sav.className='savebtn';sav.textContent='Salvar saldo';
+  sav.onclick=function(){
+    var db=load();if(!db.carro)db.carro={};
+    db.carro.saldoDevedor=parseFloat(document.getElementById('csaldo').value)||0;
+    db.carro.saldoData=document.getElementById('csdata').value;
+    db.carro.saldoObs=document.getElementById('csobs').value;
+    save(db);closeSH();renderCarro();toast('Saldo atualizado');
+  };
+  document.getElementById('sbody').appendChild(sav);
+  document.getElementById('sbg').classList.add('on');
 }
 function openCarroParcela(pid){
   var db=load(),c=db.carro||{},p=pid?(c.parcelas||[]).find(function(x){return x.id===pid;}):null;
@@ -1513,23 +1539,31 @@ function consultarFIPE(){
   var btn=document.getElementById('fipeBtn'),res=document.getElementById('fipeResult');
   if(!btn||!res)return;
   btn.textContent='Consultando...';btn.disabled=true;
-  res.textContent='Buscando na tabela FIPE...';
-  fetch('https://parallelum.com.br/fipe/api/v1/carros/marcas/56/modelos/10929/anos')
-    .then(function(r){return r.json();})
-    .then(function(anos){
-      var ano=anos[0]&&anos[0].codigo?anos[0].codigo:'2024-1';
-      return fetch('https://parallelum.com.br/fipe/api/v1/carros/marcas/56/modelos/10929/anos/'+ano+'/valor');
-    })
-    .then(function(r){return r.json();})
-    .then(function(d){
-      res.innerHTML='<div style="font-size:20px;font-weight:800;color:var(--yel);margin-bottom:6px">'+d.Valor+'</div>'+
-        '<div style="font-size:12px;color:var(--t3)">'+d.Marca+' '+d.Modelo+' '+d.AnoModelo+'<br>Ref: '+d.MesReferencia+'</div>';
-      btn.textContent='&#128270; Atualizar';btn.disabled=false;
-    })
-    .catch(function(){
-      res.innerHTML='<div style="font-size:13px;color:var(--t3)">Nao foi possivel consultar a FIPE agora. Tente novamente.</div>';
+  res.innerHTML='<div style="font-size:12px;color:var(--t3)">Buscando na tabela FIPE...</div>';
+  // Tenta múltiplas APIs FIPE
+  var urls=[
+    'https://fipe.parallelum.com.br/api/v1/carros/marcas/56/modelos/10929/anos/2024-1/valor',
+    'https://brasilapi.com.br/api/fipe/preco/v1/005004-0'
+  ];
+  function tryUrl(idx){
+    if(idx>=urls.length){
+      res.innerHTML='<div style="font-size:13px;color:var(--t3)">API FIPE indisponivel no momento.<br>Consulte em <span style="color:var(--accl)">fipe.org.br</span></div>';
       btn.textContent='&#128270; Consultar';btn.disabled=false;
-    });
+      return;
+    }
+    fetch(urls[idx])
+      .then(function(r){if(!r.ok)throw new Error('err');return r.json();})
+      .then(function(d){
+        var valor=d.Valor||d.price||d.valor||'--';
+        var modelo=d.Modelo||d.model||d.modelo||'Corolla Cross';
+        var ref=d.MesReferencia||d.referenceMonth||'';
+        res.innerHTML='<div style="font-size:20px;font-weight:800;color:var(--yel);margin-bottom:6px">'+valor+'</div>'+
+          '<div style="font-size:12px;color:var(--t3)">Toyota '+modelo+'<br>Ref: '+ref+'</div>';
+        btn.textContent='&#128270; Atualizar';btn.disabled=false;
+      })
+      .catch(function(){tryUrl(idx+1);});
+  }
+  tryUrl(0);
 }
 function limparDuplicatas(){
   var db=load();
