@@ -1510,13 +1510,13 @@ function editarSaldoCarro(){
   document.getElementById('sbody').innerHTML=
     '<div style="font-size:13px;color:var(--t2);margin-bottom:16px">Informe o saldo atual conforme o banco (CarBank).</div>'+
     '<div class="field"><label>Saldo devedor atual (R$)</label>'+
-    '<input id="csaldo" type="number" step="0.01" inputmode="decimal" value="'+(c.saldoDevedor||152122.98)+'" style="font-size:20px;font-weight:800"></div>'+
+    '<input id="csaldo" type="text" inputmode="numeric" placeholder="Ex: 152.122,98" value="'+(c.saldoDevedor?Number(c.saldoDevedor).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2}):'')+'" style="font-size:20px;font-weight:800"></div>'+
     '<div class="field"><label>Data de referencia</label><input id="csdata" type="date" value="'+new Date().toISOString().split('T')[0]+'"></div>'+
     '<div class="field"><label>Obs.</label><input id="csobs" type="text" placeholder="Ex: Consultado no site CarBank" value=""></div>';
   var sav=document.createElement('button');sav.className='savebtn';sav.textContent='Salvar saldo';
   sav.onclick=function(){
     var db=load();if(!db.carro)db.carro={};
-    db.carro.saldoDevedor=parseFloat(document.getElementById('csaldo').value)||0;
+    var rawS=document.getElementById('csaldo').value.replace(/\./g,'').replace(',','.');db.carro.saldoDevedor=parseFloat(rawS)||0;
     db.carro.saldoData=document.getElementById('csdata').value;
     db.carro.saldoObs=document.getElementById('csobs').value;
     save(db);closeSH();renderCarro();toast('Saldo atualizado');
