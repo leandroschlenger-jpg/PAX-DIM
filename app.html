@@ -1429,7 +1429,18 @@ function showObs(id){
   setTimeout(function(){var el=document.getElementById('obsEdit');if(el)el.focus();},300);
 }
 function renderCarro(){
-  var db=load(),c=db.carro||{parcelas:[]};
+  var db=load();
+  // Ensure carro data exists with payment history
+  if(!db.carro||!db.carro.parcelas||db.carro.parcelas.length===0){
+    if(!db.carro)db.carro={codigoFipe:'',valorFinanciado:145000,totalParcelas:48};
+    db.carro.parcelas=[
+      {id:uid(),num:1,valor:5288.54,data:'2026-04-30',status:'Pago',obs:'Pago pela Thays'},
+      {id:uid(),num:2,valor:5212.30,data:'2026-05-08',status:'Pago',obs:'Antecipacao Leandro'},
+      {id:uid(),num:3,valor:5188.54,data:'2026-06-01',status:'Pago',obs:'Antecipacao Leandro'}
+    ];
+    save(db);
+  }
+  var c=db.carro||{parcelas:[]};
   var parc=c.parcelas||[];
   var totalPago=parc.filter(function(p){return p.status==='Pago';}).reduce(function(s,p){return s+p.valor;},0);
   var saldo=Math.max(0,(c.valorFinanciado||145000)-totalPago);
