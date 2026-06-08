@@ -486,7 +486,7 @@ button{font-family:inherit;cursor:pointer;border:none;background:none}
 <div class="toast" id="toast"></div>
 <script>
 
-var USERS={'2505':{id:'leandro',fbPath:'leandro',nome:'Leandro',avatar:null},'0809':{id:'thays',fbPath:'thays2',nome:'Thays',avatar:'https://api.dicebear.com/8.x/adventurer/svg?seed=Thays2&backgroundColor=ffd6e0&hair=long20,long17,long16&hairColor=f5c518,e8a000&skinColor=f8d9c4,ecad80'},'2014':{id:'paulo',fbPath:'paulo',nome:'Paulo',avatar:'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/25.png'}};
+var USERS={'2505':{id:'leandro',fbPath:'leandro',nome:'Leandro',avatar:null},'0809':{id:'thays',fbPath:'thays2',nome:'Thays',avatar:'https://api.dicebear.com/8.x/adventurer/svg?seed=Thays2&backgroundColor=ffd6e0&hair=long20,long17,long16&hairColor=f5c518,e8a000&skinColor=f8d9c4,ecad80'},'2014':{id:'paulo',fbPath:'paulo',nome:'Paulo',avatar:'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/25.png'}};
 var curUser=null,pinEntered='';
 function numpad(n){
   if(n===-1){pinEntered='';updateDots();}
@@ -509,9 +509,13 @@ function numpad(n){
           var av=document.getElementById('userAvatar');
           if(u.avatar){
             var isSprite=u.avatar.indexOf('PokeAPI')>=0||u.avatar.indexOf('.png')>=0;
-            av.innerHTML='<img src="'+u.avatar+'" style="width:'+(isSprite?'30px':'34px')+';height:'+(isSprite?'30px':'34px')+';border-radius:'+(isSprite?'0':'50%')+';object-fit:contain;image-rendering:pixelated">';
-            av.style.background=isSprite?'rgba(255,204,0,.15)':'transparent';
-            av.style.borderRadius=isSprite?'10px':'50%';
+            if(isSprite){
+              av.innerHTML='<img src="'+u.avatar+'" style="width:56px;height:56px;object-fit:cover;object-position:50% 15%;border-radius:50%">';
+              av.style.background='rgba(255,204,0,.2)';av.style.borderRadius='50%';av.style.width='40px';av.style.height='40px';av.style.overflow='hidden';
+            } else {
+              av.innerHTML='<img src="'+u.avatar+'" style="width:34px;height:34px;border-radius:50%;object-fit:cover">';
+              av.style.background='transparent';av.style.borderRadius='50%';av.style.width='34px';av.style.height='34px';
+            }
           } else{av.textContent=u.nome.charAt(0).toUpperCase();av.style.background='var(--acc)';av.style.borderRadius='50%';}
           av.style.display='flex';
           initFB();
