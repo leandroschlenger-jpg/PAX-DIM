@@ -7,6 +7,8 @@
 <meta name="theme-color" content="#080a12">
 <title>PAX</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
 <style>
 :root{--bg:#080a12;--s1:#0f1120;--s2:#161929;--s3:#1d2035;--bdr:#252840;--bdr2:#2e3250;--acc:#7b6ef6;--accl:#9d94f8;--grn:#00d4aa;--grnd:rgba(0,212,170,.12);--red:#ff5f57;--redd:rgba(255,95,87,.12);--yel:#ffcc00;--blu:#4da6ff;--t1:#f4f6ff;--t2:#a8b0cc;--t3:#606880;}
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
@@ -495,6 +497,7 @@ function numpad(n){
         if(pinEntered===PIN){
           document.getElementById('lockscreen').style.display='none';
           document.getElementById('lockerr').textContent='';
+          initFB();
         } else {
           document.querySelectorAll('.lock-dot').forEach(function(d){d.classList.add('error');});
           document.getElementById('lockerr').textContent='Senha incorreta';
@@ -521,7 +524,7 @@ function toggleValues(){
   render(curPage);renderLemb(load());
 }
 
-var KEY='pax_fin',_db=null;
+var KEY='pax_fin',_db=null,_fbRef=null,_fbReady=false,_fbSynced=false;
 var OLD_KEYS=['pax_v7','pax_v6','pax_v5','pax_v4','pax_v3','pax_db_v2'];
 function uid(){return Date.now().toString(36)+Math.random().toString(36).slice(2,5);}
 function mkT(m,d,op,v,c,s,desc,cat,forma){return{id:uid(),mes:m,data:d,operacao:op,valor:v,conta:c,status:s,descricao:desc,categoria:cat||'Outros',forma:forma||''};}
@@ -721,9 +724,40 @@ function load(){
 }
 function save(db){
   _db=db;
-  try{localStorage.setItem(KEY,JSON.stringify(db));}catch(e){
-    try{localStorage.setItem(KEY,JSON.stringify(db));}catch(e2){}
-  }
+  db._ts=Date.now();
+  try{localStorage.setItem(KEY,JSON.stringify(db));}catch(e){}
+  if(_fbRef){try{_fbRef.set(db).catch(function(){});}catch(e){}}
+}
+function initFB(){
+  if(_fbReady)return;
+  _fbReady=true;
+  try{
+    var fbCfg={
+      apiKey:'AIzaSyAOiyExNYWUutmMjq7i9viBKlU2R0FTZu0',
+      authDomain:'pax-financeiro.firebaseapp.com',
+      databaseURL:'https://pax-financeiro-default-rtdb.firebaseio.com',
+      projectId:'pax-financeiro',
+      storageBucket:'pax-financeiro.firebasestorage.app',
+      messagingSenderId:'1032347607150',
+      appId:'1:1032347607150:web:3651c3f4f402019bcf467f'
+    };
+    var fbApp=firebase.apps.length?firebase.apps[0]:firebase.initializeApp(fbCfg);
+    _fbRef=firebase.database(fbApp).ref('pax/data');
+    _fbRef.once('value').then(function(snap){
+      var fbData=snap.val();
+      var localTs=(_db&&_db._ts)||0;
+      var fbTs=(fbData&&fbData._ts)||0;
+      if(fbData&&Array.isArray(fbData.fluxo)&&fbTs>=localTs){
+        _db=fbData;
+        try{localStorage.setItem(KEY,JSON.stringify(_db));}catch(e){}
+        if(!_fbSynced){_fbSynced=true;render(curPage);toast('Sincronizado com Firebase');}
+      } else if(_db&&!fbTs){
+        _fbRef.set(_db).catch(function(){});
+        toast('Dados enviados ao Firebase');
+      }
+      _fbSynced=true;
+    }).catch(function(e){console.log('FB read error',e);_fbSynced=true;});
+  }catch(e){console.log('FB init error',e);_fbSynced=true;}
 }
 var fmt=function(v){if(valHidden)return'R$ *****';return(v==null||isNaN(v))?'--':'R$ '+Number(v).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});};
 var fmtD=function(d){if(!d)return'--';var p=d.split('-');return p[2]+'/'+p[1];};
