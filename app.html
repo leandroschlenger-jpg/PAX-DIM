@@ -375,13 +375,8 @@ body.paulo-mode .p-nav{display:flex}
         <div class="hlbl">Total</div><div class="hval yellow" id="iTotal">--</div><div class="hsub" id="iSub">--</div>
       </div>
       <div class="dc">
-        <div class="dct">Distribuicao do saldo (Mai/26)</div>
-        <div class="lrow"><div class="lb"><div class="lt">Partilha</div></div><div class="lr"><div class="lv yellow">R$ 8.117,87</div></div></div>
-        <div class="lrow"><div class="lb"><div class="lt">Leo</div></div><div class="lr"><div class="lv yellow">R$ 1.014,31</div></div></div>
-        <div class="lrow"><div class="lb"><div class="lt">Apto (a receber)</div></div><div class="lr"><div class="lv yellow">R$ 40.323,58</div></div></div>
-        <div class="lrow"><div class="lb"><div class="lt">Reserva rotativo</div></div><div class="lr"><div class="lv yellow">R$ 1.980,04</div></div></div>
-        <div class="lrow"><div class="lb"><div class="lt">Casamento</div></div><div class="lr"><div class="lv yellow">R$ 10.018,92</div></div></div>
-        <div class="lrow"><div class="lb"><div class="lt">Cartao de credito</div></div><div class="lr"><div class="lv" style="color:var(--t3)">R$ 0</div></div></div>
+        <div class="dct" style="display:flex;justify-content:space-between;align-items:center">Distribuicao do saldo<button onclick="openGenSheet('distrib',null)" style="background:rgba(123,110,246,.15);border:1px solid rgba(123,110,246,.3);border-radius:8px;padding:4px 10px;color:var(--accl);font-size:12px;font-weight:700;cursor:pointer">+ Adicionar</button></div>
+        <div id="listDistrib"></div>
       </div>
       <div class="dc"><div id="listI"></div></div>
     </div>
@@ -551,7 +546,7 @@ body.paulo-mode .p-nav{display:flex}
 <div class="toast" id="toast"></div>
 <script>
 
-var USERS={'2505':{id:'leandro',fbPath:'leandro',nome:'Leandro',svgAvatar:"<svg viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'><circle cx='20' cy='20' r='20' fill='#0a0a0a'/><circle cx='20' cy='20' r='13' fill='#cc0000'/><g stroke-linecap='round' stroke-linejoin='round'><polygon points='20,4 10,10 10,30 20,36' fill='#111' stroke='#fff' stroke-width='1.2'/><polygon points='20,4 20,36 10,30 10,10' fill='none' stroke='#fff' stroke-width='0.6'/><line x1='20' y1='4' x2='20' y2='36' stroke='#fff' stroke-width='1.5'/><line x1='20' y1='20' x2='30' y2='7' stroke='#fff' stroke-width='1.5'/><line x1='20' y1='20' x2='30' y2='33' stroke='#fff' stroke-width='1.5'/><line x1='14' y1='20' x2='30' y2='7' stroke='#222' stroke-width='0.8'/><line x1='14' y1='20' x2='30' y2='33' stroke='#222' stroke-width='0.8'/></g></svg>"},'0809':{id:'thays',fbPath:'thays2',nome:'Thays',svgAvatar:"<svg viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'><defs><radialGradient id='tg' cx='45%' cy='35%'><stop offset='0%' stop-color='#fde8d0'/><stop offset='100%' stop-color='#f4c49a'/></radialGradient></defs><circle cx='20' cy='40' r='18' fill='#f5c518'/><ellipse cx='20' cy='8' rx='11' ry='7' fill='#f5c518'/><path d='M9 12 Q10 6 20 5 Q30 6 31 12' fill='#e8a800'/><circle cx='20' cy='22' r='14' fill='url(#tg)'/><ellipse cx='14' cy='21' rx='3' ry='3.5' fill='#fff'/><ellipse cx='26' cy='21' rx='3' ry='3.5' fill='#fff'/><ellipse cx='14' cy='21' rx='2' ry='2.5' fill='#5b9bd5'/><ellipse cx='26' cy='21' rx='2' ry='2.5' fill='#5b9bd5'/><ellipse cx='14' cy='21' rx='1.2' ry='1.5' fill='#1a1a1a'/><ellipse cx='26' cy='21' rx='1.2' ry='1.5' fill='#1a1a1a'/><circle cx='13.2' cy='20.2' r='0.7' fill='#fff'/><circle cx='25.2' cy='20.2' r='0.7' fill='#fff'/><ellipse cx='12' cy='26' rx='3.5' ry='2' fill='#f0a080' opacity='0.7'/><ellipse cx='28' cy='26' rx='3.5' ry='2' fill='#f0a080' opacity='0.7'/><path d='M15 27.5 Q20 31 25 27.5' fill='none' stroke='#c0606a' stroke-width='1.3' stroke-linecap='round'/></svg>"},'2014':{id:'paulo',fbPath:'paulo',nome:'Paulo',svgAvatar:"<svg viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'><defs><radialGradient id='pg' cx='45%' cy='35%'><stop offset='0%' stop-color='#ffe566'/><stop offset='100%' stop-color='#f4a800'/></radialGradient></defs><circle cx='20' cy='22' r='16' fill='url(#pg)'/><polygon points='12,8 8,2 15,6' fill='#f4a800'/><polygon points='8,2 13,1 15,6' fill='#1a1a1a'/><polygon points='28,8 32,2 25,6' fill='#f4a800'/><polygon points='32,2 27,1 25,6' fill='#1a1a1a'/><ellipse cx='14' cy='21' rx='3.5' ry='4' fill='#1a1a1a'/><ellipse cx='26' cy='21' rx='3.5' ry='4' fill='#1a1a1a'/><circle cx='13' cy='19.5' r='1.2' fill='#fff'/><circle cx='25' cy='19.5' r='1.2' fill='#fff'/><ellipse cx='11' cy='27' rx='4' ry='2.5' fill='#e8445a' opacity='0.85'/><ellipse cx='29' cy='27' rx='4' ry='2.5' fill='#e8445a' opacity='0.85'/><ellipse cx='20' cy='24' rx='1.2' ry='0.8' fill='#c47800'/><path d='M16 26.5 Q20 29.5 24 26.5' fill='none' stroke='#a85000' stroke-width='1.2' stroke-linecap='round'/></svg>"}};
+var USERS={'2505':{id:'leandro',fbPath:'leandro',nome:'Leandro',svgAvatar:"<svg viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'><circle cx='20' cy='20' r='20' fill='#0a0a0a'/><circle cx='20' cy='20' r='13' fill='#cc0000'/><g stroke-linecap='round' stroke-linejoin='round'><polygon points='20,4 10,10 10,30 20,36' fill='#111' stroke='#fff' stroke-width='1.2'/><polygon points='20,4 20,36 10,30 10,10' fill='none' stroke='#fff' stroke-width='0.6'/><line x1='20' y1='4' x2='20' y2='36' stroke='#fff' stroke-width='1.5'/><line x1='20' y1='20' x2='30' y2='7' stroke='#fff' stroke-width='1.5'/><line x1='20' y1='20' x2='30' y2='33' stroke='#fff' stroke-width='1.5'/><line x1='14' y1='20' x2='30' y2='7' stroke='#222' stroke-width='0.8'/><line x1='14' y1='20' x2='30' y2='33' stroke='#222' stroke-width='0.8'/></g></svg>"},'0809':{id:'thays',fbPath:'thays2',nome:'Thays',svgAvatar:"<svg viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'><defs><radialGradient id='tface' cx='45%' cy='40%' r='55%'><stop offset='0%' stop-color='#f5c5a0'/><stop offset='100%' stop-color='#d4845a'/></radialGradient></defs><circle cx='20' cy='40' r='20' fill='#2a1f31'/><circle cx='20' cy='22' r='13' fill='url(#tface)'/><ellipse cx='20' cy='15' rx='13' ry='9' fill='#3d2010'/><circle cx='11' cy='14' r='4.5' fill='#3d2010'/><circle cx='29' cy='14' r='4.5' fill='#3d2010'/><ellipse cx='11' cy='13' rx='3.5' ry='3' fill='#2a1508'/><ellipse cx='29' cy='13' rx='3.5' ry='3' fill='#2a1508'/><circle cx='9' cy='12' r='3' fill='#5c3018'/><circle cx='10' cy='10' r='2.5' fill='#3d2010'/><circle cx='13' cy='9' r='3' fill='#5c3018'/><circle cx='16' cy='8' r='2' fill='#3d2010'/><circle cx='20' cy='8' r='2.5' fill='#5c3018'/><circle cx='24' cy='8' r='2' fill='#3d2010'/><circle cx='27' cy='9' r='3' fill='#5c3018'/><circle cx='30' cy='10' r='2.5' fill='#3d2010'/><circle cx='31' cy='12' r='3' fill='#5c3018'/><path d='M13.5 19.5 Q14 18 15 18.5' fill='none' stroke='#3d2010' stroke-width='1' stroke-linecap='round'/><path d='M26.5 19.5 Q26 18 25 18.5' fill='none' stroke='#3d2010' stroke-width='1' stroke-linecap='round'/><circle cx='14.5' cy='20.5' r='2.8' fill='#3d2010'/><circle cx='25.5' cy='20.5' r='2.8' fill='#3d2010'/><circle cx='13.8' cy='19.8' r='1' fill='#fff'/><circle cx='24.8' cy='19.8' r='1' fill='#fff'/><ellipse cx='11.5' cy='25' rx='3.5' ry='2.2' fill='#e8846a' opacity='0.75'/><ellipse cx='28.5' cy='25' rx='3.5' ry='2.2' fill='#e8846a' opacity='0.75'/><path d='M16 27 Q20 29.5 24 27' fill='none' stroke='#8b3a3a' stroke-width='1.5' stroke-linecap='round'/><rect x='17' y='30' width='6' height='5' rx='1' fill='#4a2060'/><rect x='18.5' y='30' width='3' height='2' rx='0.5' fill='#8b5cf6'/><text x='20' y='36.5' text-anchor='middle' font-size='4' fill='#fbbf24' font-weight='bold'>$</text></svg>"},'2014':{id:'paulo',fbPath:'paulo',nome:'Paulo',svgAvatar:"<svg viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'><defs><radialGradient id='pg' cx='40%' cy='35%' r='60%'><stop offset='0%' stop-color='#fff176'/><stop offset='100%' stop-color='#f9a825'/></radialGradient><radialGradient id='pg2' cx='50%' cy='50%' r='50%'><stop offset='0%' stop-color='#ffee58'/><stop offset='100%' stop-color='#f57f17'/></radialGradient></defs><circle cx='20' cy='21' r='17' fill='url(#pg2)'/><polygon points='10,9 6,1 14,7' fill='#f9a825'/><polygon points='6,1 12,0 14,7' fill='#1a1a1a'/><polygon points='30,9 34,1 26,7' fill='#f9a825'/><polygon points='34,1 28,0 26,7' fill='#1a1a1a'/><circle cx='14' cy='20' r='4.5' fill='#1a1a1a'/><circle cx='26' cy='20' r='4.5' fill='#1a1a1a'/><circle cx='14' cy='20' r='3.5' fill='#2a1a00'/><circle cx='26' cy='20' r='3.5' fill='#2a1a00'/><circle cx='12.5' cy='18.5' r='1.5' fill='#fff'/><circle cx='24.5' cy='18.5' r='1.5' fill='#fff'/><circle cx='13' cy='19' r='0.6' fill='#fffde7'/><circle cx='25' cy='19' r='0.6' fill='#fffde7'/><ellipse cx='10' cy='26' rx='4.5' ry='3' fill='#e53935' opacity='0.9'/><ellipse cx='30' cy='26' rx='4.5' ry='3' fill='#e53935' opacity='0.9'/><ellipse cx='20' cy='24.5' rx='1.5' ry='1' fill='#bf6900'/><path d='M15.5 27 Q20 30.5 24.5 27' fill='none' stroke='#7b3f00' stroke-width='1.4' stroke-linecap='round'/></svg>"}};
 var curUser=null,pinEntered='';
 function numpad(n){
   if(n===-1){pinEntered='';updateDots();}
@@ -626,7 +621,7 @@ var OLD_KEYS=['pax_v7','pax_v6','pax_v5','pax_v4','pax_v3','pax_db_v2'];
 function uid(){return Date.now().toString(36)+Math.random().toString(36).slice(2,5);}
 function mkT(m,d,op,v,c,s,desc,cat,forma){return{id:uid(),mes:m,data:d,operacao:op,valor:v,conta:c,status:s,descricao:desc,categoria:cat||'Outros',forma:forma||''};}
 function seedVazio(){
-  return {fluxo:[],patrimonio:[],dividas:[],investimentos:[],emergencia:[],casamento:[],processos:[],mesesFechados:[],saldoMes:{},carro:{codigoFipe:'',valorFinanciado:0,totalParcelas:48,parcelas:[]},lembretes:[]};
+  return {fluxo:[],patrimonio:[],dividas:[],investimentos:[],emergencia:[],casamento:[],processos:[],mesesFechados:[],saldoMes:{},carro:{codigoFipe:'',valorFinanciado:0,totalParcelas:48,parcelas:[]},lembretes:[],distrib:[]};
 }
 function seedThays(){
   var T=[
@@ -857,6 +852,14 @@ function seed(){
         {id:uid(),num:3,valor:5188.54,data:'2026-06-01',status:'Pago',obs:'Antecipacao Leandro'}
       ]
     },
+    distrib:[
+      {id:uid(),nome:'Partilha',valor:8117.87},
+      {id:uid(),nome:'Leo',valor:1014.31},
+      {id:uid(),nome:'Apto (a receber)',valor:40323.58},
+      {id:uid(),nome:'Reserva rotativo',valor:1980.04},
+      {id:uid(),nome:'Casamento',valor:10018.92},
+      {id:uid(),nome:'Cartao de credito',valor:0}
+    ],
     lembretes:[
       {id:uid(),titulo:'Deposito judicial - Processo Felix cobranca titulo',data:'2026-06-10',processo:'Proc 4 - Felix (requerido)',prioridade:'Alta',status:'Pendente',obs:'Verificar se deposito de 18/02 foi aceito nos embargos de execucao'},
       {id:uid(),titulo:'Acompanhar Processo Latam SP',data:'2026-06-15',processo:'Proc 6 - Latam',prioridade:'Media',status:'Pendente',obs:'Dr. Luiz Fernando - checar andamento da indenizacao'},
@@ -1337,9 +1340,10 @@ var gDef={
   dividas:{t:'Divida',f:[{k:'nome',l:'Nome',tp:'text'},{k:'valor',l:'Valor (R$)',tp:'num'},{k:'status',l:'Status',tp:'sel',o:['Em pagamento','Aguardando','Pago']},{k:'obs',l:'Obs.',tp:'text'}]},
   inv:{t:'Investimento',f:[{k:'nome',l:'Ativo',tp:'text'},{k:'tipo',l:'Tipo',tp:'sel',o:['Acao','Fundo','Renda Fixa','Outro']},{k:'qtd',l:'Qtd.',tp:'text'},{k:'valorAtual',l:'Valor atual (R$)',tp:'num'}]},
   emg:{t:'Fundo',f:[{k:'nome',l:'Pessoa',tp:'text'},{k:'acumulado',l:'Acumulado (R$)',tp:'num'},{k:'meta',l:'Meta (R$)',tp:'num'},{k:'local',l:'Onde',tp:'text'}]},
-  cas:{t:'Acao',f:[{k:'acao',l:'Acao',tp:'text'},{k:'data',l:'Data',tp:'date'},{k:'custo',l:'Custo (R$)',tp:'num'},{k:'status',l:'Status',tp:'sel',o:['Pendente','Em andamento','Concluido']}]}
+  cas:{t:'Acao',f:[{k:'acao',l:'Acao',tp:'text'},{k:'data',l:'Data',tp:'date'},{k:'custo',l:'Custo (R$)',tp:'num'},{k:'status',l:'Status',tp:'sel',o:['Pendente','Em andamento','Concluido']}]},
+  distrib:{t:'Saldo',f:[{k:'nome',l:'Descricao',tp:'text'},{k:'valor',l:'Valor (R$)',tp:'num'}]}
 };
-var gMap={bens:'patrimonio',dividas:'dividas',inv:'investimentos',emg:'emergencia',cas:'casamento'};
+var gMap={bens:'patrimonio',dividas:'dividas',inv:'investimentos',emg:'emergencia',cas:'casamento',distrib:'distrib'};
 function openGenSheet(col,id){
   editId=id;var def=gDef[col],db=load(),dbk=gMap[col];
   var data=id?db[dbk].find(function(x){return x.id===id;}):null;
@@ -1836,8 +1840,8 @@ function renderResumo(db){
         '<div style="font-size:11px;color:var(--t3);margin-top:4px">Meta: abaixo de 40%</div>';
     })()+
     '<div style="height:1px;background:var(--bdr);margin:14px 0"></div>'+
-    '<div class="prow"><span>Investimentos + Saldos</span><span style="color:var(--yel);font-weight:700">'+fmt(db.investimentos.reduce(function(s,i){return s+i.valorAtual;},0)+8117.87+1014.31+40323.58+1980.04+10018.92)+'</span></div>'+
-    '<div style="font-size:11px;color:var(--t3);margin-bottom:14px">Acoes, Fundos, Partilha, Leo, Apto, Casamento, Reserva</div>'+
+    '<div class="prow"><span>Investimentos + Saldos</span><span style="color:var(--yel);font-weight:700">'+fmt(db.investimentos.reduce(function(s,i){return s+i.valorAtual;},0)+((db.distrib||[]).reduce(function(s,d){return s+(d.valor||0);},0)))+'</span></div>'+
+    '<div style="font-size:11px;color:var(--t3);margin-bottom:14px">Acoes, Fundos e Distribuicao de Saldos</div>'+
     (function(){
       // Month-over-month arrows for last 2 months with data
       var meses2=Object.keys(ms).sort();
@@ -1891,7 +1895,7 @@ function renderDividas(db){
 function renderMais(db){
   var invTotal=db.investimentos.reduce(function(s,i){return s+i.valorAtual;},0);
   var isThays=curUser&&curUser.id==='thays';
-  var saldos=isThays?0:(8117.87+1014.31+40323.58+1980.04+10018.92);
+  var saldos=isThays?0:((db.distrib||[]).reduce(function(s,d){return s+(d.valor||0);},0));
   document.getElementById('tInv').textContent=fmt(invTotal+saldos);
   var ea=db.emergencia.reduce(function(s,e){return s+e.acumulado;},0),em=db.emergencia.reduce(function(s,e){return s+e.meta;},0);
   document.getElementById('tEmg').textContent=(em>0?(ea/em*100).toFixed(0):0)+'% da meta';
@@ -1909,8 +1913,22 @@ function renderMais(db){
   var menuCas=document.getElementById('menuCas');
   if(menuCas)menuCas.style.display=isPaulo?'none':'flex';
 }
+function renderDistrib(db){
+  var el=document.getElementById('listDistrib');if(!el)return;
+  var rows=(db.distrib||[]);
+  if(!rows.length){el.innerHTML='<div style="color:var(--t3);font-size:13px;padding:8px 0">Nenhum item. Toque + para adicionar.</div>';return;}
+  var tot=rows.reduce(function(s,d){return s+(d.valor||0);},0);
+  el.innerHTML=rows.map(function(r){
+    var pos=r.valor>=0;
+    var vFmt='R$ '+Math.abs(r.valor).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
+    return '<div class="lrow"><div class="lb"><div class="lt">'+r.nome+'</div></div><div class="lr"><div class="lv '+(pos?'yellow':'red')+'">'+(pos?'':'− ')+vFmt+'</div><button class="eb" data-rid="'+r.id+'" onclick="openGenSheet(\'distrib\',\''+r.id+'\')">&#9998;</button></div></div>';
+  }).join('')+
+  '<div class="lrow" style="border-top:1px solid var(--bdr2);margin-top:4px"><div class="lb"><div class="lt" style="font-weight:800">Total</div></div><div class="lr"><div class="lv yellow" style="font-weight:800">R$ '+tot.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2})+'</div></div></div>';
+}
 function renderInv(db){
-  var tot=db.investimentos.reduce(function(s,i){return s+i.valorAtual;},0);
+  if(!db.distrib){db.distrib=[{id:uid(),nome:'Partilha',valor:8117.87},{id:uid(),nome:'Leo',valor:1014.31},{id:uid(),nome:'Apto (a receber)',valor:40323.58},{id:uid(),nome:'Reserva rotativo',valor:1980.04},{id:uid(),nome:'Casamento',valor:10018.92},{id:uid(),nome:'Cartao de credito',valor:0}];save(db);}
+  renderDistrib(db);
+  var tot=(db.investimentos||[]).reduce(function(s,i){return s+i.valorAtual;},0);
   document.getElementById('iTotal').textContent=fmt(tot);document.getElementById('iSub').textContent=db.investimentos.length+' ativos';
   document.getElementById('listI').innerHTML=db.investimentos.map(function(r){
     return'<div class="lrow"><div class="lico" style="background:rgba(123,110,246,.1)">'+(r.tipo==='Acao'?'&#128202;':r.tipo==='Fundo'?'&#128188;':'&#127968;')+'</div><div class="lb"><div class="lt">'+r.nome+'</div><div class="ls">'+r.tipo+' - '+r.qtd+'</div></div><div class="lr"><div class="lv yellow">'+(r.valorAtual>0?fmt(r.valorAtual):'--')+'</div><button class="eb" data-iid="'+r.id+'">&#9998;</button></div></div>';
@@ -2266,4 +2284,4 @@ function resetData(){localStorage.removeItem(KEY);_db=null;load();render('fluxo'
 </body>
 </html>
  
-                                                                                                                                                                                                                                                                                                                                 
+                                                                                                                                                                                                                                                                                                              
