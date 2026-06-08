@@ -486,7 +486,7 @@ button{font-family:inherit;cursor:pointer;border:none;background:none}
 <div class="toast" id="toast"></div>
 <script>
 
-var USERS={'2505':{id:'leandro',nome:'Leandro',avatar:null},'0809':{id:'thays',nome:'Thays',avatar:'https://api.dicebear.com/8.x/adventurer/svg?seed=Thays&backgroundColor=ffd6e0&hair=long20,long17,long16&hairColor=f5c518,e8a000&skinColor=f8d9c4,ecad80'}};
+var USERS={'2505':{id:'leandro',fbPath:'leandro',nome:'Leandro',avatar:null},'0809':{id:'thays',fbPath:'thays2',nome:'Thays',avatar:'https://api.dicebear.com/8.x/adventurer/svg?seed=Thays2&backgroundColor=ffd6e0&hair=long20,long17,long16&hairColor=f5c518,e8a000&skinColor=f8d9c4,ecad80'},'2014':{id:'paulo',fbPath:'paulo',nome:'Paulo',avatar:'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/25.png'}};
 var curUser=null,pinEntered='';
 function numpad(n){
   if(n===-1){pinEntered='';updateDots();}
@@ -499,16 +499,20 @@ function numpad(n){
         var u=USERS[pinEntered];
         if(u){
           curUser=u;
-          KEY='pax_fin_'+u.id;
+          KEY='pax_fin_'+u.fbPath;
           _db=null;_fbReady=false;_fbSynced=false;_fbRef=null;
           if(u.id!=='leandro'){
-            try{localStorage.removeItem(KEY);}catch(e){}
+            try{localStorage.removeItem(KEY);localStorage.removeItem('pax_fin_'+u.id);}catch(e){}
           }
           document.getElementById('lockscreen').style.display='none';
           document.getElementById('lockerr').textContent='';
           var av=document.getElementById('userAvatar');
-          if(u.avatar){av.innerHTML='<img src="'+u.avatar+'" style="width:34px;height:34px;border-radius:50%;object-fit:cover">';av.style.background='transparent';}
-          else{av.textContent=u.nome.charAt(0).toUpperCase();av.style.background='var(--acc)';}
+          if(u.avatar){
+            var isSprite=u.avatar.indexOf('PokeAPI')>=0||u.avatar.indexOf('.png')>=0;
+            av.innerHTML='<img src="'+u.avatar+'" style="width:'+(isSprite?'30px':'34px')+';height:'+(isSprite?'30px':'34px')+';border-radius:'+(isSprite?'0':'50%')+';object-fit:contain;image-rendering:pixelated">';
+            av.style.background=isSprite?'rgba(255,204,0,.15)':'transparent';
+            av.style.borderRadius=isSprite?'10px':'50%';
+          } else{av.textContent=u.nome.charAt(0).toUpperCase();av.style.background='var(--acc)';av.style.borderRadius='50%';}
           av.style.display='flex';
           initFB();
         } else {
@@ -585,7 +589,12 @@ function seedThays(){
   base._owner='thays';
   return base;
 }
+function seedPaulo(){
+  var base=seedVazio();base._owner='paulo';return base;
+}
 function seed(){
+  if(curUser&&curUser.id==='thays')return seedThays();
+  if(curUser&&curUser.id==='paulo')return seedPaulo();
   if(curUser&&curUser.id!=='leandro')return seedVazio();
   var T=[
     ['2026-03','2026-03-06','Entrada',39611.22,'PJ Itau Nu','OK','Distribuicao','Receita'],
@@ -800,7 +809,7 @@ function initFB(){
       appId:'1:1032347607150:web:3651c3f4f402019bcf467f'
     };
     var fbApp=firebase.apps.length?firebase.apps[0]:firebase.initializeApp(fbCfg);
-    _fbRef=firebase.database(fbApp).ref('pax/u/'+(curUser?curUser.id:'anon')+'/data');
+    _fbRef=firebase.database(fbApp).ref('pax/u/'+(curUser?curUser.fbPath:'anon')+'/data');
     _fbRef.once('value').then(function(snap){
       var fbData=snap.val();
       var uid=curUser?curUser.id:'leandro';
@@ -821,7 +830,7 @@ function initFB(){
         _fbRef.set(_db).catch(function(){});
         toast('Dados enviados ao Firebase');
       } else {
-        _db=(uid==='thays')?seedThays():seedVazio();
+        _db=uid==='thays'?seedThays():uid==='paulo'?seedPaulo():seedVazio();
         _db._owner=uid;
         try{localStorage.removeItem(KEY);}catch(e){}
         _fbRef.set(_db).catch(function(){});
@@ -1388,7 +1397,7 @@ function render(id){
   else if(id==='inv')renderInv(db);
   else if(id==='emg')renderEmg(db);
   else if(id==='cas')renderCas(db);
-  else if(id==='carro'){if(curUser&&curUser.id==='thays')renderCarroThays();else renderCarro();}
+  else if(id==='carro'){if(curUser&&curUser.id!=='leandro')renderCarroThays();else renderCarro();}
 }
 function renderResumo(db){
   var bens=db.patrimonio.reduce(function(s,i){return s+i.valor;},0);
@@ -1555,9 +1564,10 @@ function renderMais(db){
   var apto=document.getElementById('menuApto');
   var proc=document.getElementById('menuProc');
   var carroSub=document.getElementById('menuCarroSub');
-  if(apto)apto.style.display=isThays?'none':'flex';
-  if(proc)proc.style.display=isThays?'none':'flex';
-  if(carroSub)carroSub.textContent=isThays?'Manutencao e documentos':'Financiamento - 48 parcelas';
+  var hideExtra=curUser&&curUser.id!=='leandro';
+  if(apto)apto.style.display=hideExtra?'none':'flex';
+  if(proc)proc.style.display=hideExtra?'none':'flex';
+  if(carroSub)carroSub.textContent=hideExtra?'Manutencao e documentos':'Financiamento - 48 parcelas';
 }
 function renderInv(db){
   var tot=db.investimentos.reduce(function(s,i){return s+i.valorAtual;},0);
