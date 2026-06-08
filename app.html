@@ -501,6 +501,9 @@ function numpad(n){
           curUser=u;
           KEY='pax_fin_'+u.id;
           _db=null;_fbReady=false;_fbSynced=false;_fbRef=null;
+          if(u.id!=='leandro'){
+            try{localStorage.removeItem(KEY);}catch(e){}
+          }
           document.getElementById('lockscreen').style.display='none';
           document.getElementById('lockerr').textContent='';
           document.getElementById('userAvatar').textContent=u.nome.charAt(0).toUpperCase();
