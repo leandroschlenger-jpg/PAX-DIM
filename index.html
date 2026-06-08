@@ -173,6 +173,71 @@ button{font-family:inherit;cursor:pointer;border:none;background:none}
 .mpill.has{color:var(--t2)}.mpill.cur{background:var(--acc);color:#fff;border-color:transparent}
 .toast{position:fixed;bottom:calc(88px + env(safe-area-inset-bottom,0px));left:50%;transform:translateX(-50%) translateY(20px);background:var(--s3);border:1px solid var(--bdr2);padding:10px 18px;border-radius:999px;font-size:13px;font-weight:700;color:var(--t1);z-index:500;opacity:0;transition:all .25s cubic-bezier(.4,0,.2,1);pointer-events:none;white-space:nowrap}
 .toast.on{opacity:1;transform:translateX(-50%) translateY(0)}
+
+/* ── THAYS MODE ────────────────────────────── */
+body.thays-mode{--acc:#c084a8;--accl:#e6b4d0;--bg:#1a1520;--card:#221929;--s2:#2a1f31;--s3:#301e38;--bdr:rgba(192,132,168,.15);--bdr2:rgba(192,132,168,.28);--grn:#a8d5b0;--red:#e8a0a8;--yel:#e8c97a;--t1:#f5eef8;--t2:#c8afd6;--t3:#8e6fa0}
+body.thays-mode .topbar{background:linear-gradient(135deg,#221929,#2a1530);border-bottom:1px solid rgba(192,132,168,.18)}
+body.thays-mode .nav{background:rgba(26,21,32,.97);border-top:1px solid rgba(192,132,168,.18)}
+body.thays-mode .ni.on{color:#e6b4d0}
+body.thays-mode .savebtn{background:linear-gradient(135deg,#c084a8,#9b59b6)}
+body.thays-mode .fab{background:linear-gradient(135deg,#c084a8,#9b59b6);box-shadow:0 6px 28px rgba(192,132,168,.4)}
+body.thays-mode .mpill.cur{background:linear-gradient(135deg,#c084a8,#9b59b6)}
+body.thays-mode .fhero{background:linear-gradient(135deg,#2a1530,#3a1f45)}
+
+/* ── PAULO GAME MODE ───────────────────────── */
+body.paulo-mode{--acc:#7c3aed;--accl:#a78bfa;--bg:#0f0f1a;--card:#161625;--s2:#1e1e35;--s3:#252540;--bdr:rgba(124,58,237,.2);--bdr2:rgba(124,58,237,.35);--grn:#34d399;--red:#f87171;--yel:#fbbf24;--t1:#f0f0ff;--t2:#b4b4d0;--t3:#6b6b9a}
+body.paulo-mode .topbar{background:linear-gradient(135deg,#161625,#1e1a35);border-bottom:1px solid rgba(124,58,237,.25)}
+body.paulo-mode .nav{display:none!important}
+body.paulo-mode #fab{display:none!important}
+.pg-paulo{display:none}.pg-paulo.on{display:block}
+.p-nav{display:none;position:fixed;bottom:0;left:0;right:0;background:rgba(15,15,26,.97);border-top:1px solid rgba(124,58,237,.25);padding:0 0 env(safe-area-inset-bottom,0px);z-index:200}
+body.paulo-mode .p-nav{display:flex}
+.p-ni{flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;padding:8px 4px 6px;font-size:10px;font-weight:700;color:#6b6b9a;cursor:pointer;border:none;background:none;transition:color .2s}
+.p-ni.on{color:#a78bfa}
+.p-ni .ic{font-size:22px;line-height:1}
+.p-screen{padding:16px 16px calc(80px + env(safe-area-inset-bottom,0px))}
+.p-xpbar-wrap{background:rgba(124,58,237,.15);border-radius:8px;height:10px;overflow:hidden;margin:8px 0}
+.p-xpbar{height:100%;background:linear-gradient(90deg,#7c3aed,#a78bfa);border-radius:8px;transition:width .6s}
+.p-hero{background:linear-gradient(135deg,#1e1a35,#251e45);border-radius:24px;padding:24px;margin-bottom:16px;text-align:center}
+.p-level{font-size:11px;font-weight:800;color:#a78bfa;letter-spacing:2px;text-transform:uppercase;margin-bottom:4px}
+.p-coins{font-size:42px;font-weight:900;color:#fbbf24;margin:8px 0 4px;letter-spacing:-1px}
+.p-coinslbl{font-size:12px;color:#b4b4d0;margin-bottom:16px}
+.p-2col{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px}
+.p-stat{background:rgba(124,58,237,.12);border:1px solid rgba(124,58,237,.2);border-radius:16px;padding:14px;text-align:center}
+.p-stat .sv{font-size:20px;font-weight:800;color:#fbbf24}
+.p-stat .sl{font-size:11px;color:#b4b4d0;margin-top:2px}
+.p-btn{border:none;border-radius:14px;padding:14px;font-size:14px;font-weight:800;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;width:100%;margin-bottom:10px}
+.p-btn.purple{background:linear-gradient(135deg,#7c3aed,#a78bfa);color:#fff}
+.p-btn.gold{background:linear-gradient(135deg,#d97706,#fbbf24);color:#000}
+.p-section{font-size:12px;font-weight:800;color:#a78bfa;letter-spacing:2px;text-transform:uppercase;margin:16px 0 10px}
+.p-dream{background:#161625;border:1px solid rgba(124,58,237,.2);border-radius:16px;padding:16px;margin-bottom:10px}
+.p-dream-top{display:flex;align-items:center;gap:12px;margin-bottom:10px}
+.p-dream-emoji{font-size:26px;width:46px;height:46px;background:rgba(124,58,237,.15);border-radius:12px;display:flex;align-items:center;justify-content:center}
+.p-dream-info{flex:1}
+.p-dream-name{font-size:15px;font-weight:800;color:#f0f0ff}
+.p-dream-price{font-size:12px;color:#b4b4d0;margin-top:2px}
+.p-pbar{background:rgba(124,58,237,.15);border-radius:6px;height:8px;overflow:hidden;margin-bottom:6px}
+.p-pbar-fill{height:100%;background:linear-gradient(90deg,#7c3aed,#a78bfa);border-radius:6px;transition:width .5s}
+.p-pbar-fill.done{background:linear-gradient(90deg,#059669,#34d399)}
+.p-dream-pct{font-size:11px;color:#a78bfa;font-weight:700}
+.p-dream-pct.done{color:#34d399}
+.p-mission{background:#161625;border:1px solid rgba(124,58,237,.2);border-radius:16px;padding:16px;margin-bottom:10px;display:flex;align-items:center;gap:12px}
+.p-mission.done{border-color:rgba(52,211,153,.3);background:rgba(52,211,153,.05)}
+.p-mission-ico{font-size:22px;width:44px;height:44px;background:rgba(124,58,237,.15);border-radius:12px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.p-mission.done .p-mission-ico{background:rgba(52,211,153,.15)}
+.p-mission-body{flex:1}
+.p-mission-title{font-size:14px;font-weight:700;color:#f0f0ff;margin-bottom:2px}
+.p-mission-xp{font-size:11px;color:#a78bfa;font-weight:700}
+.p-mission.done .p-mission-xp{color:#34d399}
+.p-badge-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.p-badge{background:#161625;border:1px solid rgba(124,58,237,.2);border-radius:16px;padding:14px;text-align:center}
+.p-badge.locked{opacity:.4;filter:grayscale(.7)}
+.p-badge-ico{font-size:30px;margin-bottom:6px}
+.p-badge-name{font-size:12px;font-weight:800;color:#f0f0ff}
+.p-badge-desc{font-size:10px;color:#b4b4d0;margin-top:3px}
+.p-input{background:var(--s2);border:1.5px solid var(--bdr2);border-radius:14px;padding:14px 16px;font-size:18px;font-weight:800;color:var(--t1);width:100%;box-sizing:border-box;margin-bottom:14px;display:block}
+.p-addream{background:rgba(124,58,237,.1);border:2px dashed rgba(124,58,237,.3);border-radius:16px;padding:16px;text-align:center;color:#a78bfa;font-size:14px;font-weight:700;cursor:pointer;margin-bottom:10px}
+.p-toast{display:none;position:fixed;top:76px;left:50%;transform:translateX(-50%);background:linear-gradient(135deg,#7c3aed,#a78bfa);color:#fff;padding:12px 24px;border-radius:999px;font-size:13px;font-weight:800;z-index:9999;white-space:nowrap;pointer-events:none}
 </style>
 </head>
 <body>
@@ -509,10 +574,15 @@ function numpad(n){
           var av=document.getElementById('userAvatar');
           if(u.svgAvatar){
             av.innerHTML=u.svgAvatar;
+            var svgEl=av.querySelector('svg');
+            if(svgEl){svgEl.setAttribute('width','40');svgEl.setAttribute('height','40');}
             av.style.background='transparent';av.style.borderRadius='0';
             av.style.width='40px';av.style.height='40px';av.style.overflow='visible';
           } else{av.textContent=u.nome.charAt(0).toUpperCase();av.style.background='var(--acc)';av.style.borderRadius='50%';}
           av.style.display='flex';
+          if(u.id==='paulo'){document.body.classList.add('paulo-mode');document.body.classList.remove('thays-mode');}
+          else if(u.id==='thays'){document.body.classList.add('thays-mode');document.body.classList.remove('paulo-mode');}
+          else{document.body.classList.remove('paulo-mode','thays-mode');}
           initFB();
         } else {
           document.querySelectorAll('.lock-dot').forEach(function(d){d.classList.add('error');});
@@ -535,6 +605,7 @@ function updateDots(){
 function trocarUsuario(){
   if(!confirm('Trocar de usuario?'))return;
   curUser=null;KEY='pax_fin_guest';_db=null;_fbRef=null;_fbReady=false;_fbSynced=false;
+  document.body.classList.remove('paulo-mode','thays-mode');
   pinEntered='';updateDots();
   document.getElementById('userAvatar').style.display='none';
   document.getElementById('lockscreen').style.display='flex';
@@ -589,7 +660,28 @@ function seedThays(){
   return base;
 }
 function seedPaulo(){
-  var base=seedVazio();base._owner='paulo';return base;
+  var base=seedVazio();base._owner='paulo';
+  base.paulo={
+    xp:0,nivel:1,cofrinho:0,mesada:150,gasto:0,gasto_count:0,
+    sonhos:[
+      {id:'s1',nome:'Novo jogo',emoji:'\u{1F3AE}',preco:300,guardado:0},
+      {id:'s2',nome:'Tenis novo',emoji:'\u{1F45F}',preco:200,guardado:0}
+    ],
+    missoes:[
+      {id:'m1',desc:'Guarde R$ 10 este m\xeas',xp:30,tipo:'guardar',meta:10,progresso:0,feita:false},
+      {id:'m2',desc:'Registre 3 compras',xp:20,tipo:'compra',meta:3,progresso:0,feita:false},
+      {id:'m3',desc:'Realize um sonho',xp:100,tipo:'sonho',meta:1,progresso:0,feita:false}
+    ],
+    conquistas:[
+      {id:'c1',nome:'Primeiro Real',desc:'Guardou o 1\xba real',emoji:'\u{1F947}',ok:false},
+      {id:'c2',nome:'Poupador',desc:'Guardou R$ 50',emoji:'\u{1F437}',ok:false},
+      {id:'c3',nome:'Sonhador',desc:'Criou um sonho',emoji:'\u{2B50}',ok:false},
+      {id:'c4',nome:'Realizador',desc:'Realizou um sonho',emoji:'\u{1F3C6}',ok:false},
+      {id:'c5',nome:'Her\xf3i',desc:'Guardou a mesada toda',emoji:'\u{1F9B8}',ok:false},
+      {id:'c6',nome:'Miss\xe3o OK',desc:'Completou uma miss\xe3o',emoji:'\u{1F3AF}',ok:false}
+    ]
+  };
+  return base;
 }
 function seed(){
   if(curUser&&curUser.id==='thays')return seedThays();
@@ -1385,6 +1477,250 @@ function saveLemb(){
 Chart.defaults.color='#606880';Chart.defaults.borderColor='#252840';
 Chart.defaults.font.family='-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif';Chart.defaults.font.size=11;
 function dc(id){if(charts[id]){charts[id].destroy();delete charts[id];}}
+
+/* ══ PAULO GAME ENGINE ══════════════════════════════════════════════════ */
+var NIVEL_NOMES=['','Novato','Poupador','Negociador','Investidor','Milionário'];
+var NIVEL_XP=[0,0,100,300,600,1000];
+function pGetNivel(xp){for(var l=5;l>=1;l--){if(xp>=NIVEL_XP[l])return l;}return 1;}
+function pXpNext(nivel){return NIVEL_XP[Math.min(nivel+1,5)]||1000;}
+function pToast(msg){
+  var t=document.getElementById('p-toast-el');
+  if(!t){t=document.createElement('div');t.id='p-toast-el';t.className='p-toast';document.body.appendChild(t);}
+  t.textContent=msg;t.style.display='block';
+  clearTimeout(t._tid);t._tid=setTimeout(function(){t.style.display='none';},3000);
+}
+function addXP(amount,db){
+  if(!db.paulo)return;
+  var oldNivel=pGetNivel(db.paulo.xp||0);
+  db.paulo.xp=(db.paulo.xp||0)+amount;
+  var novoNivel=pGetNivel(db.paulo.xp);
+  if(novoNivel>oldNivel){db.paulo.nivel=novoNivel;setTimeout(function(){pToast('\u{1F389} SUBIU PARA N\xcdVEL '+novoNivel+'! '+NIVEL_NOMES[novoNivel]);},500);}
+}
+function checkConquistas(db){
+  if(!db.paulo||!db.paulo.conquistas)return;
+  var p=db.paulo,c=p.conquistas;
+  c.forEach(function(co){
+    if(co.ok)return;
+    if(co.id==='c1'&&p.cofrinho>=1){co.ok=true;setTimeout(function(){pToast(co.emoji+' Conquista: '+co.nome+'!');},600);addXP(10,db);}
+    if(co.id==='c2'&&p.cofrinho>=50){co.ok=true;setTimeout(function(){pToast(co.emoji+' Conquista: '+co.nome+'!');},600);addXP(20,db);}
+    if(co.id==='c3'&&p.sonhos&&p.sonhos.length>0){co.ok=true;addXP(10,db);}
+    if(co.id==='c4'&&p.sonhos&&p.sonhos.some(function(s){return s.guardado>=s.preco;})){co.ok=true;setTimeout(function(){pToast(co.emoji+' Conquista: '+co.nome+'!');},600);addXP(50,db);}
+    if(co.id==='c5'&&p.cofrinho>=(p.mesada||150)){co.ok=true;setTimeout(function(){pToast(co.emoji+' Conquista: '+co.nome+'!');},600);addXP(30,db);}
+    if(co.id==='c6'&&p.missoes&&p.missoes.some(function(m){return m.feita;})){co.ok=true;addXP(20,db);}
+  });
+}
+function checkMissoes(db){
+  if(!db.paulo||!db.paulo.missoes)return;
+  var p=db.paulo;
+  p.missoes.forEach(function(m){
+    if(m.feita)return;
+    if(m.tipo==='guardar')m.progresso=Math.min(p.cofrinho||0,m.meta);
+    if(m.tipo==='compra')m.progresso=Math.min(p.gasto_count||0,m.meta);
+    if(m.tipo==='sonho')m.progresso=p.sonhos&&p.sonhos.some(function(s){return s.guardado>=s.preco;})?1:0;
+    if(m.progresso>=m.meta){m.feita=true;addXP(m.xp,db);setTimeout(function(){pToast('\u{1F3AF} Miss\xe3o conclu\xedda! +'+m.xp+' XP');},400);}
+  });
+}
+function goP(id){
+  document.querySelectorAll('.pg-paulo').forEach(function(p){p.classList.remove('on');});
+  document.querySelectorAll('.p-ni').forEach(function(n){n.classList.remove('on');});
+  var pg=document.getElementById('pg-paulo-'+id);if(pg)pg.classList.add('on');
+  var ni=document.getElementById('p-ni-'+id);if(ni)ni.classList.add('on');
+  document.getElementById('screen').scrollTop=0;
+  var db=load();
+  if(id==='home')renderPauloHome(db);
+  else if(id==='sonhos')renderPauloSonhos(db);
+  else if(id==='missoes')renderPauloMissoes(db);
+  else if(id==='conquistas')renderPauloConquistas(db);
+}
+function renderPauloHome(db){
+  if(!db.paulo)return;
+  var p=db.paulo;
+  var xp=p.xp||0,nivel=pGetNivel(xp),nome=NIVEL_NOMES[nivel];
+  var xpBase=NIVEL_XP[nivel],xpProx=pXpNext(nivel),xpRange=xpProx-xpBase,xpCur=xp-xpBase;
+  var pct=Math.min(100,xpRange>0?Math.round(xpCur/xpRange*100):100);
+  var ll=document.getElementById('p-level-label');if(ll)ll.textContent='N\xcdVEL '+nivel+' \xb7 '+nome.toUpperCase();
+  var pb=document.getElementById('p-xpbar');if(pb)pb.style.width=pct+'%';
+  var xl=document.getElementById('p-xp-label');if(xl)xl.textContent=xp+' XP \xb7 faltam '+(xpProx-xp)+' para o pr\xf3ximo n\xedvel';
+  var fmt2=function(v){return'R$ '+((v||0).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2}));};
+  var cf=document.getElementById('p-cofrinho');if(cf)cf.textContent=fmt2(p.cofrinho||0);
+  var me=document.getElementById('p-mesada');if(me)me.textContent=fmt2(p.mesada||150);
+  var gs=document.getElementById('p-gasto');if(gs)gs.textContent=fmt2(p.gasto||0);
+}
+function renderPauloSonhos(db){
+  if(!db.paulo)return;
+  var el=document.getElementById('p-sonhos-list');if(!el)return;
+  var sonhos=db.paulo.sonhos||[];
+  if(!sonhos.length){el.innerHTML='<div style="text-align:center;color:#6b6b9a;padding:40px 0">Nenhum sonho ainda!<br><br>Adicione seu primeiro sonho abaixo \u{1F447}</div>';return;}
+  el.innerHTML=sonhos.map(function(s){
+    var pct=s.preco>0?Math.min(100,Math.round(s.guardado/s.preco*100)):0;
+    var done=s.guardado>=s.preco;
+    return '<div class="p-dream">'+
+      '<div class="p-dream-top">'+
+        '<div class="p-dream-emoji">'+s.emoji+'</div>'+
+        '<div class="p-dream-info">'+
+          '<div class="p-dream-name">'+(done?'\u2705 ':'')+s.nome+'</div>'+
+          '<div class="p-dream-price">R$ '+s.guardado.toLocaleString('pt-BR',{minimumFractionDigits:2})+' / R$ '+s.preco.toLocaleString('pt-BR',{minimumFractionDigits:2})+'</div>'+
+        '</div>'+
+        '<button onclick="pEditSonho(\'' +s.id+ '\')" style="background:rgba(124,58,237,.15);border:none;border-radius:10px;padding:8px;font-size:13px;cursor:pointer;color:#a78bfa">\u270F\uFE0F</button>'+
+      '</div>'+
+      '<div class="p-pbar"><div class="p-pbar-fill'+(done?' done':'')+'" style="width:'+pct+'%"></div></div>'+
+      '<div style="display:flex;justify-content:space-between;align-items:center">'+
+        '<div class="p-dream-pct'+(done?' done':'')+'">'+pct+'%'+(done?' \u2014 Sonho realizado! \u{1F389}':'')+'</div>'+
+        (!done?'<button onclick="pGuardarNoSonho(\'' +s.id+ '\')" style="background:linear-gradient(135deg,#7c3aed,#a78bfa);border:none;border-radius:10px;padding:7px 12px;color:#fff;font-size:12px;font-weight:800;cursor:pointer">+ Guardar</button>':'')+
+      '</div>'+
+    '</div>';
+  }).join('');
+}
+function renderPauloMissoes(db){
+  if(!db.paulo)return;
+  var el=document.getElementById('p-missoes-list');if(!el)return;
+  var ICONS={guardar:'\u{1F4B0}',compra:'\u{1F6D2}',sonho:'\u2B50'};
+  el.innerHTML=(db.paulo.missoes||[]).map(function(m){
+    var pct=m.meta>0?Math.min(100,Math.round(m.progresso/m.meta*100)):0;
+    return '<div class="p-mission'+(m.feita?' done':'')+'">'+
+      '<div class="p-mission-ico">'+(m.feita?'\u2705':(ICONS[m.tipo]||'\u{1F3AF}'))+'</div>'+
+      '<div class="p-mission-body">'+
+        '<div class="p-mission-title">'+m.desc+'</div>'+
+        '<div class="p-mission-xp">'+(m.feita?'Conclu\xedda! \u{1F389}':'+'+m.xp+' XP \xb7 '+m.progresso+'/'+m.meta)+'</div>'+
+        (!m.feita&&m.meta>1?'<div class="p-pbar" style="margin-top:6px"><div class="p-pbar-fill" style="width:'+pct+'%"></div></div>':'')+
+      '</div>'+
+    '</div>';
+  }).join('');
+}
+function renderPauloConquistas(db){
+  if(!db.paulo)return;
+  var el=document.getElementById('p-conquistas-list');if(!el)return;
+  el.innerHTML=(db.paulo.conquistas||[]).map(function(c){
+    return '<div class="p-badge'+(c.ok?'':' locked')+'">'+
+      '<div class="p-badge-ico">'+c.emoji+'</div>'+
+      '<div class="p-badge-name">'+c.nome+'</div>'+
+      '<div class="p-badge-desc">'+(c.ok?c.desc:'???')+'</div>'+
+    '</div>';
+  }).join('');
+}
+function pGuardar(){
+  document.getElementById('stitle').textContent='\u{1F4B0} Guardar Dinheiro';
+  document.getElementById('sbody').innerHTML=
+    '<div style="text-align:center;font-size:48px;margin-bottom:8px">\u{1F437}</div>'+
+    '<div style="text-align:center;font-size:13px;color:#b4b4d0;margin-bottom:20px">Quanto voc\xea quer guardar?</div>'+
+    '<input id="p-val-guardar" type="text" inputmode="decimal" class="ainp" placeholder="0,00" oninput="moneyMask(this)" style="font-size:22px">';
+  var btn=document.createElement('button');btn.className='savebtn';btn.textContent='Guardar \u{1F4B0}';
+  btn.onclick=function(){
+    var v=parseMoney(document.getElementById('p-val-guardar').value);
+    if(!v||v<=0){toast('Digite um valor');return;}
+    var db=load();if(!db.paulo)db.paulo=seedPaulo().paulo;
+    db.paulo.cofrinho=(db.paulo.cofrinho||0)+v;
+    var xpGanho=Math.max(1,Math.round(v*2));
+    addXP(xpGanho,db);checkMissoes(db);checkConquistas(db);
+    save(db);closeSH();goP('home');
+    pToast('+'+xpGanho+' XP guardados! \u{1F4B0}');
+  };
+  document.getElementById('sbody').appendChild(btn);
+  document.getElementById('sbg').classList.add('on');
+  setTimeout(function(){var i=document.getElementById('p-val-guardar');if(i)i.focus();},300);
+}
+function pRegistrarCompra(){
+  document.getElementById('stitle').textContent='\u{1F6D2} Registrar Compra';
+  document.getElementById('sbody').innerHTML=
+    '<div class="field"><label>O que voc\xea comprou?</label><input id="p-compra-desc" type="text" class="ainp" placeholder="Ex: lanche, jogo..."></div>'+
+    '<div class="field"><label>Quanto custou?</label><input id="p-compra-val" type="text" inputmode="decimal" class="ainp" placeholder="0,00" oninput="moneyMask(this)" style="font-size:22px"></div>';
+  var btn=document.createElement('button');btn.className='savebtn';btn.textContent='Registrar \u{1F6D2}';
+  btn.onclick=function(){
+    var desc=document.getElementById('p-compra-desc').value.trim();
+    var v=parseMoney(document.getElementById('p-compra-val').value);
+    if(!desc||!v||v<=0){toast('Preencha tudo');return;}
+    var db=load();if(!db.paulo)db.paulo=seedPaulo().paulo;
+    db.paulo.gasto=(db.paulo.gasto||0)+v;
+    db.paulo.gasto_count=(db.paulo.gasto_count||0)+1;
+    db.fluxo.push({id:uid(),mes:curMes,data:new Date().toISOString().split('T')[0],operacao:'Saida',valor:v,conta:'Mesada',status:'OK',descricao:desc,categoria:'Outros',forma:''});
+    addXP(5,db);checkMissoes(db);checkConquistas(db);
+    save(db);closeSH();goP('home');
+    pToast('+5 XP pela compra registrada! \u{1F6D2}');
+  };
+  document.getElementById('sbody').appendChild(btn);
+  document.getElementById('sbg').classList.add('on');
+  setTimeout(function(){document.getElementById('p-compra-desc').focus();},300);
+}
+function pSelEmoji(btn,idx){
+  document.querySelectorAll('#p-emoji-grid button').forEach(function(b){b.style.background='rgba(124,58,237,.1)';});
+  btn.style.background='rgba(124,58,237,.4)';
+  document.getElementById('p-s-emoji').value=btn.getAttribute('data-emoji');
+}
+function pEditSonho(id){
+  var db=load();if(!db.paulo)return;
+  if(!db.paulo.sonhos)db.paulo.sonhos=[];
+  var s=id?db.paulo.sonhos.find(function(x){return x.id===id;}):null;
+  var EMOJIS=['\u{1F3AE}','\u{1F45F}','\u{1F3B8}','\u26BD','\u{1F4F1}','\u{1F6B2}','\u{1F3A8}','\u{1F3AC}','\u{1F4DA}','\u{1F355}','\u{1F381}','\u2708\uFE0F'];
+  document.getElementById('stitle').textContent=s?'Editar Sonho':'Novo Sonho \u2B50';
+  var curEmoji=s?s.emoji:EMOJIS[0];
+  document.getElementById('sbody').innerHTML=
+    '<div class="field"><label>Nome do sonho</label><input id="p-s-nome" type="text" class="ainp" placeholder="Ex: Novo t\xeanis" value="'+(s?s.nome:'')+'"></div>'+
+    '<div class="field"><label>Emoji</label>'+
+    '<div id="p-emoji-grid" style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:16px">'+
+      EMOJIS.map(function(e,i){
+        return '<button type="button" onclick="pSelEmoji(this,'+i+')" data-emoji="'+e+'" style="font-size:22px;padding:8px;border:1px solid rgba(124,58,237,.3);border-radius:10px;background:'+(e===curEmoji?'rgba(124,58,237,.4)':'rgba(124,58,237,.1)')+';cursor:pointer">'+e+'</button>';
+      }).join('')+
+    '</div><input id="p-s-emoji" type="hidden" value="'+curEmoji+'"></div>'+
+    '<div class="field"><label>Pre\xe7o (R$)</label><input id="p-s-preco" type="text" inputmode="decimal" class="ainp" placeholder="0,00" oninput="moneyMask(this)" style="font-size:22px" value="'+(s&&s.preco?s.preco.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2}):'')+'"></div>';
+  if(s){
+    var del=document.createElement('button');del.className='delbtn';del.textContent='Excluir este sonho';
+    del.onclick=function(){
+      if(!confirm('Excluir?'))return;
+      var db=load();db.paulo.sonhos=db.paulo.sonhos.filter(function(x){return x.id!==id;});
+      save(db);closeSH();goP('sonhos');
+    };
+    document.getElementById('sbody').appendChild(del);
+  }
+  var btn=document.createElement('button');btn.className='savebtn';btn.textContent='Salvar Sonho \u2B50';
+  btn.onclick=function(){
+    var nome=document.getElementById('p-s-nome').value.trim();
+    var emoji=document.getElementById('p-s-emoji').value||'\u2B50';
+    var preco=parseMoney(document.getElementById('p-s-preco').value);
+    if(!nome||!preco){toast('Preencha nome e pre\xe7o');return;}
+    var db=load();if(!db.paulo)db.paulo=seedPaulo().paulo;if(!db.paulo.sonhos)db.paulo.sonhos=[];
+    if(s){
+      var idx=db.paulo.sonhos.findIndex(function(x){return x.id===id;});
+      if(idx>=0){db.paulo.sonhos[idx].nome=nome;db.paulo.sonhos[idx].emoji=emoji;db.paulo.sonhos[idx].preco=preco;}
+    } else {
+      db.paulo.sonhos.push({id:uid(),nome:nome,emoji:emoji,preco:preco,guardado:0});
+      addXP(15,db);pToast('+15 XP! Sonho criado \u2B50');
+    }
+    checkConquistas(db);save(db);closeSH();goP('sonhos');
+  };
+  document.getElementById('sbody').appendChild(btn);
+  document.getElementById('sbg').classList.add('on');
+  setTimeout(function(){document.getElementById('p-s-nome').focus();},300);
+}
+function pGuardarNoSonho(id){
+  var db=load();if(!db.paulo||!db.paulo.sonhos)return;
+  var s=db.paulo.sonhos.find(function(x){return x.id===id;});if(!s)return;
+  var falta=Math.max(0,s.preco-s.guardado);
+  document.getElementById('stitle').textContent='\u{1F4AB} Guardar para '+s.emoji+' '+s.nome;
+  document.getElementById('sbody').innerHTML=
+    '<div style="text-align:center;margin-bottom:16px">'+
+      '<div style="font-size:36px">'+s.emoji+'</div>'+
+      '<div style="font-size:13px;color:#b4b4d0;margin-top:8px">Faltam R$ '+falta.toLocaleString('pt-BR',{minimumFractionDigits:2})+' para realizar!</div>'+
+    '</div>'+
+    '<input id="p-sonho-val" type="text" inputmode="decimal" class="ainp" placeholder="0,00" oninput="moneyMask(this)" style="font-size:22px">';
+  var btn=document.createElement('button');btn.className='savebtn';btn.textContent='Guardar para este sonho \u{1F4AB}';
+  btn.onclick=function(){
+    var v=parseMoney(document.getElementById('p-sonho-val').value);
+    if(!v||v<=0){toast('Digite um valor');return;}
+    var db=load();
+    var idx=db.paulo.sonhos.findIndex(function(x){return x.id===id;});if(idx<0)return;
+    db.paulo.sonhos[idx].guardado=Math.min(db.paulo.sonhos[idx].preco,db.paulo.sonhos[idx].guardado+v);
+    db.paulo.cofrinho=(db.paulo.cofrinho||0)+v;
+    var xpG=Math.max(1,Math.round(v*3));
+    addXP(xpG,db);checkMissoes(db);checkConquistas(db);
+    var done=db.paulo.sonhos[idx].guardado>=db.paulo.sonhos[idx].preco;
+    save(db);closeSH();goP('sonhos');
+    pToast(done?'\u{1F389} SONHO REALIZADO! '+s.emoji:'\u{1F4AB} +'+xpG+' XP!');
+  };
+  document.getElementById('sbody').appendChild(btn);
+  document.getElementById('sbg').classList.add('on');
+  setTimeout(function(){var i=document.getElementById('p-sonho-val');if(i)i.focus();},300);
+}
+
 function render(id){
   var db=load();
   if(id==='fluxo')renderFluxo(db);
@@ -1930,4 +2266,4 @@ function resetData(){localStorage.removeItem(KEY);_db=null;load();render('fluxo'
 </body>
 </html>
  
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           
+                                                                                                                                                                                                                                                                                                                                 
