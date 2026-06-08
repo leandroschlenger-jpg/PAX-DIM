@@ -181,7 +181,7 @@ body.thays-mode .topbar{background:linear-gradient(135deg,#221929,#2a1530);borde
 body.thays-mode .nav{background:rgba(26,21,32,.97);border-top:1px solid rgba(192,132,168,.18)}
 body.thays-mode .ni.on{color:#e6b4d0}
 body.thays-mode .savebtn{background:linear-gradient(135deg,#c084a8,#9b59b6)}
-body.thays-mode #pg-proc,body.thays-mode #menuProc{display:none!important}
+body.thays-mode #pg-proc,body.thays-mode #menuProc,body.thays-mode #menuApto,body.thays-mode #menuDistrib{display:none!important}
 body.thays-mode .fab{background:linear-gradient(135deg,#c084a8,#9b59b6);box-shadow:0 6px 28px rgba(192,132,168,.4)}
 body.thays-mode .mpill.cur{background:linear-gradient(135deg,#c084a8,#9b59b6)}
 body.thays-mode .fhero{background:linear-gradient(135deg,#2a1530,#3a1f45)}
@@ -270,13 +270,14 @@ body.paulo-mode .p-nav{display:flex}
     </div>
     <div class="lock-err" id="lockerr"></div>
   </div>
+<input type="file" id="avatarInput" accept="image/*" style="display:none" onchange="handleAvatarUpload(event)">
 <div id="app">
   <header class="topbar">
     <div class="brand">PAX<em>.</em></div>
     <div class="topbar-right">
       <button class="eyebtn on" id="eyebtn" onclick="toggleValues()" title="Mostrar/ocultar valores"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/><line x1="1" y1="1" x2="23" y2="23" id="eyeSlash" style="display:none"/></svg></button>
       <button class="mbtn" onclick="openMP()"><span id="mlabel">--</span> &#9660;</button>
-      <div id="userAvatar" onclick="trocarUsuario()" style="display:none;width:34px;height:34px;border-radius:50%;background:var(--acc);color:#fff;font-size:14px;font-weight:800;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0" title="Trocar usuario"></div>
+      <div id="userAvatar" onclick="openAvatarMenu()" style="display:none;width:34px;height:34px;border-radius:50%;background:var(--acc);color:#fff;font-size:14px;font-weight:800;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0" title="Trocar usuario"></div>
     </div>
   </header>
   <div id="screen">
@@ -622,10 +623,7 @@ function numpad(n){
           document.getElementById('lockscreen').style.display='none';
           document.body.classList.remove('locked');
           document.getElementById('lockerr').textContent='';
-          var av=document.getElementById('userAvatar');
-          av.innerHTML='';
-          av.textContent=u.nome.charAt(0).toUpperCase();
-          av.style.cssText='width:40px;height:40px;display:flex;align-items:center;justify-content:center;border-radius:50%;background:var(--acc);font-size:18px;font-weight:800;color:#fff;flex-shrink:0';
+          displayAvatar();
           if(u.id==='paulo'){document.body.classList.add('paulo-mode');document.body.classList.remove('thays-mode');}
           else if(u.id==='thays'){document.body.classList.add('thays-mode');document.body.classList.remove('paulo-mode');}
           else{document.body.classList.remove('paulo-mode','thays-mode');}
@@ -649,13 +647,67 @@ function updateDots(){
     if(d){d.classList.toggle('filled',i<pinEntered.length);d.classList.remove('error');}
   }
 }
+
+function displayAvatar(){
+  var av=document.getElementById('userAvatar');
+  if(!av)return;
+  if(!curUser){av.style.display='none';return;}
+  var stored=localStorage.getItem('pax_av_'+curUser.id);
+  av.style.cssText='width:34px;height:34px;display:flex;align-items:center;justify-content:center;border-radius:50%;background:var(--acc);font-size:14px;font-weight:800;color:#fff;flex-shrink:0;overflow:hidden;cursor:pointer';
+  if(stored){
+    av.innerHTML='<img src="'+stored+'" style="width:100%;height:100%;object-fit:cover;border-radius:50%;display:block">';
+  } else {
+    av.innerHTML='';
+    av.textContent=curUser.nome.charAt(0).toUpperCase();
+  }
+}
+function openAvatarMenu(){
+  if(!curUser)return;
+  document.getElementById('stitle').textContent='Perfil — '+curUser.nome;
+  var stored=localStorage.getItem('pax_av_'+curUser.id);
+  document.getElementById('sbody').innerHTML=
+    '<div style="display:flex;flex-direction:column;align-items:center;gap:12px;padding:8px 0">'+
+    '<div style="width:80px;height:80px;border-radius:50%;overflow:hidden;background:var(--s2);display:flex;align-items:center;justify-content:center;font-size:32px;font-weight:800;color:var(--acc)">'+(stored?'<img src="'+stored+'" style="width:100%;height:100%;object-fit:cover">':curUser.nome.charAt(0).toUpperCase())+'</div>'+
+    '<button onclick="document.getElementById('avatarInput').click()" style="padding:10px 24px;border-radius:20px;background:var(--acc);color:#fff;font-weight:700;font-size:14px;border:none;width:100%">📷 Mudar foto de perfil</button>'+
+    (stored?'<button onclick="removeAvatar()" style="padding:10px 24px;border-radius:20px;background:var(--s2);color:var(--t2);font-weight:700;font-size:14px;border:1px solid var(--bdr);width:100%">🗑 Remover foto</button>':'')+
+    '<hr style="border:none;border-top:1px solid var(--bdr);width:100%;margin:4px 0">'+
+    '<button onclick="closeSH();setTimeout(trocarUsuario,200)" style="padding:10px 24px;border-radius:20px;background:var(--s3);color:var(--t2);font-weight:700;font-size:14px;border:1px solid var(--bdr);width:100%">🔄 Trocar usuário</button>'+
+    '</div>';
+  document.getElementById('sbg').classList.add('on');
+}
+function handleAvatarUpload(e){
+  var file=e.target.files[0];if(!file||!curUser)return;
+  var reader=new FileReader();
+  reader.onload=function(ev){
+    // Resize to max 200x200 before storing
+    var img=new Image();
+    img.onload=function(){
+      var canvas=document.createElement('canvas');
+      var sz=Math.min(img.width,img.height,200);
+      canvas.width=sz;canvas.height=sz;
+      var ctx=canvas.getContext('2d');
+      ctx.drawImage(img,(img.width-sz)/2,(img.height-sz)/2,sz,sz,0,0,sz,sz);
+      var b64=canvas.toDataURL('image/jpeg',0.8);
+      localStorage.setItem('pax_av_'+curUser.id,b64);
+      displayAvatar();closeSH();toast('Foto atualizada!');
+    };
+    img.src=ev.target.result;
+  };
+  reader.readAsDataURL(file);
+  e.target.value='';
+}
+function removeAvatar(){
+  if(!curUser)return;
+  localStorage.removeItem('pax_av_'+curUser.id);
+  displayAvatar();closeSH();toast('Foto removida');
+}
 function trocarUsuario(){
   if(!confirm('Trocar de usuario?'))return;
   curUser=null;KEY='pax_fin_guest';_db=null;_fbRef=null;_fbReady=false;_fbSynced=false;
   document.body.classList.remove('paulo-mode','thays-mode');
   document.body.classList.add('locked');
   pinEntered='';updateDots();
-  document.getElementById('userAvatar').style.display='none';
+  document.getElementById('userAvatar').style.display='none';displayAvatar();
   document.getElementById('lockscreen').style.display='flex';
 }
 
@@ -1055,6 +1107,7 @@ function setF(f,el){
 }
 function renderFluxo(db){
   if(!db||!Array.isArray(db.fluxo))db=load();
+  if(curUser&&curUser.id==='paulo'){goP('extrato');return;}
   var all=db.fluxo.filter(function(t){return t.mes===curMes;});
   var ent=all.filter(function(t){return t.operacao==='Entrada';}).reduce(function(s,t){return s+t.valor;},0);
   var sai=all.filter(function(t){return t.operacao==='Saida';}).reduce(function(s,t){return s+t.valor;},0);
@@ -1610,7 +1663,7 @@ function goP(id){
   else if(id==='conquistas')renderPauloConquistas(db);
 }
 function renderPauloHome(db){
-  if(!db.paulo)return;
+  if(!db.paulo){db.paulo=seedPaulo().paulo;save(db);}
   var p=db.paulo;
   var xp=p.xp||0,nivel=pGetNivel(xp),nome=NIVEL_NOMES[nivel];
   var xpBase=NIVEL_XP[nivel],xpProx=pXpNext(nivel),xpRange=xpProx-xpBase,xpCur=xp-xpBase;
