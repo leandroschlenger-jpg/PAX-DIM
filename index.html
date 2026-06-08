@@ -762,6 +762,26 @@ function sub(id){
   curPage=id;render(id);
 }
 function closeSub(){go('mais');}
+function editSaldoContas(){
+  var db=load();if(!db.saldoMes)db.saldoMes={};
+  var cur=(db.saldoMes[curMes]||{}).saldo||0;
+  document.getElementById('stitle').textContent='Saldo das Contas';
+  document.getElementById('sbody').innerHTML=
+    '<div class="field"><label>Saldo atual das contas (R$)</label>'+
+    '<input id="fsc" type="text" inputmode="decimal" class="ainp" placeholder="0,00" '+
+    'value="'+(cur?cur.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2}):'')+'" '+
+    'oninput="moneyMask(this)" style="font-size:26px"></div>'+
+    '<div style="font-size:12px;color:var(--t2);margin-bottom:16px">Informe o saldo real das suas contas bancarias. O Liquido Previsto sera calculado automaticamente.</div>';
+  var sav=document.createElement('button');sav.className='savebtn';sav.textContent='Salvar';
+  sav.onclick=function(){
+    var db=load();if(!db.saldoMes)db.saldoMes={};
+    db.saldoMes[curMes]={saldo:parseMoney(document.getElementById('fsc').value)};
+    save(db);closeSH();renderFluxo(db);toast('Saldo atualizado');
+  };
+  document.getElementById('sbody').appendChild(sav);
+  document.getElementById('sbg').classList.add('on');
+  setTimeout(function(){var v=document.getElementById('fsc');if(v){v.focus();v.select();}},300);
+}
 function setF(f,el){
   curF=f;
   document.querySelectorAll('.chip').forEach(function(c){c.classList.remove('on');});
@@ -772,7 +792,14 @@ function renderFluxo(db){
   var all=db.fluxo.filter(function(t){return t.mes===curMes;});
   var ent=all.filter(function(t){return t.operacao==='Entrada';}).reduce(function(s,t){return s+t.valor;},0);
   var sai=all.filter(function(t){return t.operacao==='Saida';}).reduce(function(s,t){return s+t.valor;},0);
-  var saldo=ent-sai,pend=all.filter(function(t){return t.status!=='OK';}).length;
+  var saldo=ent-sai;
+  var pendE=all.filter(function(t){return t.operacao==='Entrada'&&t.status!=='OK';}).reduce(function(s,t){return s+t.valor;},0);
+  var pendS=all.filter(function(t){return t.operacao==='Saida'&&t.status!=='OK';}).reduce(function(s,t){return s+t.valor;},0);
+  var pend=all.filter(function(t){return t.status!=='OK';}).length;
+  if(!db.saldoMes)db.saldoMes={};
+  var scObj=db.saldoMes[curMes]||{};
+  var saldoContas=scObj.saldo||0;
+  var liquido=saldoContas+pendE-pendS;
   var fechado=isMesFechado(curMes);
   var banner=document.getElementById('fechadoBanner');
   var btnF=document.getElementById('btnFecharMes');
@@ -785,6 +812,17 @@ function renderFluxo(db){
       '<div><div class="fsl">Entradas</div><div class="fsv e">'+fmt(ent)+'</div></div>'+
       '<div><div class="fsl">Saidas</div><div class="fsv s">'+fmt(sai)+'</div></div>'+
       (pend>0?'<div><div class="fsl">Pendentes</div><div class="fsv" style="color:var(--yel)">'+pend+'</div></div>':'')+
+    '</div>'+
+    '<div style="margin-top:14px;border-top:1px solid rgba(255,255,255,.08);padding-top:14px;display:flex;gap:12px;align-items:stretch">'+
+      '<div style="flex:1;background:rgba(0,0,0,.25);border-radius:14px;padding:10px 12px;cursor:pointer" onclick="editSaldoContas()">'+
+        '<div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--t3);margin-bottom:3px">Saldo Contas &#9998;</div>'+
+        '<div id="fSaldoContas" style="font-size:16px;font-weight:800;color:var(--blu)">'+(saldoContas>0?fmt(saldoContas):'<span style="color:var(--t3);font-size:13px">Toque p/ informar</span>')+'</div>'+
+      '</div>'+
+      '<div style="flex:1;background:rgba(0,0,0,.25);border-radius:14px;padding:10px 12px">'+
+        '<div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--t3);margin-bottom:3px">Liquido Previsto</div>'+
+        '<div style="font-size:16px;font-weight:800;color:'+(liquido>=0?'var(--grn)':'var(--red)')+'">'+fmt(liquido)+'</div>'+
+        '<div style="font-size:10px;color:var(--t3);margin-top:2px">+(a receber) -(a pagar)</div>'+
+      '</div>'+
     '</div>';
   var contas=['Ifood','PJ Itau Nu'];
   document.getElementById('apills').innerHTML=contas.map(function(c){
@@ -943,7 +981,7 @@ function openTxSheet(ex){
       '<button class="tbtn s'+(op==='Saida'?' on':'')+'" onclick="setOp(\'Saida\',this)">&#8595; Saida</button>'+
     '</div>'+
     '<div class="awrap"><span class="apfx">R$</span>'+
-    '<input class="ainp" id="fval" type="number" inputmode="decimal" placeholder="0,00" step="0.01" value="'+(ex?ex.valor:'')+'" oninput="onVI(this.value)">'+
+    '<input class="ainp" id="fval" type="text" inputmode="decimal" placeholder="0,00" value="'+(ex?Number(ex.valor).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2}):'')+'" oninput="moneyMask(this);onVI(this.value)">'+
     '</div><div class="vhint" id="vh"></div>'+
     '<div class="field"><label>Descricao</label><input id="fdesc" type="text" placeholder="Ex: Aluguel, Distribuicao..." value="'+(ex?ex.descricao:'')+'"></div>'+
     '<div class="field"><label>Categoria</label><select id="fcat">'+
@@ -994,9 +1032,20 @@ function openTxSheet(ex){
   setTimeout(function(){var v=document.getElementById('fval');if(v)v.focus();},300);
 }
 function onVI(v){
-  var n=parseFloat(v),h=document.getElementById('vh');if(!h)return;
+  var n=parseMoney(v),h=document.getElementById('vh');if(!h)return;
   if(!isNaN(n)&&n<0){setOpD('Saida');h.textContent='Valor negativo = Saida automatico';h.style.color='var(--red)';}
   else{h.textContent='';}
+}
+function moneyMask(el){
+  var v=el.value.replace(/[^0-9]/g,'');
+  if(!v){el.value='';return;}
+  var n=parseInt(v,10)/100;
+  el.value=n.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
+}
+function parseMoney(v){
+  if(v===null||v===undefined)return 0;
+  if(typeof v==='number')return v;
+  return parseFloat(String(v).replace(/\./g,'').replace(',','.'))||0;
 }
 function setOpD(op){
   var h=document.getElementById('fop');if(!h)return;h.value=op;
@@ -1026,7 +1075,7 @@ function saveTx(){
   var fstatusEl=document.getElementById('fstatus');
   if(!fdataEl||!fvalEl||!fopEl||!fdescEl||!fcontaEl||!fstatusEl){toast('Erro: formulario incompleto');return;}
   var data=fdataEl.value||curMes+'-01';
-  var raw=parseFloat(fvalEl.value)||0;
+  var raw=parseMoney(fvalEl.value);
   var op=fopEl.value||'Saida';
   if(raw<0){op='Saida';raw=Math.abs(raw);}
   if(raw===0){toast('Informe o valor');return;}
@@ -1092,14 +1141,14 @@ function openGenSheet(col,id){
   document.getElementById('sbody').innerHTML=def.f.map(function(f){
     var v=data?data[f.k]:'';
     if(f.tp==='sel')return'<div class="field"><label>'+f.l+'</label><select id="gf_'+f.k+'">'+f.o.map(function(o){return'<option'+(o===v?' selected':'')+'>'+o+'</option>';}).join('')+'</select></div>';
-    return'<div class="field"><label>'+f.l+'</label><input id="gf_'+f.k+'" type="'+(f.tp==='num'?'number':'text')+'"'+(f.tp==='num'?' step="0.01"':'')+' value="'+(v||'')+'"></div>';
+    var gv2=f.tp==='num'&&v?Number(v).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2}):(v||'');return'<div class="field"><label>'+f.l+'</label><input id="gf_'+f.k+'" type="text"'+(f.tp==='num'?' inputmode="decimal" oninput="moneyMask(this)" placeholder="0,00"':'')+' value="'+gv2+'"></div>';
   }).join('')+'<button class="savebtn" onclick="saveGen(\''+col+'\')">Salvar</button>';
   if(id){var db2=document.createElement('button');db2.className='delbtn';db2.textContent='Excluir';db2.onclick=function(){delGen(col,id);};document.getElementById('sbody').appendChild(db2);}
   document.getElementById('sbg').classList.add('on');
 }
 function saveGen(col){
   var db=load(),dbk=gMap[col],item={id:editId||uid()};
-  gDef[col].f.forEach(function(f){var el=document.getElementById('gf_'+f.k);if(el)item[f.k]=f.tp==='num'?parseFloat(el.value)||0:el.value;});
+  gDef[col].f.forEach(function(f){var el=document.getElementById('gf_'+f.k);if(el)item[f.k]=f.tp==='num'?parseMoney(el.value):el.value;});
   if(editId){var i=db[dbk].findIndex(function(x){return x.id===editId;});if(i>=0)db[dbk][i]=item;}
   else db[dbk].push(item);
   save(db);closeSH();render(curPage);toast('Salvo');
@@ -1541,7 +1590,7 @@ function openCarroParcela(pid){
   document.getElementById('stitle').textContent=p?'Editar Parcela':'Nova Parcela';
   document.getElementById('sbody').innerHTML=
     '<div class="field"><label>Numero da parcela</label><input id="cpnum" type="number" value="'+nextNum+'" inputmode="numeric"></div>'+
-    '<div class="field"><label>Valor (R$)</label><input id="cpval" type="number" step="0.01" value="'+(p?p.valor:5288.54)+'" inputmode="decimal"></div>'+
+    '<div class="field"><label>Valor (R$)</label><input id="cpval" type="text" inputmode="decimal" placeholder="0,00" value="'+(p?Number(p.valor).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2}):'5.288,54')+'" oninput="moneyMask(this)"></div>'+
     '<div class="field"><label>Data do pagamento</label><input id="cpdata" type="date" value="'+(p?p.data:curMes+'-01')+'"></div>'+
     '<div class="field"><label>Status</label><select id="cpstatus"><option'+((!p||p.status==='Pago')?' selected':'')+'>Pago</option><option'+(p&&p.status==='Pendente'?' selected':'')+'>Pendente</option></select></div>'+
     '<div class="field"><label>Obs.</label><input id="cpobs" type="text" placeholder="Ex: Antecipacao..." value="'+(p&&p.obs?p.obs:'')+'" ></div>';
@@ -1559,7 +1608,7 @@ function saveCarroParcela(pid){
   var db=load();if(!db.carro)db.carro={parcelas:[]};if(!db.carro.parcelas)db.carro.parcelas=[];
   var item={id:pid||uid(),
     num:parseInt(document.getElementById('cpnum').value)||1,
-    valor:parseFloat(document.getElementById('cpval').value)||0,
+    valor:parseMoney(document.getElementById('cpval').value),
     data:document.getElementById('cpdata').value,
     status:document.getElementById('cpstatus').value,
     obs:document.getElementById('cpobs').value};
