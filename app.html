@@ -182,6 +182,7 @@ button{font-family:inherit;cursor:pointer;border:none;background:none}
     <div class="topbar-right">
       <button class="eyebtn" id="eyebtn" onclick="toggleValues()">&#128584;</button>
       <button class="mbtn" onclick="openMP()"><span id="mlabel">--</span> &#9660;</button>
+      <div id="userAvatar" onclick="trocarUsuario()" style="display:none;width:34px;height:34px;border-radius:50%;background:var(--acc);color:#fff;font-size:14px;font-weight:800;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0" title="Trocar usuario"></div>
     </div>
   </header>
   <div id="screen">
@@ -485,7 +486,8 @@ button{font-family:inherit;cursor:pointer;border:none;background:none}
 <div class="toast" id="toast"></div>
 <script>
 
-var PIN='2505',pinEntered='';
+var USERS={'2505':{id:'leandro',nome:'Leandro'},'0809':{id:'thays',nome:'Thays'}};
+var curUser=null,pinEntered='';
 function numpad(n){
   if(n===-1){pinEntered='';updateDots();}
   else if(n===-2){pinEntered=pinEntered.slice(0,-1);updateDots();}
@@ -494,9 +496,15 @@ function numpad(n){
     pinEntered+=n;updateDots();
     if(pinEntered.length===4){
       setTimeout(function(){
-        if(pinEntered===PIN){
+        var u=USERS[pinEntered];
+        if(u){
+          curUser=u;
+          KEY='pax_fin_'+u.id;
+          _db=null;_fbReady=false;_fbSynced=false;_fbRef=null;
           document.getElementById('lockscreen').style.display='none';
           document.getElementById('lockerr').textContent='';
+          document.getElementById('userAvatar').textContent=u.nome.charAt(0).toUpperCase();
+          document.getElementById('userAvatar').style.display='flex';
           initFB();
         } else {
           document.querySelectorAll('.lock-dot').forEach(function(d){d.classList.add('error');});
@@ -516,6 +524,13 @@ function updateDots(){
     if(d){d.classList.toggle('filled',i<pinEntered.length);d.classList.remove('error');}
   }
 }
+function trocarUsuario(){
+  if(!confirm('Trocar de usuario?'))return;
+  curUser=null;KEY='pax_fin_guest';_db=null;_fbRef=null;_fbReady=false;_fbSynced=false;
+  pinEntered='';updateDots();
+  document.getElementById('userAvatar').style.display='none';
+  document.getElementById('lockscreen').style.display='flex';
+}
 
 var valHidden=true;
 function toggleValues(){
@@ -524,7 +539,7 @@ function toggleValues(){
   render(curPage);renderLemb(load());
 }
 
-var KEY='pax_fin',_db=null,_fbRef=null,_fbReady=false,_fbSynced=false;
+var KEY='pax_fin_guest',_db=null,_fbRef=null,_fbReady=false,_fbSynced=false;
 var OLD_KEYS=['pax_v7','pax_v6','pax_v5','pax_v4','pax_v3','pax_db_v2'];
 function uid(){return Date.now().toString(36)+Math.random().toString(36).slice(2,5);}
 function mkT(m,d,op,v,c,s,desc,cat,forma){return{id:uid(),mes:m,data:d,operacao:op,valor:v,conta:c,status:s,descricao:desc,categoria:cat||'Outros',forma:forma||''};}
@@ -742,7 +757,7 @@ function initFB(){
       appId:'1:1032347607150:web:3651c3f4f402019bcf467f'
     };
     var fbApp=firebase.apps.length?firebase.apps[0]:firebase.initializeApp(fbCfg);
-    _fbRef=firebase.database(fbApp).ref('pax/data');
+    _fbRef=firebase.database(fbApp).ref('pax/u/'+(curUser?curUser.id:'anon')+'/data');
     _fbRef.once('value').then(function(snap){
       var fbData=snap.val();
       var localTs=(_db&&_db._ts)||0;
