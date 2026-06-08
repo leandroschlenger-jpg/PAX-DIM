@@ -22,7 +22,7 @@ button{font-family:inherit;cursor:pointer;border:none;background:none}
 .brand em{color:var(--acc);font-style:normal}
 .topbar-right{display:flex;align-items:center;gap:10px}
 .mbtn{display:flex;align-items:center;gap:6px;background:var(--s2);border:1px solid var(--bdr);border-radius:999px;padding:7px 14px;font-size:13px;font-weight:700;color:var(--t1)}
-.eyebtn{background:var(--acc);border:none;border-radius:14px;padding:10px 18px;font-size:22px;color:#fff;font-weight:800;box-shadow:0 3px 12px rgba(123,110,246,.4);transition:all .15s}.eyebtn:active{transform:scale(.92)}
+.eyebtn{background:var(--s2);border:1px solid var(--bdr);border-radius:12px;padding:8px 12px;font-size:18px;color:var(--t2);transition:all .15s;line-height:1}.eyebtn:active{transform:scale(.92)}.eyebtn.on{color:var(--acc);border-color:var(--acc)}
 .nav{flex-shrink:0;display:flex;background:rgba(15,17,32,.92);border-top:1px solid var(--bdr);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);padding:6px 0 calc(6px + env(safe-area-inset-bottom,0px))}
 .ni{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding:6px 4px;font-size:10px;font-weight:600;color:var(--t3);transition:color .2s;position:relative}
 .ni .ic{font-size:22px;line-height:1;transition:transform .2s}
@@ -180,7 +180,7 @@ button{font-family:inherit;cursor:pointer;border:none;background:none}
   <header class="topbar">
     <div class="brand">PAX<em>.</em></div>
     <div class="topbar-right">
-      <button class="eyebtn" id="eyebtn" onclick="toggleValues()">&#128584;</button>
+      <button class="eyebtn" id="eyebtn" onclick="toggleValues()" title="Mostrar/ocultar valores"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/><line x1="1" y1="1" x2="23" y2="23" id="eyeSlash" style="display:none"/></svg></button>
       <button class="mbtn" onclick="openMP()"><span id="mlabel">--</span> &#9660;</button>
       <div id="userAvatar" onclick="trocarUsuario()" style="display:none;width:34px;height:34px;border-radius:50%;background:var(--acc);color:#fff;font-size:14px;font-weight:800;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0" title="Trocar usuario"></div>
     </div>
@@ -290,9 +290,9 @@ button{font-family:inherit;cursor:pointer;border:none;background:none}
       </div>
       <div class="ar" style="margin-bottom:8px">
         <div class="ai" onclick="sub('cas')"><div class="aico" style="background:rgba(167,139,250,.12)">&#128141;</div><div class="abody"><div class="atitle">Casamento</div><div class="asub" id="tCas">--</div></div><div class="aarr">&#8250;</div></div>
-        <div class="ai" onclick="sub('carro')"><div class="aico" style="background:rgba(96,165,250,.12)">&#128663;</div><div class="abody"><div class="atitle">Carro</div><div class="asub">Financiamento - 48 parcelas</div></div><div class="aarr">&#8250;</div></div>
-        <div class="ai" onclick="sub('apto')"><div class="aico" style="background:rgba(45,212,170,.12)">&#127968;</div><div class="abody"><div class="atitle">Apto Cajamar</div><div class="asub">Venda + saldos</div></div><div class="aarr">&#8250;</div></div>
-        <div class="ai" onclick="sub('proc')"><div class="aico" style="background:rgba(251,191,36,.12)">&#9878;</div><div class="abody"><div class="atitle">Processos Judiciais</div><div class="asub">6 processos</div></div><div class="aarr">&#8250;</div></div>
+        <div id="menuCarro" class="ai" onclick="sub('carro')"><div class="aico" style="background:rgba(96,165,250,.12)">&#128663;</div><div class="abody"><div class="atitle">Carro</div><div class="asub" id="menuCarroSub">Financiamento - 48 parcelas</div></div><div class="aarr">&#8250;</div></div>
+        <div id="menuApto" class="ai" onclick="sub('apto')"><div class="aico" style="background:rgba(45,212,170,.12)">&#127968;</div><div class="abody"><div class="atitle">Apto Cajamar</div><div class="asub">Venda + saldos</div></div><div class="aarr">&#8250;</div></div>
+        <div id="menuProc" class="ai" onclick="sub('proc')"><div class="aico" style="background:rgba(251,191,36,.12)">&#9878;</div><div class="abody"><div class="atitle">Processos Judiciais</div><div class="asub">6 processos</div></div><div class="aarr">&#8250;</div></div>
       </div>
       <div class="ar" style="margin-top:16px">
         <div class="ai" onclick="limparDuplicatas()"><div class="aico" style="background:rgba(255,204,0,.1)">&#129529;</div><div class="abody"><div class="atitle">Limpar duplicatas</div><div class="asub">Remove lancamentos duplicados</div></div><div class="aarr">&#8250;</div></div>
@@ -486,7 +486,7 @@ button{font-family:inherit;cursor:pointer;border:none;background:none}
 <div class="toast" id="toast"></div>
 <script>
 
-var USERS={'2505':{id:'leandro',nome:'Leandro'},'0809':{id:'thays',nome:'Thays'}};
+var USERS={'2505':{id:'leandro',nome:'Leandro',avatar:null},'0809':{id:'thays',nome:'Thays',avatar:'https://api.dicebear.com/8.x/adventurer/svg?seed=Thays&backgroundColor=ffd6e0&hair=long20,long17,long16&hairColor=f5c518,e8a000&skinColor=f8d9c4,ecad80'}};
 var curUser=null,pinEntered='';
 function numpad(n){
   if(n===-1){pinEntered='';updateDots();}
@@ -506,8 +506,10 @@ function numpad(n){
           }
           document.getElementById('lockscreen').style.display='none';
           document.getElementById('lockerr').textContent='';
-          document.getElementById('userAvatar').textContent=u.nome.charAt(0).toUpperCase();
-          document.getElementById('userAvatar').style.display='flex';
+          var av=document.getElementById('userAvatar');
+          if(u.avatar){av.innerHTML='<img src="'+u.avatar+'" style="width:34px;height:34px;border-radius:50%;object-fit:cover">';av.style.background='transparent';}
+          else{av.textContent=u.nome.charAt(0).toUpperCase();av.style.background='var(--acc)';}
+          av.style.display='flex';
           initFB();
         } else {
           document.querySelectorAll('.lock-dot').forEach(function(d){d.classList.add('error');});
@@ -538,7 +540,10 @@ function trocarUsuario(){
 var valHidden=true;
 function toggleValues(){
   valHidden=!valHidden;
-  document.getElementById('eyebtn').innerHTML=valHidden?'&#128584;':'&#128065;';
+  var slash=document.getElementById('eyeSlash');
+  if(slash)slash.style.display=valHidden?'none':'block';
+  var btn=document.getElementById('eyebtn');
+  if(btn){btn.classList.toggle('on',!valHidden);}
   render(curPage);renderLemb(load());
 }
 
@@ -1383,7 +1388,7 @@ function render(id){
   else if(id==='inv')renderInv(db);
   else if(id==='emg')renderEmg(db);
   else if(id==='cas')renderCas(db);
-  else if(id==='carro')renderCarro();
+  else if(id==='carro'){if(curUser&&curUser.id==='thays')renderCarroThays();else renderCarro();}
 }
 function renderResumo(db){
   var bens=db.patrimonio.reduce(function(s,i){return s+i.valor;},0);
@@ -1541,11 +1546,18 @@ function renderDividas(db){
 }
 function renderMais(db){
   var invTotal=db.investimentos.reduce(function(s,i){return s+i.valorAtual;},0);
-  var saldos=8117.87+1014.31+40323.58+1980.04+10018.92;
+  var isThays=curUser&&curUser.id==='thays';
+  var saldos=isThays?0:(8117.87+1014.31+40323.58+1980.04+10018.92);
   document.getElementById('tInv').textContent=fmt(invTotal+saldos);
   var ea=db.emergencia.reduce(function(s,e){return s+e.acumulado;},0),em=db.emergencia.reduce(function(s,e){return s+e.meta;},0);
   document.getElementById('tEmg').textContent=(em>0?(ea/em*100).toFixed(0):0)+'% da meta';
   document.getElementById('tCas').textContent=fmt(db.casamento.reduce(function(s,c){return s+c.custo;},0))+' planejados - 06/Set/2026';
+  var apto=document.getElementById('menuApto');
+  var proc=document.getElementById('menuProc');
+  var carroSub=document.getElementById('menuCarroSub');
+  if(apto)apto.style.display=isThays?'none':'flex';
+  if(proc)proc.style.display=isThays?'none':'flex';
+  if(carroSub)carroSub.textContent=isThays?'Manutencao e documentos':'Financiamento - 48 parcelas';
 }
 function renderInv(db){
   var tot=db.investimentos.reduce(function(s,i){return s+i.valorAtual;},0);
@@ -1595,6 +1607,64 @@ function showObs(id){
   document.getElementById('sbody').appendChild(sav);
   document.getElementById('sbg').classList.add('on');
   setTimeout(function(){var el=document.getElementById('obsEdit');if(el)el.focus();},300);
+}
+function renderCarroThays(){
+  var db=load();
+  var c=db.carro||{};
+  var manut=c.manutencoes||[];
+  var docs=c.documentos||[];
+  document.getElementById('carroSaldo').textContent='--';
+  document.getElementById('carroSub').textContent='Manutencoes e documentos';
+  document.getElementById('carroPago').textContent=fmt(manut.reduce(function(s,m){return s+(m.valor||0);},0));
+  document.getElementById('carroQtd').textContent=manut.length+' registros';
+  var fipeEl=document.getElementById('fipeResult');
+  if(fipeEl)fipeEl.innerHTML='<div style="color:var(--t3);font-size:13px">Secao de financiamento nao disponivel</div>';
+  var parcsEl=document.getElementById('parcelasSection');
+  if(parcsEl){
+    parcsEl.innerHTML='<div style="padding:16px 0">'+
+      '<div style="font-size:14px;font-weight:700;color:var(--t2);margin-bottom:12px">Manutencoes</div>'+
+      (manut.length===0?'<div class="empty"><div class="etitle">Nenhuma manutencao registrada</div></div>':
+        manut.map(function(m){return'<div class="lrow"><div class="lb"><div class="lt">'+m.desc+'</div><div class="ls">'+fmtD(m.data)+'</div></div><div class="lr"><div class="lv red">'+fmt(m.valor)+'</div></div></div>';}).join(''))+
+      '<button onclick="addManutencao()" style="margin-top:12px;padding:8px 18px;border-radius:20px;background:var(--acc);color:#fff;font-size:12px;font-weight:700;border:none;width:100%">+ Adicionar manutencao</button>'+
+      '<div style="font-size:14px;font-weight:700;color:var(--t2);margin:18px 0 12px">Documentos</div>'+
+      (docs.length===0?'<div class="empty"><div class="etitle">Nenhum documento registrado</div></div>':
+        docs.map(function(d){return'<div class="lrow"><div class="lb"><div class="lt">'+d.nome+'</div><div class="ls">Vence: '+fmtD(d.vencimento)+'</div></div></div>';}).join(''))+
+      '<button onclick="addDocCarro()" style="margin-top:12px;padding:8px 18px;border-radius:20px;background:var(--s2);color:var(--t1);font-size:12px;font-weight:700;border:1px solid var(--bdr);width:100%">+ Adicionar documento</button>'+
+    '</div>';
+  }
+}
+function addManutencao(){
+  var db=load();if(!db.carro)db.carro={};if(!db.carro.manutencoes)db.carro.manutencoes=[];
+  document.getElementById('stitle').textContent='Nova Manutencao';
+  document.getElementById('sbody').innerHTML=
+    '<div class="field"><label>Descricao</label><input id="mndesc" type="text" placeholder="Ex: Troca de oleo"></div>'+
+    '<div class="field"><label>Data</label><input id="mndata" type="date" value="'+new Date().toISOString().slice(0,10)+'"></div>'+
+    '<div class="field"><label>Valor (R$)</label><input id="mnval" type="text" inputmode="decimal" placeholder="0,00" oninput="moneyMask(this)"></div>'+
+    '<div class="field"><label>Obs.</label><input id="mnobs" type="text" placeholder="Opcional"></div>';
+  var sav=document.createElement('button');sav.className='savebtn';sav.textContent='Salvar';
+  sav.onclick=function(){
+    var db=load();if(!db.carro.manutencoes)db.carro.manutencoes=[];
+    db.carro.manutencoes.push({id:uid(),desc:document.getElementById('mndesc').value||'Manutencao',data:document.getElementById('mndata').value,valor:parseMoney(document.getElementById('mnval').value),obs:document.getElementById('mnobs').value});
+    save(db);closeSH();renderCarroThays();toast('Manutencao adicionada');
+  };
+  document.getElementById('sbody').appendChild(sav);
+  document.getElementById('sbg').classList.add('on');
+}
+function addDocCarro(){
+  var db=load();if(!db.carro)db.carro={};if(!db.carro.documentos)db.carro.documentos=[];
+  document.getElementById('stitle').textContent='Novo Documento';
+  document.getElementById('sbody').innerHTML=
+    '<div class="field"><label>Nome do documento</label><input id="dcnome" type="text" placeholder="Ex: IPVA, Seguro..."></div>'+
+    '<div class="field"><label>Vencimento</label><input id="dcvenc" type="date"></div>'+
+    '<div class="field"><label>Obs.</label><input id="dcobs" type="text" placeholder="Opcional"></div>';
+  var sav=document.createElement('button');sav.className='savebtn';sav.textContent='Salvar';
+  sav.onclick=function(){
+    var db=load();if(!db.carro.documentos)db.carro.documentos=[];
+    db.carro.documentos.push({id:uid(),nome:document.getElementById('dcnome').value||'Documento',vencimento:document.getElementById('dcvenc').value,obs:document.getElementById('dcobs').value});
+    save(db);closeSH();renderCarroThays();toast('Documento adicionado');
+  };
+  document.getElementById('sbody').appendChild(sav);
+  document.getElementById('sbg').classList.add('on');
 }
 function renderCarro(){
   var db=load();
