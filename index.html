@@ -246,7 +246,7 @@ body.paulo-mode .p-nav{display:flex}
   <header class="topbar">
     <div class="brand">PAX<em>.</em></div>
     <div class="topbar-right">
-      <button class="eyebtn" id="eyebtn" onclick="toggleValues()" title="Mostrar/ocultar valores"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/><line x1="1" y1="1" x2="23" y2="23" id="eyeSlash" style="display:none"/></svg></button>
+      <button class="eyebtn on" id="eyebtn" onclick="toggleValues()" title="Mostrar/ocultar valores"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/><line x1="1" y1="1" x2="23" y2="23" id="eyeSlash" style="display:none"/></svg></button>
       <button class="mbtn" onclick="openMP()"><span id="mlabel">--</span> &#9660;</button>
       <div id="userAvatar" onclick="trocarUsuario()" style="display:none;width:34px;height:34px;border-radius:50%;background:var(--acc);color:#fff;font-size:14px;font-weight:800;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0" title="Trocar usuario"></div>
     </div>
@@ -424,7 +424,7 @@ body.paulo-mode .p-nav{display:flex}
         </div>
         <div id="listParcelas"></div>
       </div>
-      <div class="dc">
+      <div class="dc" id="dc-fipe">
         <div class="dct" style="display:flex;justify-content:space-between;align-items:center">
           <span>Tabela FIPE</span>
           <button onclick="editarFIPE()" style="padding:6px 14px;border-radius:20px;background:var(--s2);color:var(--accl);font-size:12px;font-weight:700;border:1px solid var(--acc)">&#9998; Atualizar</button>
@@ -438,7 +438,7 @@ body.paulo-mode .p-nav{display:flex}
           </div>
         </a>
       </div>
-      <div class="dc">
+      <div class="dc" id="dc-carbank">
         <div class="dct">Acesso CarBank</div>
         <a href="https://cliente.carbankbrasil.com.br/login" target="_blank" style="display:flex;align-items:center;gap:10px;padding:12px;background:rgba(96,165,250,.08);border:1px solid rgba(96,165,250,.2);border-radius:12px;text-decoration:none;margin-bottom:12px">
           <span style="font-size:22px">&#128279;</span>
@@ -551,6 +551,7 @@ body.paulo-mode .p-nav{display:flex}
     </div>
     <button class="p-btn purple" onclick="pGuardar()">💰 Guardar dinheiro</button>
     <button class="p-btn gold" onclick="pRegistrarCompra()">🛒 Registrar compra</button>
+    <button class="p-btn" style="background:var(--s2);color:var(--t1);border:1px solid var(--bdr);margin-top:8px" onclick="goP('extrato')">📋 Meus lançamentos</button>
   </div>
 </div>
 <div class="pg-paulo" id="pg-paulo-sonhos">
@@ -572,6 +573,13 @@ body.paulo-mode .p-nav{display:flex}
     <div class="p-badge-grid" id="p-conquistas-list"></div>
   </div>
 </div>
+<div class="pg-paulo" id="pg-paulo-extrato">
+  <div class="p-screen">
+    <div class="p-section">📋 Meus Lançamentos</div>
+    <div id="p-extrato-list"></div>
+  </div>
+</div>
+
 <!-- PAULO NAV -->
 <nav class="p-nav" id="p-nav">
   <button class="p-ni on" id="p-ni-home" onclick="goP('home')"><span class="ic">🏠</span>Início</button>
@@ -614,17 +622,17 @@ function numpad(n){
           document.body.classList.remove('locked');
           document.getElementById('lockerr').textContent='';
           var av=document.getElementById('userAvatar');
-          if(u.svgAvatar){
-            av.innerHTML=u.svgAvatar;
-            var svgEl=av.querySelector('svg');
-            if(svgEl){svgEl.setAttribute('width','40');svgEl.setAttribute('height','40');}
-            av.style.background='transparent';av.style.borderRadius='0';
-            av.style.width='40px';av.style.height='40px';av.style.overflow='visible';
-          } else{av.textContent=u.nome.charAt(0).toUpperCase();av.style.background='var(--acc)';av.style.borderRadius='50%';}
-          av.style.display='flex';
+          av.innerHTML='';
+          av.textContent=u.nome.charAt(0).toUpperCase();
+          av.style.background='var(--acc)';av.style.borderRadius='50%';
+          av.style.width='40px';av.style.height='40px';av.style.display='flex';
+          av.style.alignItems='center';av.style.justifyContent='center';
+          av.style.fontSize='18px';av.style.fontWeight='800';av.style.color='#fff';
+          av.style.overflow='hidden';
           if(u.id==='paulo'){document.body.classList.add('paulo-mode');document.body.classList.remove('thays-mode');}
           else if(u.id==='thays'){document.body.classList.add('thays-mode');document.body.classList.remove('paulo-mode');}
           else{document.body.classList.remove('paulo-mode','thays-mode');}
+          _db=null;_fbSynced=false;
           initFB();
         } else {
           document.querySelectorAll('.lock-dot').forEach(function(d){d.classList.add('error');});
@@ -654,7 +662,7 @@ function trocarUsuario(){
   document.getElementById('lockscreen').style.display='flex';
 }
 
-var valHidden=true;
+var valHidden=false;
 function toggleValues(){
   valHidden=!valHidden;
   var slash=document.getElementById('eyeSlash');
@@ -912,84 +920,7 @@ function seed(){
       {id:uid(),titulo:'Deposito judicial - Processo Felix cobranca titulo',data:'2026-06-10',processo:'Proc 4 - Felix (requerido)',prioridade:'Alta',status:'Pendente',obs:'Verificar se deposito de 18/02 foi aceito nos embargos de execucao'},
       {id:uid(),titulo:'Acompanhar Processo Latam SP',data:'2026-06-15',processo:'Proc 6 - Latam',prioridade:'Media',status:'Pendente',obs:'Dr. Luiz Fernando - checar andamento da indenizacao'},
       {id:uid(),titulo:'Parcela carro 4/48',data:'2026-07-01',processo:'',prioridade:'Alta',status:'Pendente',obs:'Acessar carbankbrasil.com.br - CPF 323.025.288-83 senha 9297'},
-      {id:uid(),titulo:'A receber Inter - Apto Cajamar',data:'2026-06-30',processo:'',prioridade:'Alta',status:'Pendente',obs:'R$ 165.000 pendente de recebimento pelo Inter'}
-    ]
-  };
-}
-function load(){
-  if(_db)return _db;
-  try{
-    var r=localStorage.getItem(KEY);
-    if(r){var p=JSON.parse(r);if(p&&Array.isArray(p.fluxo)){_db=p;return _db;}}
-    if(!curUser||curUser.id==='leandro'){
-      for(var k=0;k<OLD_KEYS.length;k++){
-        var oldv=localStorage.getItem(OLD_KEYS[k]);
-        if(oldv){var op=JSON.parse(oldv);if(op&&Array.isArray(op.fluxo)){_db=op;save(_db);return _db;}}
-      }
-    }
-  }catch(e){}
-  _db=seed();save(_db);return _db;
-}
-function save(db){
-  _db=db;
-  db._ts=Date.now();
-  db._owner=curUser?curUser.id:'leandro';
-  try{localStorage.setItem(KEY,JSON.stringify(db));}catch(e){}
-  if(_fbRef){try{_fbRef.set(db).catch(function(){});}catch(e){}}
-}
-function initFB(){
-  if(_fbReady)return;
-  _fbReady=true;
-  try{
-    var fbCfg={
-      apiKey:'AIzaSyAOiyExNYWUutmMjq7i9viBKlU2R0FTZu0',
-      authDomain:'pax-financeiro.firebaseapp.com',
-      databaseURL:'https://pax-financeiro-default-rtdb.firebaseio.com',
-      projectId:'pax-financeiro',
-      storageBucket:'pax-financeiro.firebasestorage.app',
-      messagingSenderId:'1032347607150',
-      appId:'1:1032347607150:web:3651c3f4f402019bcf467f'
-    };
-    var fbApp=firebase.apps.length?firebase.apps[0]:firebase.initializeApp(fbCfg);
-    _fbRef=firebase.database(fbApp).ref('pax/u/'+(curUser?curUser.fbPath:'anon')+'/data');
-    _fbRef.once('value').then(function(snap){
-      var fbData=snap.val();
-      var uid=curUser?curUser.id:'leandro';
-      var isLeandro=uid==='leandro';
-      var fbOwner=fbData&&fbData._owner;
-      var fbValid=fbData&&Array.isArray(fbData.fluxo)&&(fbOwner===uid||(!fbOwner&&isLeandro));
-      var localTs=(_db&&_db._ts)||0;
-      var fbTs=(fbData&&fbData._ts)||0;
-      if(fbValid&&fbTs>=localTs){
-        _db=fbData;
-        try{localStorage.setItem(KEY,JSON.stringify(_db));}catch(e){}
-        if(!_fbSynced){_fbSynced=true;render(curPage);if(isLeandro)toast('Sincronizado com Firebase');}
-      } else if(fbValid){
-        _db=fbData;
-        try{localStorage.setItem(KEY,JSON.stringify(_db));}catch(e){}
-        if(!_fbSynced){_fbSynced=true;render(curPage);}
-      } else if(isLeandro&&_db&&!fbTs){
-        _fbRef.set(_db).catch(function(){});
-        toast('Dados enviados ao Firebase');
-      } else {
-        _db=uid==='thays'?seedThays():uid==='paulo'?seedPaulo():seedVazio();
-        _db._owner=uid;
-        try{localStorage.removeItem(KEY);}catch(e){}
-        _fbRef.set(_db).catch(function(){});
-        if(!_fbSynced){_fbSynced=true;render(curPage);}
-      }
-      _fbSynced=true;
-    }).catch(function(e){console.log('FB read error',e);_fbSynced=true;});
-  }catch(e){console.log('FB init error',e);_fbSynced=true;}
-}
-var fmt=function(v){if(valHidden)return'R$ *****';return(v==null||isNaN(v))?'--':'R$ '+Number(v).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});};
-var fmtD=function(d){if(!d)return'--';var p=d.split('-');return p[2]+'/'+p[1];};
-var mNome=function(m){var n=['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];var p=m.split('-');return n[+p[1]-1]+'/'+p[0].slice(2);};
-var dName=function(d){return['Dom','Seg','Ter','Qua','Qui','Sex','Sab'][new Date(d+'T12:00').getDay()];};
-var fmtK=function(v){if(!v||isNaN(v))return'R$0';var a=Math.abs(v);return'R$'+(a>=1e6?(a/1e6).toFixed(1)+'M':a>=1000?Math.round(a/1000)+'k':a.toFixed(0));};
-var _hoje=new Date(),curPage='resumo',curMes=_hoje.getFullYear()+'-'+('0'+(_hoje.getMonth()+1)).slice(-2),  curF='all',editId=null,charts={};
-var tt;
-function toast(m){var e=document.getElementById('toast');e.textContent=m;e.classList.add('on');clearTimeout(tt);tt=setTimeout(function(){e.classList.remove('on');},2200);}
+      2200);}
 function openMP(){
   var db=load(),hm={};db.fluxo.forEach(function(t){hm[t.mes]=1;});
   var g=document.getElementById('mgrid'),ms=[];
@@ -1573,6 +1504,25 @@ function checkMissoes(db){
   });
 }
 function goP(id){
+  if(id==='extrato'){
+    document.querySelectorAll('.pg-paulo').forEach(function(p){p.classList.remove('on');});
+    var ep=document.getElementById('pg-paulo-extrato');if(ep)ep.classList.add('on');
+    document.querySelectorAll('.p-ni').forEach(function(n){n.classList.remove('on');});
+    var db=load();
+    var list=document.getElementById('p-extrato-list');
+    if(!list)return;
+    var txs=(db.fluxo||[]).filter(function(t){return t.mes===curMes;}).slice().reverse();
+    if(!txs.length){list.innerHTML='<div style="text-align:center;color:var(--t3);padding:30px 0;font-size:14px">Nenhum lancamento neste mes 🙂</div>';return;}
+    list.innerHTML=txs.map(function(t){
+      var isE=t.operacao==='Entrada';
+      var col=isE?'#6ee7b7':'#fca5a5';
+      return '<div style="display:flex;justify-content:space-between;align-items:center;padding:12px 16px;background:var(--s2);border-radius:14px;margin-bottom:8px">'+
+        '<div><div style="font-size:13px;font-weight:700;color:var(--t1)">'+t.descricao+'</div><div style="font-size:11px;color:var(--t3);margin-top:2px">'+fmtD(t.data)+'</div></div>'+
+        '<div style="font-size:14px;font-weight:800;color:'+col+'">'+(isE?'+':'-')+' R$ '+Math.abs(t.valor).toLocaleString('pt-BR',{minimumFractionDigits:2})+'</div>'+
+      '</div>';
+    }).join('');
+    return;
+  }
   document.querySelectorAll('.pg-paulo').forEach(function(p){p.classList.remove('on');});
   document.querySelectorAll('.p-ni').forEach(function(n){n.classList.remove('on');});
   var pg=document.getElementById('pg-paulo-'+id);if(pg)pg.classList.add('on');
@@ -2026,6 +1976,8 @@ function showObs(id){
 }
 function renderCarroThays(){
   var db=load();
+  var _ef=document.getElementById('dc-fipe');if(_ef)_ef.style.display='none';
+  var _ec=document.getElementById('dc-carbank');if(_ec)_ec.style.display='none';
   var c=db.carro||{};
   var manut=c.manutencoes||[];
   var docs=c.documentos||[];
