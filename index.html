@@ -933,7 +933,11 @@ function load(){
       }
     }
   }catch(e){}
-  _db=seed();save(_db);return _db;
+  _db=seed();
+  // Só salva se Firebase não está carregando (evita sobrescrever dados reais)
+  if(!_fbRef||_fbSynced){save(_db);}
+  else{try{localStorage.setItem(KEY,JSON.stringify(_db));}catch(e){}}
+  return _db;
 }
 function save(db){
   _db=db;
@@ -977,7 +981,7 @@ function initFB(){
         _fbRef.set(_db).catch(function(){});
         toast('Dados enviados ao Firebase');
       } else {
-        _db=uid==='thays'?seedThays():uid==='paulo'?seedPaulo():seedVazio();
+        _db=uid==='thays'?seedThays():uid==='paulo'?seedPaulo():seed();
         _db._owner=uid;
         try{localStorage.removeItem(KEY);}catch(e){}
         _fbRef.set(_db).catch(function(){});
