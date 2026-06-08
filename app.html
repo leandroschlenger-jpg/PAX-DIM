@@ -1565,9 +1565,12 @@ function renderMais(db){
   var proc=document.getElementById('menuProc');
   var carroSub=document.getElementById('menuCarroSub');
   var hideExtra=curUser&&curUser.id!=='leandro';
+  var isPaulo=curUser&&curUser.id==='paulo';
   if(apto)apto.style.display=hideExtra?'none':'flex';
   if(proc)proc.style.display=hideExtra?'none':'flex';
   if(carroSub)carroSub.textContent=hideExtra?'Manutencao e documentos':'Financiamento - 48 parcelas';
+  var menuCarro=document.getElementById('menuCarro');
+  if(menuCarro)menuCarro.style.display=isPaulo?'none':'flex';
 }
 function renderInv(db){
   var tot=db.investimentos.reduce(function(s,i){return s+i.valorAtual;},0);
