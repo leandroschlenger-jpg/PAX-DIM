@@ -729,16 +729,15 @@ function seed(){
 function load(){
   if(_db)return _db;
   try{
-    // Try current key first
     var r=localStorage.getItem(KEY);
     if(r){var p=JSON.parse(r);if(p&&Array.isArray(p.fluxo)){_db=p;return _db;}}
-    // Try to migrate from old keys
-    for(var k=0;k<OLD_KEYS.length;k++){
-      var old=localStorage.getItem(OLD_KEYS[k]);
-      if(old){var op=JSON.parse(old);if(op&&Array.isArray(op.fluxo)){_db=op;save(_db);return _db;}}
+    if(!curUser||curUser.id==='leandro'){
+      for(var k=0;k<OLD_KEYS.length;k++){
+        var oldv=localStorage.getItem(OLD_KEYS[k]);
+        if(oldv){var op=JSON.parse(oldv);if(op&&Array.isArray(op.fluxo)){_db=op;save(_db);return _db;}}
+      }
     }
   }catch(e){}
-  // Only seed if absolutely no data found anywhere
   _db=seed();save(_db);return _db;
 }
 function save(db){
@@ -764,15 +763,24 @@ function initFB(){
     _fbRef=firebase.database(fbApp).ref('pax/u/'+(curUser?curUser.id:'anon')+'/data');
     _fbRef.once('value').then(function(snap){
       var fbData=snap.val();
+      var isLeandro=curUser&&curUser.id==='leandro';
       var localTs=(_db&&_db._ts)||0;
       var fbTs=(fbData&&fbData._ts)||0;
       if(fbData&&Array.isArray(fbData.fluxo)&&fbTs>=localTs){
         _db=fbData;
         try{localStorage.setItem(KEY,JSON.stringify(_db));}catch(e){}
         if(!_fbSynced){_fbSynced=true;render(curPage);toast('Sincronizado com Firebase');}
-      } else if(_db&&!fbTs){
+      } else if(fbData&&Array.isArray(fbData.fluxo)){
+        _db=fbData;
+        try{localStorage.setItem(KEY,JSON.stringify(_db));}catch(e){}
+        if(!_fbSynced){_fbSynced=true;render(curPage);}
+      } else if(isLeandro&&_db&&!fbTs){
         _fbRef.set(_db).catch(function(){});
         toast('Dados enviados ao Firebase');
+      } else if(!isLeandro){
+        _db=seedVazio();
+        try{localStorage.removeItem(KEY);}catch(e){}
+        if(!_fbSynced){_fbSynced=true;render(curPage);}
       }
       _fbSynced=true;
     }).catch(function(e){console.log('FB read error',e);_fbSynced=true;});
