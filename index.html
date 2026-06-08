@@ -289,7 +289,7 @@ button{font-family:inherit;cursor:pointer;border:none;background:none}
         <div class="tile" onclick="sub('emg')"><div class="tico">&#128737;</div><div class="tlbl">Emergencia</div><div class="tval yellow" id="tEmg">--</div></div>
       </div>
       <div class="ar" style="margin-bottom:8px">
-        <div class="ai" onclick="sub('cas')"><div class="aico" style="background:rgba(167,139,250,.12)">&#128141;</div><div class="abody"><div class="atitle">Casamento</div><div class="asub" id="tCas">--</div></div><div class="aarr">&#8250;</div></div>
+        <div id="menuCas" class="ai" onclick="sub('cas')"><div class="aico" style="background:rgba(167,139,250,.12)">&#128141;</div><div class="abody"><div class="atitle">Casamento</div><div class="asub" id="tCas">--</div></div><div class="aarr">&#8250;</div></div>
         <div id="menuCarro" class="ai" onclick="sub('carro')"><div class="aico" style="background:rgba(96,165,250,.12)">&#128663;</div><div class="abody"><div class="atitle">Carro</div><div class="asub" id="menuCarroSub">Financiamento - 48 parcelas</div></div><div class="aarr">&#8250;</div></div>
         <div id="menuApto" class="ai" onclick="sub('apto')"><div class="aico" style="background:rgba(45,212,170,.12)">&#127968;</div><div class="abody"><div class="atitle">Apto Cajamar</div><div class="asub">Venda + saldos</div></div><div class="aarr">&#8250;</div></div>
         <div id="menuProc" class="ai" onclick="sub('proc')"><div class="aico" style="background:rgba(251,191,36,.12)">&#9878;</div><div class="abody"><div class="atitle">Processos Judiciais</div><div class="asub">6 processos</div></div><div class="aarr">&#8250;</div></div>
@@ -1571,6 +1571,8 @@ function renderMais(db){
   if(carroSub)carroSub.textContent=hideExtra?'Manutencao e documentos':'Financiamento - 48 parcelas';
   var menuCarro=document.getElementById('menuCarro');
   if(menuCarro)menuCarro.style.display=isPaulo?'none':'flex';
+  var menuCas=document.getElementById('menuCas');
+  if(menuCas)menuCas.style.display=isPaulo?'none':'flex';
 }
 function renderInv(db){
   var tot=db.investimentos.reduce(function(s,i){return s+i.valorAtual;},0);
