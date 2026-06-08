@@ -31,7 +31,8 @@ button{font-family:inherit;cursor:pointer;border:none;background:none}
 .page.on{display:block;animation:pi .22s ease-out}
 @keyframes pi{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
 /* LOCK SCREEN */
-.lockscreen{position:fixed;inset:0;background:var(--bg);z-index:1000;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px 30px}
+.lockscreen{position:fixed;inset:0;background:var(--bg);z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px 30px}
+body.locked .nav,body.locked #fab,body.locked .topbar,body.locked .p-nav,body.locked .pg-paulo{display:none!important}
 .lock-logo{font-size:48px;margin-bottom:8px}
 .lock-brand{font-size:28px;font-weight:800;margin-bottom:4px}
 .lock-brand em{color:var(--acc);font-style:normal}
@@ -240,7 +241,7 @@ body.paulo-mode .p-nav{display:flex}
 .p-toast{display:none;position:fixed;top:76px;left:50%;transform:translateX(-50%);background:linear-gradient(135deg,#7c3aed,#a78bfa);color:#fff;padding:12px 24px;border-radius:999px;font-size:13px;font-weight:800;z-index:9999;white-space:nowrap;pointer-events:none}
 </style>
 </head>
-<body>
+<body class="locked">
 <div id="app">
   <header class="topbar">
     <div class="brand">PAX<em>.</em></div>
@@ -533,6 +534,7 @@ body.paulo-mode .p-nav{display:flex}
     <button class="ni" id="nav-lemb" onclick="go('lemb')" style="position:relative"><span class="ic">&#128276;</span>Alertas<span id="lembBadge" style="display:none;position:absolute;top:5px;right:calc(50% - 14px);width:7px;height:7px;border-radius:50%;background:var(--red);border:2px solid var(--bg)"></span></button>
   </nav>
 </div>
+
 <!-- PAULO GAME PAGES -->
 <div class="pg-paulo" id="pg-paulo-home">
   <div class="p-screen">
@@ -590,7 +592,7 @@ body.paulo-mode .p-nav{display:flex}
 <div class="toast" id="toast"></div>
 <script>
 
-var USERS={'2505':{id:'leandro',fbPath:'leandro',nome:'Leandro',svgAvatar:"<svg viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'><circle cx='20' cy='20' r='20' fill='%23000'/><circle cx='20' cy='20' r='13.5' fill='%23c00'/><polygon points='5,3 9,3 9,37 5,37' fill='%23111'/><line x1='6.5' y1='3' x2='6.5' y2='37' stroke='%23ddd' stroke-width='1.2'/><polygon points='9,3 14,3 21,20 18,20' fill='%23111'/><line x1='10' y1='3.5' x2='19.5' y2='20' stroke='%23ddd' stroke-width='1.1'/><polygon points='9,37 14,37 21,20 18,20' fill='%23111'/><line x1='10' y1='36.5' x2='19.5' y2='20' stroke='%23ddd' stroke-width='1.1'/><polygon points='31,3 35,3 35,37 31,37' fill='%23111'/><line x1='33.5' y1='3' x2='33.5' y2='37' stroke='%23ddd' stroke-width='1.2'/><polygon points='31,3 26,3 19,20 22,20' fill='%23111'/><line x1='30' y1='3.5' x2='20.5' y2='20' stroke='%23ddd' stroke-width='1.1'/><polygon points='31,37 26,37 19,20 22,20' fill='%23111'/><line x1='30' y1='36.5' x2='20.5' y2='20' stroke='%23ddd' stroke-width='1.1'/></svg>"},'0809':{id:'thays',fbPath:'thays2',nome:'Thays',svgAvatar:"<svg viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'><defs><radialGradient id='tf' cx='45%' cy='40%'><stop offset='0%' stop-color='%23f9c9a8'/><stop offset='100%' stop-color='%23d4845a'/></radialGradient></defs><circle cx='20' cy='40' r='20' fill='%232a1f31'/><circle cx='20' cy='23' r='12' fill='url(%23tf)'/><ellipse cx='20' cy='14' rx='12' ry='8' fill='%233d2010'/><ellipse cx='11' cy='16' rx='5' ry='6' fill='%233d2010'/><ellipse cx='29' cy='16' rx='5' ry='6' fill='%233d2010'/><circle cx='9' cy='13' r='4' fill='%234a2810'/><circle cx='12' cy='10' r='3.5' fill='%235c3018'/><circle cx='16' cy='8' r='3' fill='%234a2810'/><circle cx='20' cy='7.5' r='3' fill='%235c3018'/><circle cx='24' cy='8' r='3' fill='%234a2810'/><circle cx='28' cy='10' r='3.5' fill='%235c3018'/><circle cx='31' cy='13' r='4' fill='%234a2810'/><ellipse cx='14' cy='22' rx='2.8' ry='3' fill='%231a1a1a'/><ellipse cx='26' cy='22' rx='2.8' ry='3' fill='%231a1a1a'/><circle cx='12.8' cy='20.8' r='1.2' fill='%23fff'/><circle cx='24.8' cy='20.8' r='1.2' fill='%23fff'/><path d='M13 19.5 Q13.5 18 15 18.5' fill='none' stroke='%23333' stroke-width='0.9'/><path d='M27 19.5 Q26.5 18 25 18.5' fill='none' stroke='%23333' stroke-width='0.9'/><ellipse cx='11.5' cy='26' rx='3.5' ry='2.2' fill='%23e8846a' opacity='0.8'/><ellipse cx='28.5' cy='26' rx='3.5' ry='2.2' fill='%23e8846a' opacity='0.8'/><path d='M16 28 Q20 31 24 28' fill='none' stroke='%23a03030' stroke-width='1.4' stroke-linecap='round'/><rect x='16' y='32' width='8' height='6' rx='1.5' fill='%234a1060'/><text x='20' y='37' text-anchor='middle' font-size='5' fill='%23fbbf24' font-weight='bold' font-family='Arial'>$</text></svg>"},'2014':{id:'paulo',fbPath:'paulo',nome:'Paulo',svgAvatar:"<svg viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'><defs><radialGradient id='pf' cx='42%' cy='38%'><stop offset='0%' stop-color='%23fff176'/><stop offset='100%' stop-color='%23f9a825'/></radialGradient></defs><circle cx='20' cy='22' r='16' fill='url(%23pf)'/><polygon points='10,9 7,1 15,8' fill='%23f9a825'/><polygon points='7,1 13,2 15,8' fill='%231a1a1a'/><polygon points='30,9 33,1 25,8' fill='%23f9a825'/><polygon points='33,1 27,2 25,8' fill='%231a1a1a'/><ellipse cx='14' cy='21' rx='4' ry='4.5' fill='%231a1a1a'/><ellipse cx='26' cy='21' rx='4' ry='4.5' fill='%231a1a1a'/><circle cx='12.5' cy='19.2' r='1.8' fill='%23fff'/><circle cx='24.5' cy='19.2' r='1.8' fill='%23fff'/><ellipse cx='10.5' cy='27' rx='5' ry='3.2' fill='%23e53935' opacity='0.9'/><ellipse cx='29.5' cy='27' rx='5' ry='3.2' fill='%23e53935' opacity='0.9'/><ellipse cx='20' cy='25' rx='1.5' ry='1' fill='%23b8860b'/><path d='M15.5 27.5 Q20 31 24.5 27.5' fill='none' stroke='%237b3f00' stroke-width='1.5' stroke-linecap='round'/></svg>"}};
+var USERS={'2505':{id:'leandro',fbPath:'leandro',nome:'Leandro',svgAvatar:"<svg viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'><circle cx='20' cy='20' r='20' fill='#000'/><circle cx='20' cy='20' r='13.5' fill='#c00'/><polygon points='5.5,3 9,3 9,37 5.5,37' fill='#111'/><polygon points='6.5,3 7.8,3 7.8,37 6.5,37' fill='#ddd'/><polygon points='9,3 14,3 21,19 19.5,21' fill='#111'/><polygon points='9.8,3 11.2,3 20.2,20.2 19.5,21' fill='#ddd'/><polygon points='9,37 14,37 21,21 19.5,19' fill='#111'/><polygon points='9.8,37 11.2,37 20.2,19.8 19.5,19' fill='#ddd'/><polygon points='31,3 34.5,3 34.5,37 31,37' fill='#111'/><polygon points='32.2,3 33.5,3 33.5,37 32.2,37' fill='#ddd'/><polygon points='31,3 26,3 19,19 20.5,21' fill='#111'/><polygon points='30.2,3 28.8,3 19.8,20.2 20.5,21' fill='#ddd'/><polygon points='31,37 26,37 19,21 20.5,19' fill='#111'/><polygon points='30.2,37 28.8,37 19.8,19.8 20.5,19' fill='#ddd'/></svg>"},'0809':{id:'thays',fbPath:'thays2',nome:'Thays',svgAvatar:"<svg viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'><defs><radialGradient id='tface' cx='45%' cy='40%' r='55%'><stop offset='0%' stop-color='#f5c5a0'/><stop offset='100%' stop-color='#d4845a'/></radialGradient></defs><circle cx='20' cy='40' r='20' fill='#2a1f31'/><circle cx='20' cy='22' r='13' fill='url(#tface)'/><ellipse cx='20' cy='15' rx='13' ry='9' fill='#3d2010'/><circle cx='11' cy='14' r='4.5' fill='#3d2010'/><circle cx='29' cy='14' r='4.5' fill='#3d2010'/><ellipse cx='11' cy='13' rx='3.5' ry='3' fill='#2a1508'/><ellipse cx='29' cy='13' rx='3.5' ry='3' fill='#2a1508'/><circle cx='9' cy='12' r='3' fill='#5c3018'/><circle cx='10' cy='10' r='2.5' fill='#3d2010'/><circle cx='13' cy='9' r='3' fill='#5c3018'/><circle cx='16' cy='8' r='2' fill='#3d2010'/><circle cx='20' cy='8' r='2.5' fill='#5c3018'/><circle cx='24' cy='8' r='2' fill='#3d2010'/><circle cx='27' cy='9' r='3' fill='#5c3018'/><circle cx='30' cy='10' r='2.5' fill='#3d2010'/><circle cx='31' cy='12' r='3' fill='#5c3018'/><path d='M13.5 19.5 Q14 18 15 18.5' fill='none' stroke='#3d2010' stroke-width='1' stroke-linecap='round'/><path d='M26.5 19.5 Q26 18 25 18.5' fill='none' stroke='#3d2010' stroke-width='1' stroke-linecap='round'/><circle cx='14.5' cy='20.5' r='2.8' fill='#3d2010'/><circle cx='25.5' cy='20.5' r='2.8' fill='#3d2010'/><circle cx='13.8' cy='19.8' r='1' fill='#fff'/><circle cx='24.8' cy='19.8' r='1' fill='#fff'/><ellipse cx='11.5' cy='25' rx='3.5' ry='2.2' fill='#e8846a' opacity='0.75'/><ellipse cx='28.5' cy='25' rx='3.5' ry='2.2' fill='#e8846a' opacity='0.75'/><path d='M16 27 Q20 29.5 24 27' fill='none' stroke='#8b3a3a' stroke-width='1.5' stroke-linecap='round'/><rect x='17' y='30' width='6' height='5' rx='1' fill='#4a2060'/><rect x='18.5' y='30' width='3' height='2' rx='0.5' fill='#8b5cf6'/><text x='20' y='36.5' text-anchor='middle' font-size='4' fill='#fbbf24' font-weight='bold'>$</text></svg>"},'2014':{id:'paulo',fbPath:'paulo',nome:'Paulo',svgAvatar:"<svg viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'><defs><radialGradient id='pg' cx='40%' cy='35%' r='60%'><stop offset='0%' stop-color='#fff176'/><stop offset='100%' stop-color='#f9a825'/></radialGradient><radialGradient id='pg2' cx='50%' cy='50%' r='50%'><stop offset='0%' stop-color='#ffee58'/><stop offset='100%' stop-color='#f57f17'/></radialGradient></defs><circle cx='20' cy='21' r='17' fill='url(#pg2)'/><polygon points='10,9 6,1 14,7' fill='#f9a825'/><polygon points='6,1 12,0 14,7' fill='#1a1a1a'/><polygon points='30,9 34,1 26,7' fill='#f9a825'/><polygon points='34,1 28,0 26,7' fill='#1a1a1a'/><circle cx='14' cy='20' r='4.5' fill='#1a1a1a'/><circle cx='26' cy='20' r='4.5' fill='#1a1a1a'/><circle cx='14' cy='20' r='3.5' fill='#2a1a00'/><circle cx='26' cy='20' r='3.5' fill='#2a1a00'/><circle cx='12.5' cy='18.5' r='1.5' fill='#fff'/><circle cx='24.5' cy='18.5' r='1.5' fill='#fff'/><circle cx='13' cy='19' r='0.6' fill='#fffde7'/><circle cx='25' cy='19' r='0.6' fill='#fffde7'/><ellipse cx='10' cy='26' rx='4.5' ry='3' fill='#e53935' opacity='0.9'/><ellipse cx='30' cy='26' rx='4.5' ry='3' fill='#e53935' opacity='0.9'/><ellipse cx='20' cy='24.5' rx='1.5' ry='1' fill='#bf6900'/><path d='M15.5 27 Q20 30.5 24.5 27' fill='none' stroke='#7b3f00' stroke-width='1.4' stroke-linecap='round'/></svg>"}};
 var curUser=null,pinEntered='';
 function numpad(n){
   if(n===-1){pinEntered='';updateDots();}
@@ -609,6 +611,7 @@ function numpad(n){
             try{localStorage.removeItem(KEY);localStorage.removeItem('pax_fin_'+u.id);}catch(e){}
           }
           document.getElementById('lockscreen').style.display='none';
+          document.body.classList.remove('locked');
           document.getElementById('lockerr').textContent='';
           var av=document.getElementById('userAvatar');
           if(u.svgAvatar){
@@ -645,6 +648,7 @@ function trocarUsuario(){
   if(!confirm('Trocar de usuario?'))return;
   curUser=null;KEY='pax_fin_guest';_db=null;_fbRef=null;_fbReady=false;_fbSynced=false;
   document.body.classList.remove('paulo-mode','thays-mode');
+  document.body.classList.add('locked');
   pinEntered='';updateDots();
   document.getElementById('userAvatar').style.display='none';
   document.getElementById('lockscreen').style.display='flex';
@@ -2279,4 +2283,53 @@ function limparDuplicatas(){
       // Ordenar por quantidade desc, manter o maior
       contagens.sort(function(a,b){return b.n-a.n;});
       // Remover todos exceto o primeiro (maior)
-      for(var i=1;i<
+      for(var i=1;i<contagens.length;i++)remover.push(contagens[i].rid);
+    }
+  });
+
+  // 2. Remover transacoes nao-recorrentes duplicadas (mesmo desc+mes+conta+valor)
+  var vistos={};
+  var idsRemover=[];
+  db.fluxo.forEach(function(t){
+    if(t.recId)return; // ja tratado acima
+    var key=t.descricao+'|'+t.mes+'|'+t.conta+'|'+t.valor;
+    if(vistos[key]){idsRemover.push(t.id);}
+    else{vistos[key]=true;}
+  });
+
+  if(remover.length===0&&idsRemover.length===0){toast('Nenhuma duplicata encontrada');return;}
+
+  db.fluxo=db.fluxo.filter(function(t){
+    if(t.recId&&remover.indexOf(t.recId)>=0)return false;
+    if(idsRemover.indexOf(t.id)>=0)return false;
+    return true;
+  });
+
+  var removidos=antes-db.fluxo.length;
+  save(db);render(curPage);
+  toast(removidos+' lancamentos duplicados removidos');
+}
+function exportData(){
+  var a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob([JSON.stringify(load(),null,2)],{type:'application/json'}));
+  a.download='pax_'+new Date().toISOString().split('T')[0]+'.json';a.click();toast('Backup exportado');
+}
+function importData(e){
+  var f=e.target.files[0];if(!f)return;
+  var r=new FileReader();
+  r.onload=function(ev){try{if(confirm('Substituir dados pelo backup?')){_db=JSON.parse(ev.target.result);save(_db);render(curPage);toast('Importado');}}catch(err){toast('Arquivo invalido');}};
+  r.readAsText(f);e.target.value='';
+}
+function resetData(){localStorage.removeItem(KEY);_db=null;load();render('fluxo');renderLemb(load());toast('Dados de exemplo carregados');}
+(function(){
+  load(); // migrates old data automatically, never loses user changes
+  var _m=new Date();
+  curMes=_m.getFullYear()+'-'+('0'+(_m.getMonth()+1)).slice(-2);
+  updML();render('resumo');renderLemb(load());
+})();
+
+</script>
+</body>
+</html>
+ 
+                                                                                                                                                                                                                                                                                                              
