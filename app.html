@@ -549,6 +549,37 @@ function mkT(m,d,op,v,c,s,desc,cat,forma){return{id:uid(),mes:m,data:d,operacao:
 function seedVazio(){
   return {fluxo:[],patrimonio:[],dividas:[],investimentos:[],emergencia:[],casamento:[],processos:[],mesesFechados:[],saldoMes:{},carro:{codigoFipe:'',valorFinanciado:0,totalParcelas:48,parcelas:[]},lembretes:[]};
 }
+function seedThays(){
+  var T=[
+    ['2026-06','2026-06-06','Entrada',2030,'Conta 1','Pendente','Repasses Leandro (Almoco Paulo, Gasolina, Faculdade, Faxineira)','Receita'],
+    ['2026-06','2026-06-06','Entrada',7097,'Conta 1','OK','Salario','Receita'],
+    ['2026-06','2026-06-06','Entrada',0,'Conta 1','Pendente','Entrada 2','Receita'],
+    ['2026-06','2026-06-06','Saida',1600,'Conta 1','OK','Mercado','Alimentacao'],
+    ['2026-06','2026-06-06','Saida',1600,'Conta 1','OK','Mariana Faxina','Casa'],
+    ['2026-06','2026-06-06','Saida',800,'Conta 1','OK','Gasolina','Transporte'],
+    ['2026-06','2026-06-06','Saida',0,'Conta 1','Pendente','Faculdade','Educacao'],
+    ['2026-06','2026-06-06','Saida',150,'Conta 1','OK','Almoco de Paulo Rua','Alimentacao'],
+    ['2026-06','2026-06-06','Saida',400,'Conta 1','Pendente','Almoco de Thays','Alimentacao'],
+    ['2026-06','2026-06-06','Saida',350,'Conta 1','OK','Psicologa','Saude'],
+    ['2026-06','2026-06-06','Saida',300,'Conta 1','OK','Energia - Edemilson','Casa'],
+    ['2026-06','2026-06-06','Saida',250,'Conta 1','Pendente','Agua','Casa'],
+    ['2026-06','2026-06-06','Saida',680,'Conta 1','OK','Almoco escola Paulo','Educacao'],
+    ['2026-06','2026-06-06','Saida',150,'Conta 1','OK','Mesada de Paulo','Educacao'],
+    ['2026-06','2026-06-06','Saida',0,'Conta 1','Pendente','Uber','Transporte'],
+    ['2026-06','2026-06-06','Saida',352,'Conta 1','OK','Unha','Pessoal'],
+    ['2026-06','2026-06-06','Saida',87,'Conta 1','OK','MEI','Impostos'],
+    ['2026-06','2026-06-06','Saida',64.99,'Conta 1','OK','Telefone','Servicos'],
+    ['2026-06','2026-06-06','Saida',400,'Conta 1','OK','Festinha','Lazer'],
+    ['2026-06','2026-06-06','Saida',250,'Conta 1','OK','Cartoes','Outros'],
+    ['2026-06','2026-06-30','Saida',250,'Conta 1','OK','Obrigacao','Outros'],
+    ['2026-06','2026-06-30','Saida',100,'Conta 1','Pendente','Credito Paulo','Outros'],
+    ['2026-06','2026-06-30','Saida',101,'Conta 1','OK','Energia','Casa']
+  ];
+  var base=seedVazio();
+  base.fluxo=T.map(function(r){return {id:uid(),mes:r[0],data:r[1],operacao:r[2],valor:r[3],conta:r[4],status:r[5],descricao:r[6],categoria:r[7],forma:''};});
+  base._owner='thays';
+  return base;
+}
 function seed(){
   if(curUser&&curUser.id!=='leandro')return seedVazio();
   var T=[
@@ -746,6 +777,7 @@ function load(){
 function save(db){
   _db=db;
   db._ts=Date.now();
+  db._owner=curUser?curUser.id:'leandro';
   try{localStorage.setItem(KEY,JSON.stringify(db));}catch(e){}
   if(_fbRef){try{_fbRef.set(db).catch(function(){});}catch(e){}}
 }
@@ -766,23 +798,28 @@ function initFB(){
     _fbRef=firebase.database(fbApp).ref('pax/u/'+(curUser?curUser.id:'anon')+'/data');
     _fbRef.once('value').then(function(snap){
       var fbData=snap.val();
-      var isLeandro=curUser&&curUser.id==='leandro';
+      var uid=curUser?curUser.id:'leandro';
+      var isLeandro=uid==='leandro';
+      var fbOwner=fbData&&fbData._owner;
+      var fbValid=fbData&&Array.isArray(fbData.fluxo)&&(fbOwner===uid||(!fbOwner&&isLeandro));
       var localTs=(_db&&_db._ts)||0;
       var fbTs=(fbData&&fbData._ts)||0;
-      if(fbData&&Array.isArray(fbData.fluxo)&&fbTs>=localTs){
+      if(fbValid&&fbTs>=localTs){
         _db=fbData;
         try{localStorage.setItem(KEY,JSON.stringify(_db));}catch(e){}
-        if(!_fbSynced){_fbSynced=true;render(curPage);toast('Sincronizado com Firebase');}
-      } else if(fbData&&Array.isArray(fbData.fluxo)){
+        if(!_fbSynced){_fbSynced=true;render(curPage);if(isLeandro)toast('Sincronizado com Firebase');}
+      } else if(fbValid){
         _db=fbData;
         try{localStorage.setItem(KEY,JSON.stringify(_db));}catch(e){}
         if(!_fbSynced){_fbSynced=true;render(curPage);}
       } else if(isLeandro&&_db&&!fbTs){
         _fbRef.set(_db).catch(function(){});
         toast('Dados enviados ao Firebase');
-      } else if(!isLeandro){
-        _db=seedVazio();
+      } else {
+        _db=(uid==='thays')?seedThays():seedVazio();
+        _db._owner=uid;
         try{localStorage.removeItem(KEY);}catch(e){}
+        _fbRef.set(_db).catch(function(){});
         if(!_fbSynced){_fbSynced=true;render(curPage);}
       }
       _fbSynced=true;
