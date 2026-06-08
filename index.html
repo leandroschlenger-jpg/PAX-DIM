@@ -507,15 +507,10 @@ function numpad(n){
           document.getElementById('lockscreen').style.display='none';
           document.getElementById('lockerr').textContent='';
           var av=document.getElementById('userAvatar');
-          if(u.avatar){
-            var isSprite=u.avatar.indexOf('PokeAPI')>=0||u.avatar.indexOf('.png')>=0;
-            if(isSprite){
-              av.innerHTML='<img src="'+u.avatar+'" style="width:56px;height:56px;object-fit:cover;object-position:50% 15%;border-radius:50%">';
-              av.style.background='rgba(255,204,0,.2)';av.style.borderRadius='50%';av.style.width='40px';av.style.height='40px';av.style.overflow='hidden';
-            } else {
-              av.innerHTML='<img src="'+u.avatar+'" style="width:34px;height:34px;border-radius:50%;object-fit:cover">';
-              av.style.background='transparent';av.style.borderRadius='50%';av.style.width='34px';av.style.height='34px';
-            }
+          if(u.svgAvatar){
+            av.innerHTML=u.svgAvatar;
+            av.style.background='transparent';av.style.borderRadius='0';
+            av.style.width='40px';av.style.height='40px';av.style.overflow='visible';
           } else{av.textContent=u.nome.charAt(0).toUpperCase();av.style.background='var(--acc)';av.style.borderRadius='50%';}
           av.style.display='flex';
           initFB();
@@ -1935,3 +1930,4 @@ function resetData(){localStorage.removeItem(KEY);_db=null;load();render('fluxo'
 </body>
 </html>
  
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           
