@@ -1982,42 +1982,50 @@ function renderPauloExtrato(){
         '</div>'+
         '<div style="display:flex;align-items:center;gap:8px">'+
           '<div style="font-size:14px;font-weight:800;color:'+(e?'#34d399':'#fca5a5')+'">'+(e?'+':'-')+' R$'+Math.abs(t.valor).toLocaleString('pt-BR',{minimumFractionDigits:2})+'</div>'+
-          '<button onclick="pDelLancamento(\''+t.id+'\')" style="background:none;border:none;font-size:14px;color:var(--t3);cursor:pointer;padding:4px">×</button>'+
+          '<button onclick="pEditLancamento(\''+t.id+'\')" style="background:none;border:none;font-size:18px;color:var(--t3);cursor:pointer;padding:4px 6px">✏️</button>'+
+          '<button onclick="pDelLancamento(\''+t.id+'\')" style="background:none;border:none;font-size:18px;color:var(--t3);cursor:pointer;padding:4px 6px">🗑</button>'+
         '</div>'+
       '</div>';
     }).join('');
 }
-function pAddLancamento(){
-  document.getElementById('stitle').textContent='+ Novo Lançamento';
+function pAddLancamento(editId){
+  var db=load();
+  var ex=editId?(db.fluxo||[]).find(function(t){return t.id===editId;}):null;
+  var tipo=ex?ex.operacao:'Entrada';
+  document.getElementById('stitle').textContent=ex?'✏️ Editar Lançamento':'+ Novo Lançamento';
   document.getElementById('sbody').innerHTML=
     '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px">'+
-      '<button id="pl-ent" onclick="pSelTipo(\'Entrada\')" style="padding:12px;border-radius:12px;background:#34d39922;border:2px solid #34d399;color:#34d399;font-size:14px;font-weight:800;cursor:pointer">+ Entrada</button>'+
-      '<button id="pl-sai" onclick="pSelTipo(\'Saida\')" style="padding:12px;border-radius:12px;background:var(--s2);border:2px solid var(--bdr);color:var(--t3);font-size:14px;font-weight:800;cursor:pointer">− Saída</button>'+
+      '<button id="pl-ent" onclick="pSelTipo(\'Entrada\')" style="padding:12px;border-radius:12px;background:'+(tipo==='Entrada'?'#34d39922':'var(--s2)')+';border:2px solid '+(tipo==='Entrada'?'#34d399':'var(--bdr)')+';color:'+(tipo==='Entrada'?'#34d399':'var(--t3)')+';font-size:14px;font-weight:800;cursor:pointer">+ Entrada</button>'+
+      '<button id="pl-sai" onclick="pSelTipo(\'Saida\')" style="padding:12px;border-radius:12px;background:'+(tipo==='Saida'?'#f8717122':'var(--s2)')+';border:2px solid '+(tipo==='Saida'?'#f87171':'var(--bdr)')+';color:'+(tipo==='Saida'?'#f87171':'var(--t3)')+';font-size:14px;font-weight:800;cursor:pointer">− Saída</button>'+
     '</div>'+
-    '<input id="pl-tipo" type="hidden" value="Entrada">'+
-    '<input id="pl-desc" type="text" class="ainp" placeholder="Descrição (ex: Mesada, Lanche...)" style="margin-bottom:8px">'+
-    '<input id="pl-val" type="text" inputmode="decimal" class="ainp" placeholder="Valor (0,00)" oninput="moneyMask(this)" style="font-size:20px;margin-bottom:8px">'+
-    '<input id="pl-data" type="date" class="ainp" style="margin-bottom:8px">'+
-    '<input id="pl-cat" type="text" class="ainp" placeholder="Categoria (opcional)">';
-  // Set today's date
-  document.getElementById('pl-data').value=new Date().toISOString().split('T')[0];
-  var btn=document.createElement('button');btn.className='savebtn';btn.textContent='Salvar';
+    '<input id="pl-tipo" type="hidden" value="'+tipo+'">'+
+    '<input id="pl-desc" type="text" class="ainp" placeholder="Descrição (ex: Mesada, Lanche...)" style="margin-bottom:8px" value="'+(ex?ex.descricao:'')+'">'+
+    '<input id="pl-val" type="text" inputmode="decimal" class="ainp" placeholder="Valor (0,00)" oninput="moneyMask(this)" style="font-size:20px;margin-bottom:8px" value="'+(ex?ex.valor.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2}):'')+'">'+
+    '<input id="pl-data" type="date" class="ainp" style="margin-bottom:8px" value="'+(ex?ex.data:new Date().toISOString().split('T')[0])+'">'+
+    '<input id="pl-cat" type="text" class="ainp" placeholder="Categoria (opcional)" value="'+(ex&&ex.categoria&&ex.categoria!=='Outros'?ex.categoria:'')+'">';
+  var btn=document.createElement('button');btn.className='savebtn';btn.textContent=ex?'Salvar alterações':'Salvar';
   btn.onclick=function(){
-    var tipo=document.getElementById('pl-tipo').value;
+    var tipo2=document.getElementById('pl-tipo').value;
     var desc=document.getElementById('pl-desc').value.trim();
     var val=parseMoney(document.getElementById('pl-val').value);
     var data=document.getElementById('pl-data').value;
     var cat=document.getElementById('pl-cat').value.trim()||'Outros';
     if(!desc||!val||!data){toast('Preencha descrição, valor e data');return;}
-    var db=load();
-    db.fluxo.push({id:uid(),mes:data.slice(0,7),data:data,operacao:tipo,valor:val,conta:'Paulo',status:'OK',descricao:desc,categoria:cat,forma:''});
-    save(db);closeSH();renderPauloExtrato();
-    pToast(tipo==='Entrada'?'+R$'+val.toLocaleString('pt-BR',{minimumFractionDigits:2})+' registrado!':'−R$'+val.toLocaleString('pt-BR',{minimumFractionDigits:2})+' registrado!');
+    var db2=load();
+    if(ex){
+      var idx=db2.fluxo.findIndex(function(t){return t.id===editId;});
+      if(idx>=0){db2.fluxo[idx].operacao=tipo2;db2.fluxo[idx].descricao=desc;db2.fluxo[idx].valor=val;db2.fluxo[idx].data=data;db2.fluxo[idx].mes=data.slice(0,7);db2.fluxo[idx].categoria=cat;}
+    } else {
+      db2.fluxo.push({id:uid(),mes:data.slice(0,7),data:data,operacao:tipo2,valor:val,conta:'Paulo',status:'OK',descricao:desc,categoria:cat,forma:''});
+    }
+    save(db2);closeSH();renderPauloExtrato();
+    pToast(ex?'Lançamento atualizado!':(tipo2==='Entrada'?'+R$'+val.toLocaleString('pt-BR',{minimumFractionDigits:2})+' registrado!':'−R$'+val.toLocaleString('pt-BR',{minimumFractionDigits:2})+' registrado!'));
   };
   document.getElementById('sbody').appendChild(btn);
   document.getElementById('sbg').classList.add('on');
   setTimeout(function(){document.getElementById('pl-desc').focus();},300);
 }
+function pEditLancamento(id){pAddLancamento(id);}
 function pSelTipo(tipo){
   document.getElementById('pl-tipo').value=tipo;
   var eBtn=document.getElementById('pl-ent');
@@ -3275,10 +3283,11 @@ function pResponderQuiz(qIdx,chosenIdx){
   window.pEditarMissao=pEditarMissao;
   window.pExcluirMissao=pExcluirMissao;
   window._ensureMesadaPaulo=_ensureMesadaPaulo;
+  window.pEditLancamento=pEditLancamento;
 })();
 
 </script>
-<div id="ver" style="position:fixed;bottom:8px;left:0;right:0;text-align:center;font-size:10px;color:var(--t3);opacity:.45;z-index:99999;pointer-events:none;font-family:monospace">v1.113.526</div>
+<div id="ver" style="position:fixed;bottom:8px;left:0;right:0;text-align:center;font-size:10px;color:var(--t3);opacity:.45;z-index:99999;pointer-events:none;font-family:monospace">v1.114.527</div>
 </body>
 </html>
  
