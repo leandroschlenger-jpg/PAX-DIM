@@ -31,7 +31,7 @@ button{font-family:inherit;cursor:pointer;border:none;background:none}
 .page.on{display:block;animation:pi .22s ease-out}
 @keyframes pi{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
 /* LOCK SCREEN */
-.lockscreen{position:fixed;inset:0;background:var(--bg);z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px 30px;pointer-events:auto}
+.lockscreen{min-height:100dvh;min-height:100vh;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px 20px}body.locked #app{display:none!important}
 body.locked .nav,body.locked #fab,body.locked .topbar,body.locked .p-nav,body.locked .pg-paulo{display:none!important}
 .lock-logo{font-size:48px;margin-bottom:8px}
 .lock-brand{font-size:28px;font-weight:800;margin-bottom:4px}
@@ -239,27 +239,56 @@ body.paulo-mode .p-nav{display:flex}
 .p-badge-desc{font-size:10px;color:#b4b4d0;margin-top:3px}
 .p-input{background:var(--s2);border:1.5px solid var(--bdr2);border-radius:14px;padding:14px 16px;font-size:18px;font-weight:800;color:var(--t1);width:100%;box-sizing:border-box;margin-bottom:14px;display:block}
 .p-addream{background:rgba(124,58,237,.1);border:2px dashed rgba(124,58,237,.3);border-radius:16px;padding:16px;text-align:center;color:#a78bfa;font-size:14px;font-weight:700;cursor:pointer;margin-bottom:10px}
-.p-toast{display:none;position:fixed;top:76px;left:50%;transform:translateX(-50%);background:linear-gradient(135deg,#7c3aed,#a78bfa);color:#fff;padding:12px 24px;border-radius:999px;font-size:13px;font-weight:800;z-index:9999;white-space:nowrap;pointer-events:none}
+.p-toast{display:none;position:fixed;top:76px;left:50%;transform:translateX(-50%);background:linear-gradient(135deg,#7c3aed,#a78bfa);color:#fff;padding:12px 24px;border-radius:999px;font-size:13px;font-weight:800;z-index:9999;white-space:nowrap;po
+.user-sel-grid{display:flex;gap:16px;flex-wrap:wrap;justify-content:center}
+.user-sel-card{display:flex;flex-direction:column;align-items:center;gap:10px;padding:20px 16px;border-radius:20px;background:var(--s1);border:2px solid var(--bdr);cursor:pointer;min-width:88px;transition:all .15s;-webkit-tap-highlight-color:rgba(0,0,0,0)}
+.u-radio:checked+.user-sel-card{border-color:var(--acc);background:var(--s2)}
+.user-sel-av{width:56px;height:56px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:800;color:#fff}
+.user-sel-name{font-size:14px;font-weight:700;color:var(--t1)}
+inter-events:none}
 </style>
 </head>
 <body class="locked">
 <!-- LOCK -->
   <div class="lockscreen" id="lockscreen">
-    <div class="lock-logo">&#128274;</div>
-    <div class="lock-brand">PAX<em>.</em></div>
-    <div class="lock-sub">Digite o PIN</div>
-    <div class="lock-dots" id="lockdots">
-      <div class="lock-dot" id="d0"></div>
-      <div class="lock-dot" id="d1"></div>
-      <div class="lock-dot" id="d2"></div>
-      <div class="lock-dot" id="d3"></div>
+    <div class="lock-brand" style="font-size:28px;font-weight:900;letter-spacing:-.5px;margin-bottom:6px">PAX<em style="font-style:normal;color:var(--acc)">.</em></div>
+    <div style="font-size:14px;color:var(--t3);margin-bottom:40px">Financeiro pessoal</div>
+    <div style="font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--t3);margin-bottom:20px">Quem é você?</div>
+    <div class="user-sel-grid">
+      <input type="radio" name="pax_u" id="pu_l" class="u-radio" style="display:none">
+      <label for="pu_l" class="user-sel-card">
+        <div class="user-sel-av" style="background:#6366f1">L</div>
+        <div class="user-sel-name">Leandro</div>
+      </label>
+      <input type="radio" name="pax_u" id="pu_t" class="u-radio" style="display:none">
+      <label for="pu_t" class="user-sel-card">
+        <div class="user-sel-av" style="background:#ec4899">T</div>
+        <div class="user-sel-name">Thays</div>
+      </label>
+      <input type="radio" name="pax_u" id="pu_p" class="u-radio" style="display:none">
+      <label for="pu_p" class="user-sel-card">
+        <div class="user-sel-av" style="background:#10b981">P</div>
+        <div class="user-sel-name">Paulo</div>
+      </label>
     </div>
-    <input id="pinInput" type="tel" inputmode="numeric" pattern="[0-9]*" maxlength="4" autocomplete="off" autocorrect="off" autocapitalize="none"
-      style="width:160px;height:56px;font-size:28px;letter-spacing:12px;text-align:center;border:2px solid var(--acc);border-radius:16px;background:var(--s1);color:var(--t1);outline:none;padding:0 12px;margin-top:4px">
-    <div class="lock-err" id="lockerr" style="margin-top:12px;min-height:18px;font-size:14px;color:var(--red);text-align:center"></div>
   </div>
 <input type="file" id="avatarInput" accept="image/*" style="display:none" onchange="handleAvatarUpload(event)">
 <div id="app">
+  <div id="pinModal" style="display:none;position:fixed;inset:0;z-index:8888;background:rgba(0,0,0,.55);align-items:center;justify-content:center;padding:20px">
+    <div style="background:var(--s1);border-radius:24px;padding:28px 24px;width:100%;max-width:300px;text-align:center">
+      <div style="font-size:17px;font-weight:800;margin-bottom:4px">&#128274; PIN</div>
+      <div style="font-size:13px;color:var(--t3);margin-bottom:18px">Digite para revelar os valores</div>
+      <div class="lock-dots" style="justify-content:center;margin-bottom:14px">
+        <div class="lock-dot" id="pm0"></div><div class="lock-dot" id="pm1"></div>
+        <div class="lock-dot" id="pm2"></div><div class="lock-dot" id="pm3"></div>
+      </div>
+      <input id="pmInput" type="tel" inputmode="numeric" maxlength="4" autocomplete="off"
+        style="width:140px;height:48px;font-size:24px;letter-spacing:10px;text-align:center;border:2px solid var(--acc);border-radius:14px;background:var(--bg);color:var(--t1);outline:none;padding:0 10px">
+      <div id="pmErr" style="min-height:18px;font-size:13px;color:var(--red);margin-top:8px"></div>
+      <input type="checkbox" id="pmCancelCb" style="display:none">
+      <label for="pmCancelCb" style="display:inline-block;margin-top:10px;font-size:14px;color:var(--t3);cursor:pointer;padding:8px 20px">Cancelar</label>
+    </div>
+  </div>
   <header class="topbar">
     <div class="brand">PAX<em>.</em></div>
     <div class="topbar-right">
@@ -2393,42 +2422,95 @@ function importData(e){
 }
 function resetData(){localStorage.removeItem(KEY);_db=null;load();render('fluxo');renderLemb(load());toast('Dados de exemplo carregados');}
 (function(){
-  var _pi=document.getElementById('pinInput');
-  function _updDots(len,err){
+  // Mapa de usuario por radio id
+  var _umap={pu_l:USERS['2505'],pu_t:USERS['0609'],pu_p:USERS['2014']};
+
+  // Login direto ao selecionar usuario (sem PIN)
+  var _radios=document.querySelectorAll('.u-radio');
+  for(var i=0;i<_radios.length;i++){
+    _radios[i].addEventListener('change',function(){
+      var u=_umap[this.id];
+      if(!u)return;
+      curUser=u;
+      KEY='pax_fin_'+u.fbPath;
+      _db=null;_fbReady=false;_fbSynced=false;_fbRef=null;
+      if(u.id!=='leandro'){try{localStorage.removeItem(KEY);localStorage.removeItem('pax_fin_'+u.id);}catch(e){}}
+      document.getElementById('lockscreen').style.display='none';
+      document.body.classList.remove('locked');
+      displayAvatar();
+      initFB();
+      updML();render('fluxo');renderLemb(load());
+    });
+  }
+
+  // PIN modal para revelar valores (olhinho)
+  var _pmOpen=false;
+  function openPinModal(){
+    var m=document.getElementById('pinModal');
+    if(!m)return;
+    m.style.display='flex';_pmOpen=true;
+    var inp=document.getElementById('pmInput');
+    if(inp){inp.value='';setTimeout(function(){try{inp.focus();}catch(e){}},200);}
+    _pmUpdDots(0,false);
+    var err=document.getElementById('pmErr');if(err)err.textContent='';
+  }
+  function closePinModal(){
+    var m=document.getElementById('pinModal');
+    if(m)m.style.display='none';
+    _pmOpen=false;
+    var inp=document.getElementById('pmInput');if(inp)inp.value='';
+    _pmUpdDots(0,false);
+  }
+  function _pmUpdDots(len,err){
     for(var i=0;i<4;i++){
-      var d=document.getElementById('d'+i);
+      var d=document.getElementById('pm'+i);
       if(d){d.classList.toggle('filled',i<len);d.classList.toggle('error',!!err);}
     }
   }
-  if(_pi){
-    _pi.addEventListener('input',function(){
+  var _pmInp=document.getElementById('pmInput');
+  if(_pmInp){
+    _pmInp.addEventListener('input',function(){
       var v=this.value.replace(/\D/g,'').slice(0,4);
       this.value=v;
-      _updDots(v.length,false);
-      var lerr=document.getElementById('lockerr');
-      // debug: mostra quantos dígitos entraram
-      if(lerr)lerr.textContent=v.length+'/4';
+      _pmUpdDots(v.length,false);
+      var err=document.getElementById('pmErr');
       if(v.length===4){
-        var u=USERS[v];
-        if(u){
-          curUser=u;KEY='pax_fin_'+u.fbPath;
-          _db=null;_fbReady=false;_fbSynced=false;_fbRef=null;
-          if(u.id!=='leandro'){try{localStorage.removeItem(KEY);localStorage.removeItem('pax_fin_'+u.id);}catch(e){}}
-          document.getElementById('lockscreen').style.display='none';
-          document.body.classList.remove('locked');
-          if(lerr)lerr.textContent='';
-          _pi.value='';_updDots(0,false);
-          displayAvatar();initFB();
-          updML();render('fluxo');renderLemb(load());
+        if(curUser&&USERS[v]&&USERS[v].id===curUser.id){
+          closePinModal();
+          // Revela valores
+          valHidden=false;
+          var eb=document.getElementById('eyebtn');if(eb)eb.classList.add('on');
+          document.querySelectorAll('.val,.fval,.sval').forEach(function(el){el.style.filter='';});
+          var sl=document.getElementById('eyeSlash');if(sl)sl.style.display='none';
         } else {
-          if(lerr)lerr.textContent='PIN incorreto ('+v+')';
-          _updDots(4,true);
-          setTimeout(function(){_pi.value='';_updDots(0,false);if(lerr)lerr.textContent='';},1000);
+          if(err)err.textContent='PIN incorreto';
+          _pmUpdDots(4,true);
+          setTimeout(function(){if(_pmInp)_pmInp.value='';_pmUpdDots(0,false);if(err)err.textContent='';},700);
         }
       }
     });
-    setTimeout(function(){try{_pi.focus();}catch(e){}},400);
   }
+  // Cancelar via checkbox
+  var _pmCb=document.getElementById('pmCancelCb');
+  if(_pmCb)_pmCb.addEventListener('change',function(){this.checked=false;closePinModal();});
+
+  // Intercepta toggleValues para exigir PIN ao revelar
+  var _origToggle=window.toggleValues;
+  window.toggleValues=function(){
+    if(valHidden){
+      // Quer revelar: pede PIN
+      openPinModal();
+    } else {
+      // Quer esconder: libera direto
+      if(_origToggle)_origToggle();else{
+        valHidden=true;
+        var eb=document.getElementById('eyebtn');if(eb)eb.classList.remove('on');
+        var sl=document.getElementById('eyeSlash');if(sl)sl.style.display='';
+        render(curPage||'resumo');
+      }
+    }
+  };
+
   window.onerror=function(msg){
     var el=document.getElementById('lockerr');
     if(el&&document.body.classList.contains('locked'))el.textContent=String(msg).slice(0,80);
@@ -2438,11 +2520,8 @@ function resetData(){localStorage.removeItem(KEY);_db=null;load();render('fluxo'
     load();
     var _m=new Date();
     curMes=_m.getFullYear()+'-'+('0'+(_m.getMonth()+1)).slice(-2);
-    updML();render('resumo');renderLemb(load());
-  }catch(e){
-    var el=document.getElementById('lockerr');
-    if(el)el.textContent='init:'+e.message;
-  }
+    updML();
+  }catch(e){}
 })();
 
 </script>
