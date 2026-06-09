@@ -1155,6 +1155,7 @@ function closeMPBG(e){if(e.target===document.getElementById('mpbg'))document.get
 function updML(){document.getElementById('mlabel').textContent=mNome(curMes);}
 function go(id){
   document.querySelectorAll('.page').forEach(function(p){p.classList.remove('on');});
+  document.querySelectorAll('.pg-paulo').forEach(function(p){p.classList.remove('on');p.style.display='';});
   document.querySelectorAll('.ni').forEach(function(n){n.classList.remove('on');});
   document.getElementById('pg-'+id).classList.add('on');
   var n=document.getElementById('nav-'+id);if(n)n.classList.add('on');
@@ -1727,26 +1728,20 @@ function checkMissoes(db){
 }
 function goP(id){
   if(id==='extrato'){
+    document.querySelectorAll('.page').forEach(function(p){p.classList.remove('on');});
     document.querySelectorAll('.pg-paulo').forEach(function(p){p.classList.remove('on');p.style.display='';});
     var ep=document.getElementById('pg-paulo-extrato');if(ep)ep.classList.add('on');
     document.querySelectorAll('.p-tab').forEach(function(n){n.classList.remove('on');});
-    var db=load(),list=document.getElementById('p-extrato-list');
-    if(!list)return;
-    var txs=(db.fluxo||[]).filter(function(t){return t.mes===curMes;}).slice().reverse();
-    if(!txs.length){list.innerHTML='<div style="text-align:center;color:var(--t3);padding:30px">Nenhum lancamento este mes</div>';return;}
-    list.innerHTML=txs.map(function(t){
-      var e=t.operacao==='Entrada',col=e?'#6ee7b7':'#fca5a5';
-      return '<div style="display:flex;justify-content:space-between;align-items:center;padding:12px 16px;background:var(--s2);border-radius:14px;margin-bottom:8px">'+
-        '<div><div style="font-size:13px;font-weight:700;color:var(--t1)">'+t.descricao+'</div><div style="font-size:11px;color:var(--t3);margin-top:2px">'+fmtD(t.data)+'</div></div>'+
-        '<div style="font-size:14px;font-weight:800;color:'+col+'">'+(e?'+':'-')+' R$'+Math.abs(t.valor).toLocaleString('pt-BR',{minimumFractionDigits:2})+'</div></div>';
-    }).join('');
+    var niE=document.getElementById('p-ni-extrato');if(niE)niE.classList.add('on');
+    renderPauloExtrato();
     return;
   }
+  document.querySelectorAll('.page').forEach(function(p){p.classList.remove('on');});
   document.querySelectorAll('.pg-paulo').forEach(function(p){p.classList.remove('on');p.style.display='';});
   document.querySelectorAll('.p-tab').forEach(function(n){n.classList.remove('on');});
   var pg=document.getElementById('pg-paulo-'+id);if(pg)pg.classList.add('on');
   var ni=document.getElementById('p-ni-'+id);if(ni)ni.classList.add('on');
-  document.getElementById('screen').scrollTop=0;
+  var scr=document.getElementById('screen');if(scr)scr.scrollTop=0;
   var db=load();
   if(id==='home')renderPauloHome(db);
   else if(id==='sonhos')renderPauloSonhos(db);
@@ -1894,6 +1889,91 @@ function renderPauloConquistas(db){
     html2+='</div>';
   }
   el.innerHTML=html2;
+}
+
+function renderPauloExtrato(){
+  var db=load();
+  var list=document.getElementById('p-extrato-list');
+  if(!list)return;
+  var txs=(db.fluxo||[]).filter(function(t){return t.mes===curMes;}).slice().reverse();
+  if(!txs.length){
+    list.innerHTML='<div style="text-align:center;color:var(--t3);padding:48px 20px;font-size:14px">Nenhum lançamento este mês.<br><br>Toque em <b>+ Novo</b> para adicionar!</div>';
+    return;
+  }
+  var ent=txs.filter(function(t){return t.operacao==='Entrada';}).reduce(function(s,t){return s+t.valor;},0);
+  var sai=txs.filter(function(t){return t.operacao==='Saida';}).reduce(function(s,t){return s+t.valor;},0);
+  list.innerHTML=
+    '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px">'+
+      '<div style="background:#34d39922;border-radius:14px;padding:12px;text-align:center">'+
+        '<div style="font-size:11px;color:#34d399;font-weight:700;text-transform:uppercase">Entradas</div>'+
+        '<div style="font-size:18px;font-weight:900;color:#34d399">R$ '+ent.toLocaleString('pt-BR',{minimumFractionDigits:2})+'</div>'+
+      '</div>'+
+      '<div style="background:#f8717122;border-radius:14px;padding:12px;text-align:center">'+
+        '<div style="font-size:11px;color:#f87171;font-weight:700;text-transform:uppercase">Saídas</div>'+
+        '<div style="font-size:18px;font-weight:900;color:#f87171">R$ '+sai.toLocaleString('pt-BR',{minimumFractionDigits:2})+'</div>'+
+      '</div>'+
+    '</div>'+
+    txs.map(function(t){
+      var e=t.operacao==='Entrada';
+      return '<div style="display:flex;justify-content:space-between;align-items:center;padding:12px 14px;background:var(--s2);border-radius:14px;margin-bottom:8px;border:1px solid var(--bdr)">'+
+        '<div style="flex:1">'+
+          '<div style="font-size:13px;font-weight:700;color:var(--t1)">'+t.descricao+'</div>'+
+          '<div style="font-size:11px;color:var(--t3);margin-top:2px">'+fmtD(t.data)+(t.categoria?' · '+t.categoria:'')+'</div>'+
+        '</div>'+
+        '<div style="display:flex;align-items:center;gap:8px">'+
+          '<div style="font-size:14px;font-weight:800;color:'+(e?'#34d399':'#fca5a5')+'">'+(e?'+':'-')+' R$'+Math.abs(t.valor).toLocaleString('pt-BR',{minimumFractionDigits:2})+'</div>'+
+          '<button onclick="pDelLancamento(\''+t.id+'\')" style="background:none;border:none;font-size:14px;color:var(--t3);cursor:pointer;padding:4px">×</button>'+
+        '</div>'+
+      '</div>';
+    }).join('');
+}
+function pAddLancamento(){
+  document.getElementById('stitle').textContent='+ Novo Lançamento';
+  document.getElementById('sbody').innerHTML=
+    '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px">'+
+      '<button id="pl-ent" onclick="pSelTipo(\'Entrada\')" style="padding:12px;border-radius:12px;background:#34d39922;border:2px solid #34d399;color:#34d399;font-size:14px;font-weight:800;cursor:pointer">+ Entrada</button>'+
+      '<button id="pl-sai" onclick="pSelTipo(\'Saida\')" style="padding:12px;border-radius:12px;background:var(--s2);border:2px solid var(--bdr);color:var(--t3);font-size:14px;font-weight:800;cursor:pointer">− Saída</button>'+
+    '</div>'+
+    '<input id="pl-tipo" type="hidden" value="Entrada">'+
+    '<input id="pl-desc" type="text" class="ainp" placeholder="Descrição (ex: Mesada, Lanche...)" style="margin-bottom:8px">'+
+    '<input id="pl-val" type="text" inputmode="decimal" class="ainp" placeholder="Valor (0,00)" oninput="moneyMask(this)" style="font-size:20px;margin-bottom:8px">'+
+    '<input id="pl-data" type="date" class="ainp" style="margin-bottom:8px">'+
+    '<input id="pl-cat" type="text" class="ainp" placeholder="Categoria (opcional)">';
+  // Set today's date
+  document.getElementById('pl-data').value=new Date().toISOString().split('T')[0];
+  var btn=document.createElement('button');btn.className='savebtn';btn.textContent='Salvar';
+  btn.onclick=function(){
+    var tipo=document.getElementById('pl-tipo').value;
+    var desc=document.getElementById('pl-desc').value.trim();
+    var val=parseMoney(document.getElementById('pl-val').value);
+    var data=document.getElementById('pl-data').value;
+    var cat=document.getElementById('pl-cat').value.trim()||'Outros';
+    if(!desc||!val||!data){toast('Preencha descrição, valor e data');return;}
+    var db=load();
+    db.fluxo.push({id:uid(),mes:data.slice(0,7),data:data,operacao:tipo,valor:val,conta:'Paulo',status:'OK',descricao:desc,categoria:cat,forma:''});
+    save(db);closeSH();renderPauloExtrato();
+    pToast(tipo==='Entrada'?'+R$'+val.toLocaleString('pt-BR',{minimumFractionDigits:2})+' registrado!':'−R$'+val.toLocaleString('pt-BR',{minimumFractionDigits:2})+' registrado!');
+  };
+  document.getElementById('sbody').appendChild(btn);
+  document.getElementById('sbg').classList.add('on');
+  setTimeout(function(){document.getElementById('pl-desc').focus();},300);
+}
+function pSelTipo(tipo){
+  document.getElementById('pl-tipo').value=tipo;
+  var eBtn=document.getElementById('pl-ent');
+  var sBtn=document.getElementById('pl-sai');
+  if(tipo==='Entrada'){
+    eBtn.style.background='#34d39922';eBtn.style.borderColor='#34d399';eBtn.style.color='#34d399';
+    sBtn.style.background='var(--s2)';sBtn.style.borderColor='var(--bdr)';sBtn.style.color='var(--t3)';
+  } else {
+    sBtn.style.background='#f8717122';sBtn.style.borderColor='#f87171';sBtn.style.color='#f87171';
+    eBtn.style.background='var(--s2)';eBtn.style.borderColor='var(--bdr)';eBtn.style.color='var(--t3)';
+  }
+}
+function pDelLancamento(id){
+  var db=load();
+  db.fluxo=db.fluxo.filter(function(t){return t.id!==id;});
+  save(db);renderPauloExtrato();
 }
 
 function pConcluirMissao(id){
@@ -3061,10 +3141,14 @@ function finishQuiz(){
   window.pGuardarNaSonho=pGuardarNaSonho;
   window.pSelEmojiSonho=pSelEmojiSonho;
   window.pResponderQuiz=pResponderQuiz;
+  window.renderPauloExtrato=renderPauloExtrato;
+  window.pAddLancamento=pAddLancamento;
+  window.pSelTipo=pSelTipo;
+  window.pDelLancamento=pDelLancamento;
 })();
 
 </script>
-<div id="ver" style="position:fixed;bottom:8px;left:0;right:0;text-align:center;font-size:10px;color:var(--t3);opacity:.45;z-index:99999;pointer-events:none;font-family:monospace">v1.107.516</div>
+<div id="ver" style="position:fixed;bottom:8px;left:0;right:0;text-align:center;font-size:10px;color:var(--t3);opacity:.45;z-index:99999;pointer-events:none;font-family:monospace">v1.107.517</div>
 </body>
 </html>
  
