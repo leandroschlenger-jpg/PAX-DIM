@@ -12,7 +12,7 @@
 <style>
 :root{--bg:#080a12;--s1:#0f1120;--s2:#161929;--s3:#1d2035;--bdr:#252840;--bdr2:#2e3250;--acc:#7b6ef6;--accl:#9d94f8;--grn:#00d4aa;--grnd:rgba(0,212,170,.12);--red:#ff5f57;--redd:rgba(255,95,87,.12);--yel:#ffcc00;--blu:#4da6ff;--t1:#f4f6ff;--t2:#a8b0cc;--t3:#606880;}
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
-html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--t1);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;-webkit-font-smoothing:antialiased}
+html,html{overflow:hidden;height:100%}body{height:100%;background:var(--bg);color:var(--t1);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;-webkit-font-smoothing:antialiased}
 ::-webkit-scrollbar{display:none}
 button{font-family:inherit;cursor:pointer;border:none;background:none}
 #app{display:flex;flex-direction:column;height:100%}
@@ -244,19 +244,31 @@ body.paulo-mode .p-nav{display:flex}
 </head>
 <body class="locked">
 <!-- LOCK -->
-  <div class="lockscreen" id="lockscreen" onclick="document.getElementById('pinInput').focus()">
+  <div class="lockscreen" id="lockscreen">
     <div class="lock-logo">&#128274;</div>
     <div class="lock-brand">PAX<em>.</em></div>
-    <div class="lock-sub">Toque para digitar o PIN</div>
-    <div class="lock-dots" id="lockdots" style="position:relative;cursor:pointer">
+    <div class="lock-sub">Financeiro pessoal</div>
+    <div class="lock-dots" id="lockdots">
       <div class="lock-dot" id="d0"></div>
       <div class="lock-dot" id="d1"></div>
       <div class="lock-dot" id="d2"></div>
       <div class="lock-dot" id="d3"></div>
-      <input type="tel" id="pinInput" maxlength="4" inputmode="numeric" pattern="[0-9]*" autocomplete="off"
-        style="position:absolute;inset:-20px;opacity:0;width:calc(100% + 40px);height:calc(100% + 40px);cursor:pointer;font-size:16px">
     </div>
-    <div class="lock-err" id="lockerr" style="margin-top:16px;font-size:14px;color:var(--red);text-align:center;min-height:20px"></div>
+    <div class="numpad">
+      <button class="npbtn" data-n="1">1</button>
+      <button class="npbtn" data-n="2">2</button>
+      <button class="npbtn" data-n="3">3</button>
+      <button class="npbtn" data-n="4">4</button>
+      <button class="npbtn" data-n="5">5</button>
+      <button class="npbtn" data-n="6">6</button>
+      <button class="npbtn" data-n="7">7</button>
+      <button class="npbtn" data-n="8">8</button>
+      <button class="npbtn" data-n="9">9</button>
+      <button class="npbtn" data-n="-1" style="font-size:14px;color:var(--t3)">limpar</button>
+      <button class="npbtn" data-n="0">0</button>
+      <button class="npbtn" data-n="-2" style="font-size:18px;color:var(--t3)">&#9003;</button>
+    </div>
+    <div class="lock-err" id="lockerr"></div>
   </div>
 <input type="file" id="avatarInput" accept="image/*" style="display:none" onchange="handleAvatarUpload(event)">
 <div id="app">
@@ -2393,38 +2405,30 @@ function importData(e){
 }
 function resetData(){localStorage.removeItem(KEY);_db=null;load();render('fluxo');renderLemb(load());toast('Dados de exemplo carregados');}
 (function(){
-  // PIN via input nativo
-  var _pi=document.getElementById('pinInput');
-  if(_pi){
-    _pi.addEventListener('input',function(){
-      var v=this.value.replace(/\D/g,'');
-      this.value=v;
-      // Atualiza dots
-      for(var i=0;i<4;i++){var d=document.getElementById('d'+i);if(d){d.classList.toggle('filled',i<v.length);d.classList.remove('error');}}
-      if(v.length===4){
-        var lerr=document.getElementById('lockerr');
-        var u=USERS[v];
-        if(u){
-          curUser=u;
-          KEY='pax_fin_'+u.fbPath;
-          _db=null;_fbReady=false;_fbSynced=false;_fbRef=null;
-          if(u.id!=='leandro'){try{localStorage.removeItem(KEY);localStorage.removeItem('pax_fin_'+u.id);}catch(e){}}
-          document.getElementById('lockscreen').style.display='none';
-          document.body.classList.remove('locked');
-          if(lerr)lerr.textContent='';
-          _pi.value='';
-          displayAvatar();
-          initFB();
-          updML();render('fluxo');renderLemb(load());
-        } else {
-          if(lerr)lerr.textContent='PIN incorreto';
-          for(var j=0;j<4;j++){var dd=document.getElementById('d'+j);if(dd)dd.classList.add('error');}
-          setTimeout(function(){_pi.value='';for(var k=0;k<4;k++){var dk=document.getElementById('d'+k);if(dk){dk.classList.remove('filled','error');}}if(lerr)lerr.textContent='';},700);
-        }
+  // Numpad via touchend (mais confiável que click no iOS)
+  function _npFire(n){
+    try{numpad(n);}
+    catch(err){var el=document.getElementById('lockerr');if(el)el.textContent='ERR:'+err.message;}
+  }
+  var _np=document.querySelector('.numpad');
+  if(_np){
+    _np.addEventListener('touchend',function(e){
+      e.preventDefault();
+      var t=e.changedTouches[0];
+      var el=document.elementFromPoint(t.clientX,t.clientY);
+      while(el&&el!==_np){
+        if(el.getAttribute&&el.getAttribute('data-n')!==null){_npFire(parseInt(el.getAttribute('data-n'),10));return;}
+        el=el.parentElement;
+      }
+    },{passive:false});
+    // fallback desktop
+    _np.addEventListener('click',function(e){
+      var el=e.target;
+      while(el&&el!==_np){
+        if(el.getAttribute&&el.getAttribute('data-n')!==null){_npFire(parseInt(el.getAttribute('data-n'),10));return;}
+        el=el.parentElement;
       }
     });
-    // Auto-foca o input ao carregar
-    setTimeout(function(){try{_pi.focus();}catch(e){}},300);
   }
   window.onerror=function(msg){
     var el=document.getElementById('lockerr');
