@@ -254,19 +254,28 @@ inter-events:none}
 <!-- LOCK -->
   <div class="lockscreen" id="lockscreen">
     <div style="font-size:30px;font-weight:900;letter-spacing:-.5px;margin-bottom:4px">PAX<span style="color:var(--acc)">.</span></div>
-    <div style="font-size:13px;color:var(--t3);margin-bottom:48px">Financeiro pessoal</div>
-    <div style="width:100%;max-width:300px;display:flex;flex-direction:column;gap:10px">
-      <label style="font-size:13px;font-weight:700;color:var(--t2)">Quem é você?</label>
-      <select id="userSelect"
-        style="width:100%;padding:18px 16px;font-size:18px;font-weight:700;border-radius:16px;border:2px solid var(--acc);background:var(--s1);color:var(--t1);outline:none;-webkit-appearance:none;appearance:none"
-        onchange="if(this.value){loginAs(this.value)}">
-        <option value="">&#9660; Selecionar e entrar</option>
-        <option value="l">Leandro</option>
-        <option value="t">Thays</option>
-        <option value="p">Paulo</option>
-      </select>
-      <div id="loginErr" style="text-align:center;font-size:13px;color:var(--red);min-height:18px"></div>
+    <div style="font-size:13px;color:var(--t3);margin-bottom:32px">Financeiro pessoal</div>
+    <div class="lock-dots" id="lockdots">
+      <div class="lock-dot" id="d0"></div>
+      <div class="lock-dot" id="d1"></div>
+      <div class="lock-dot" id="d2"></div>
+      <div class="lock-dot" id="d3"></div>
     </div>
+    <div class="numpad" style="margin-top:24px">
+      <button class="npbtn" onclick="numpad(1)">1</button>
+      <button class="npbtn" onclick="numpad(2)">2</button>
+      <button class="npbtn" onclick="numpad(3)">3</button>
+      <button class="npbtn" onclick="numpad(4)">4</button>
+      <button class="npbtn" onclick="numpad(5)">5</button>
+      <button class="npbtn" onclick="numpad(6)">6</button>
+      <button class="npbtn" onclick="numpad(7)">7</button>
+      <button class="npbtn" onclick="numpad(8)">8</button>
+      <button class="npbtn" onclick="numpad(9)">9</button>
+      <button class="npbtn" onclick="numpad(-1)" style="font-size:13px;color:var(--t3)">limpar</button>
+      <button class="npbtn" onclick="numpad(0)">0</button>
+      <button class="npbtn" onclick="numpad(-2)" style="font-size:18px">&#9003;</button>
+    </div>
+    <div class="lock-err" id="lockerr" style="margin-top:16px;min-height:18px;font-size:13px;color:var(--red);text-align:center"></div>
   </div>
 <input type="file" id="avatarInput" accept="image/*" style="display:none" onchange="handleAvatarUpload(event)">
 <div id="app">
@@ -594,6 +603,23 @@ inter-events:none}
     <div class="p-section">📋 Meus Lançamentos</div>
     <div id="p-extrato-list"></div>
   </div>
+  <div id="pg-paulo-quiz" class="pg-paulo" style="display:none">
+    <div class="p-screen">
+      <div class="p-section">🧠 Quiz Financeiro</div>
+      <div id="quiz-coins-bar" style="display:flex;align-items:center;justify-content:space-between;background:var(--s1);border-radius:16px;padding:14px 16px;margin-bottom:16px;border:1px solid var(--bdr)">
+        <div>
+          <div style="font-size:11px;font-weight:700;text-transform:uppercase;color:var(--t3);letter-spacing:.06em">Moedas do mês</div>
+          <div id="quiz-coins-val" style="font-size:22px;font-weight:800;color:#f59e0b">🪙 0</div>
+        </div>
+        <div style="text-align:right">
+          <div style="font-size:11px;font-weight:700;text-transform:uppercase;color:var(--t3);letter-spacing:.06em">Bônus acumulado</div>
+          <div id="quiz-bonus-val" style="font-size:16px;font-weight:700;color:var(--grn)">R$ 0,00</div>
+        </div>
+      </div>
+      <div id="quiz-levels" style="display:flex;flex-direction:column;gap:10px;margin-bottom:16px"></div>
+      <div id="quiz-area" style="display:none"></div>
+    </div>
+  </div>
 </div>
 <!-- PAULO NAV -->
 <nav class="p-nav" id="p-nav">
@@ -601,6 +627,7 @@ inter-events:none}
   <button class="p-ni" id="p-ni-sonhos" onclick="goP('sonhos')"><span class="ic">⭐</span>Sonhos</button>
   <button class="p-ni" id="p-ni-missoes" onclick="goP('missoes')"><span class="ic">🎯</span>Missões</button>
   <button class="p-ni" id="p-ni-conquistas" onclick="goP('conquistas')"><span class="ic">🏆</span>Troféus</button>
+  <button class="p-ni" id="p-ni-quiz" onclick="goP('quiz')"><span class="ic">🧠</span>Quiz</button>
 </nav>
 <button class="fab" id="fab" onclick="openAdd()">+</button>
 <div class="sbg" id="sbg" onclick="closeSBG(event)">
@@ -630,6 +657,9 @@ function loginAs(key){
     var ls=document.getElementById('lockscreen');
     if(ls)ls.style.display='none';
     document.body.classList.remove('locked');
+    if(u.id==='paulo'){document.body.classList.add('paulo-mode');document.body.classList.remove('thays-mode');}
+    else if(u.id==='thays'){document.body.classList.add('thays-mode');document.body.classList.remove('paulo-mode');}
+    else{document.body.classList.remove('paulo-mode','thays-mode');}
     try{displayAvatar();}catch(ex){if(errEl)errEl.textContent='av:'+ex.message;return;}
     try{initFB();}catch(ex){if(errEl)errEl.textContent='fb:'+ex.message;}
     try{updML();render('fluxo');renderLemb(load());}catch(ex){if(errEl)errEl.textContent='render:'+ex.message;}
@@ -645,31 +675,22 @@ function numpad(n){
     if(pinEntered.length>=4)return;
     pinEntered+=n;updateDots();
     if(pinEntered.length===4){
-      setTimeout(function(){try{
+      setTimeout(function(){
         var u=USERS[pinEntered];
+        var lerr=document.getElementById('lockerr');
         if(u){
-          curUser=u;
-          KEY='pax_fin_'+u.fbPath;
-          _db=null;_fbReady=false;_fbSynced=false;_fbRef=null;
-          if(u.id!=='leandro'){
-            try{localStorage.removeItem(KEY);localStorage.removeItem('pax_fin_'+u.id);}catch(e){}
-          }
-          document.getElementById('lockscreen').style.display='none';
-          document.body.classList.remove('locked');
-          displayAvatar();
-          if(u.id==='paulo'){document.body.classList.add('paulo-mode');document.body.classList.remove('thays-mode');}
-          else if(u.id==='thays'){document.body.classList.add('thays-mode');document.body.classList.remove('paulo-mode');}
-          else{document.body.classList.remove('paulo-mode','thays-mode');}
-          _db=null;_fbSynced=false;
-          initFB();
+          loginAs(u.id==='leandro'?'l':u.id==='thays'?'t':'p');
+          pinEntered='';
         } else {
-          document.querySelectorAll('.lock-dot').forEach(function(d){d.classList.add('error');});
+          for(var i=0;i<4;i++){var d=document.getElementById('d'+i);if(d)d.classList.add('error');}
+          if(lerr)lerr.textContent='PIN incorreto';
           setTimeout(function(){
             pinEntered='';updateDots();
-            document.querySelectorAll('.lock-dot').forEach(function(d){d.classList.remove('error');});
+            for(var i=0;i<4;i++){var d=document.getElementById('d'+i);if(d)d.classList.remove('error');}
+            if(lerr)lerr.textContent='';
           },800);
         }
-      }catch(e){}},200);
+      },150);
     }
   }
 }
@@ -1693,6 +1714,7 @@ function goP(id){
   else if(id==='sonhos')renderPauloSonhos(db);
   else if(id==='missoes')renderPauloMissoes(db);
   else if(id==='conquistas')renderPauloConquistas(db);
+  else if(id==='quiz')renderPauloQuiz(db);
 }
 function renderPauloHome(db){
   if(!db.paulo){db.paulo=seedPaulo().paulo;save(db);}
@@ -2434,6 +2456,191 @@ function importData(e){
   r.readAsText(f);e.target.value='';
 }
 function resetData(){localStorage.removeItem(KEY);_db=null;load();render('fluxo');renderLemb(load());toast('Dados de exemplo carregados');}
+// ===================== PAULO QUIZ =====================
+var QUIZ_QUESTIONS = [
+  // Nível 1 - Iniciante (10 moedas)
+  {lv:0,q:'O que é uma poupança?',opts:['Dinheiro guardado para o futuro','Dinheiro para gastar hoje','Um tipo de jogo','Uma dívida'],a:0},
+  {lv:0,q:'O que acontece quando você gasta mais do que ganha?',opts:['Fica com dinheiro sobrando','Entra em dívida','Ganha mais dinheiro','Nada muda'],a:1},
+  {lv:0,q:'O que é uma despesa fixa?',opts:['Algo que você compra por impulso','Gasto que se repete todo mês','Dinheiro ganho no trabalho','Uma promoção'],a:1},
+  {lv:0,q:'Qual o melhor hábito financeiro?',opts:['Gastar tudo que ganha','Comprar sempre parcelado','Guardar parte do dinheiro todo mês','Pedir empréstimo'],a:2},
+  {lv:0,q:'O que é um orçamento?',opts:['Uma lista de desejos','Planejamento de quanto entra e sai','Um banco','Um tipo de investimento'],a:1},
+  {lv:0,q:'Para que serve uma reserva de emergência?',opts:['Pagar festa','Cobrir gastos inesperados','Comprar presentes','Viajar'],a:1},
+  // Nível 2 - Intermediário (20 moedas)
+  {lv:1,q:'O que são juros compostos?',opts:['Juros que só crescem uma vez','Juros que crescem sobre juros','Um tipo de desconto','Uma taxa do governo'],a:1},
+  {lv:1,q:'O que é inflação?',opts:['Aumento geral dos preços','Queda dos preços','Um investimento','Uma moeda'],a:0},
+  {lv:1,q:'O que é diversificação de investimentos?',opts:['Colocar tudo em um só lugar','Investir em vários tipos de ativos','Gastar em muitas lojas','Ter várias contas'],a:1},
+  {lv:1,q:'Quanto tempo deve durar uma reserva de emergência?',opts:['1 semana','1 mês','3 a 6 meses','10 anos'],a:2},
+  {lv:1,q:'O que é CDI?',opts:['Um tipo de dívida','Taxa de referência para investimentos','Uma moeda estrangeira','Um imposto'],a:1},
+  {lv:1,q:'O que são ações?',opts:['Promoções em lojas','Pedaços de uma empresa','Tipo de empréstimo','Notas de dinheiro'],a:1},
+  // Nível 3 - Avançado (30 moedas)
+  {lv:2,q:'O que é renda variável?',opts:['Salário fixo mensal','Investimento onde o retorno não é garantido','Aluguel fixo','Poupança'],a:1},
+  {lv:2,q:'O que significa P/L de uma ação?',opts:['Preço dividido pelo lucro','Prejuízo dividido pelo lucro','Preço mais lucro','Porcentagem de lucro'],a:0},
+  {lv:2,q:'O que é rebalanceamento de carteira?',opts:['Comprar mais ações','Ajustar proporção dos investimentos','Vender tudo','Abrir nova conta'],a:1},
+  {lv:2,q:'O que é o Tesouro Direto?',opts:['Banco privado','Programa de investimento em títulos do governo','App de compras','Tipo de cartão'],a:1},
+  {lv:2,q:'O que é IPCA?',opts:['Índice de preços ao consumidor','Taxa de juros bancária','Tipo de investimento','Uma moeda'],a:0},
+  {lv:2,q:'O que é um ETF?',opts:['Empréstimo a termo fixo','Fundo que replica um índice de mercado','Tipo de poupança','Cartão de crédito'],a:1}
+];
+var QUIZ_LVL_NAMES=['🌱 Iniciante','⚡ Intermediário','🔥 Avançado'];
+var QUIZ_LVL_COINS=[10,20,30];
+var _quizState=null; // {questions,idx,score,coins,level}
+
+function renderPauloQuiz(db){
+  if(!db||!db.paulo)return;
+  var q=db.paulo.quiz||(db.paulo.quiz={coins:0,monthCoins:0,lastMonth:'',answered:[],level:0});
+  // Check monthly reset
+  var nowMonth=curMes;
+  if(q.lastMonth && q.lastMonth!==nowMonth){
+    // New month: convert coins to bonus, reset
+    if(q.monthCoins>0){
+      var bonus=Math.floor(q.monthCoins/10)*1; // 10 coins = R$1
+      db.paulo.cofrinho=(db.paulo.cofrinho||0)+bonus;
+      pToast('🎉 Quiz bônus: R$ '+bonus+',00 no cofrinho!');
+    }
+    q.monthCoins=0;q.answered=[];q.lastMonth=nowMonth;
+    save(db);
+  }
+  if(!q.lastMonth)q.lastMonth=nowMonth;
+
+  // Update coins display
+  var cv=document.getElementById('quiz-coins-val');
+  var bv=document.getElementById('quiz-bonus-val');
+  if(cv)cv.textContent='🪙 '+q.monthCoins;
+  if(bv)bv.textContent='R$ '+(Math.floor(q.monthCoins/10)).toFixed(2).replace('.',',');
+
+  // Show level cards
+  var lvDiv=document.getElementById('quiz-levels');
+  if(!lvDiv)return;
+  var html2='';
+  for(var lv=0;lv<3;lv++){
+    var avail=QUIZ_QUESTIONS.filter(function(qq){return qq.lv===lv&&q.answered.indexOf(QUIZ_QUESTIONS.indexOf(qq))<0;});
+    var done=QUIZ_QUESTIONS.filter(function(qq,ii){return qq.lv===lv&&q.answered.indexOf(ii)>=0;}).length;
+    var total=QUIZ_QUESTIONS.filter(function(qq){return qq.lv===lv;}).length;
+    var locked=lv>0&&q.level<lv;
+    html2+='<div style="background:var(--s1);border-radius:16px;padding:16px;border:1.5px solid '+(locked?'var(--bdr)':'var(--acc)')+';opacity:'+(locked?'.5':'1')+'">';
+    html2+='<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">';
+    html2+='<div style="font-size:15px;font-weight:800">'+QUIZ_LVL_NAMES[lv]+'</div>';
+    html2+='<div style="font-size:12px;color:var(--t3)">'+done+'/'+total+' feitas · '+QUIZ_LVL_COINS[lv]+'🪙 cada</div>';
+    html2+='</div>';
+    // Progress bar
+    html2+='<div style="background:var(--bdr);border-radius:99px;height:6px;margin-bottom:10px">';
+    html2+='<div style="background:var(--acc);border-radius:99px;height:6px;width:'+(total>0?Math.round(done/total*100):0)+'%"></div></div>';
+    if(!locked&&avail.length>0){
+      html2+='<button class="npbtn" style="width:100%;padding:12px;font-size:14px" onclick="startQuiz('+lv+')">▶ Jogar '+QUIZ_LVL_NAMES[lv]+'</button>';
+    } else if(avail.length===0){
+      html2+='<div style="text-align:center;font-size:13px;color:var(--grn);font-weight:700">✅ Nível completo!</div>';
+    } else {
+      html2+='<div style="text-align:center;font-size:12px;color:var(--t3)">🔒 Complete o nível anterior</div>';
+    }
+    html2+='</div>';
+  }
+  lvDiv.innerHTML=html2;
+  document.getElementById('quiz-area').style.display='none';
+  document.getElementById('quiz-levels').style.display='flex';
+  document.getElementById('quiz-levels').style.flexDirection='column';
+}
+
+function startQuiz(lv){
+  var db=load();
+  if(!db.paulo.quiz)db.paulo.quiz={coins:0,monthCoins:0,lastMonth:curMes,answered:[],level:0};
+  var q=db.paulo.quiz;
+  var pool=[];
+  QUIZ_QUESTIONS.forEach(function(qq,ii){if(qq.lv===lv&&q.answered.indexOf(ii)<0)pool.push({qq:qq,ii:ii});});
+  if(!pool.length){pToast('Nível completo! Tente outro.');return;}
+  // Pick up to 5 questions
+  var selected=pool.sort(function(){return Math.random()-.5}).slice(0,5);
+  _quizState={questions:selected,idx:0,score:0,coins:0,level:lv};
+  showQuizQuestion();
+}
+
+function showQuizQuestion(){
+  if(!_quizState)return;
+  var area=document.getElementById('quiz-area');
+  var lvDiv=document.getElementById('quiz-levels');
+  if(lvDiv)lvDiv.style.display='none';
+  if(area)area.style.display='block';
+  var s=_quizState;
+  if(s.idx>=s.questions.length){finishQuiz();return;}
+  var item=s.questions[s.idx];
+  var total=s.questions.length;
+  var html2='<div style="margin-bottom:16px">';
+  html2+='<div style="display:flex;justify-content:space-between;margin-bottom:12px">';
+  html2+='<div style="font-size:12px;font-weight:700;color:var(--t3)">Pergunta '+(s.idx+1)+'/'+total+'</div>';
+  html2+='<div style="font-size:12px;color:#f59e0b;font-weight:700">'+QUIZ_LVL_NAMES[s.level]+' · '+QUIZ_LVL_COINS[s.level]+'🪙</div>';
+  html2+='</div>';
+  // Progress
+  html2+='<div style="background:var(--bdr);border-radius:99px;height:4px;margin-bottom:16px">';
+  html2+='<div style="background:var(--acc);border-radius:99px;height:4px;width:'+Math.round(s.idx/total*100)+'%"></div></div>';
+  html2+='<div style="font-size:16px;font-weight:700;color:var(--t1);margin-bottom:20px;line-height:1.4">'+item.qq.q+'</div>';
+  html2+='<div style="display:flex;flex-direction:column;gap:10px">';
+  item.qq.opts.forEach(function(opt,oi){
+    html2+='<button class="npbtn" style="text-align:left;padding:14px 16px;font-size:14px;font-weight:600" onclick="answerQuiz('+oi+')">'+opt+'</button>';
+  });
+  html2+='</div></div>';
+  if(area)area.innerHTML=html2;
+}
+
+function answerQuiz(chosen){
+  if(!_quizState)return;
+  var s=_quizState;
+  var item=s.questions[s.idx];
+  var correct=chosen===item.qq.a;
+  var coins=correct?QUIZ_LVL_COINS[s.level]:0;
+  s.score+=correct?1:0;
+  s.coins+=coins;
+  // Show feedback
+  var area=document.getElementById('quiz-area');
+  var btns=area?area.querySelectorAll('.npbtn'):[];
+  btns.forEach(function(b,bi){
+    b.onclick=null;
+    if(bi===item.qq.a)b.style.background='#16a34a';
+    else if(bi===chosen&&!correct)b.style.background='#dc2626';
+    b.style.color='#fff';
+  });
+  // Show result
+  var fb=document.createElement('div');
+  fb.style.cssText='margin-top:14px;padding:12px;border-radius:12px;text-align:center;font-weight:700;font-size:15px;background:'+(correct?'rgba(22,163,74,.15)':'rgba(220,38,38,.15)')+';color:'+(correct?'#16a34a':'#dc2626');
+  fb.textContent=correct?'✅ Correto! +'+coins+'🪙':'❌ Errado! Resposta: '+item.qq.opts[item.qq.a];
+  if(area)area.appendChild(fb);
+  setTimeout(function(){
+    s.idx++;
+    // Save answered question
+    var db=load();
+    if(!db.paulo.quiz)db.paulo.quiz={coins:0,monthCoins:0,lastMonth:curMes,answered:[],level:0};
+    db.paulo.quiz.answered.push(item.ii);
+    db.paulo.quiz.monthCoins=(db.paulo.quiz.monthCoins||0)+coins;
+    db.paulo.quiz.coins=(db.paulo.quiz.coins||0)+coins;
+    // Level up check
+    var allDone=QUIZ_QUESTIONS.filter(function(qq){return qq.lv===s.level;}).every(function(qq,ii){
+      var realIdx=QUIZ_QUESTIONS.indexOf(qq);
+      return db.paulo.quiz.answered.indexOf(realIdx)>=0;
+    });
+    if(allDone&&db.paulo.quiz.level<=s.level)db.paulo.quiz.level=s.level+1;
+    // XP
+    if(correct)addXP(coins,db);
+    save(db);
+    showQuizQuestion();
+  },1200);
+}
+
+function finishQuiz(){
+  if(!_quizState)return;
+  var s=_quizState;
+  var area=document.getElementById('quiz-area');
+  var html2='<div style="text-align:center;padding:20px 0">';
+  html2+='<div style="font-size:40px;margin-bottom:12px">'+(s.score===s.questions.length?'🏆':s.score>=s.questions.length/2?'⭐':'💪')+'</div>';
+  html2+='<div style="font-size:20px;font-weight:800;margin-bottom:6px">'+s.score+'/'+s.questions.length+' acertos!</div>';
+  html2+='<div style="font-size:16px;color:#f59e0b;font-weight:700;margin-bottom:20px">+'+s.coins+' 🪙 ganhas!</div>';
+  html2+='<div style="font-size:13px;color:var(--t3);margin-bottom:20px">10 moedas = R$ 1,00 no cofrinho no fim do mês</div>';
+  html2+='<button class="npbtn" style="width:100%;padding:14px;font-size:15px" onclick="goP(\'quiz\')">Ver níveis</button>';
+  html2+='</div>';
+  if(area)area.innerHTML=html2;
+  _quizState=null;
+  var db=load();
+  if(s.coins>0)pToast('+'+s.coins+'🪙 moedas do quiz!');
+}
+// ===================== FIM QUIZ =====================
+
+
 (function(){
   var _umap={l:USERS['2505'],t:USERS['0609'],p:USERS['2014']};
 
@@ -2513,7 +2720,7 @@ function resetData(){localStorage.removeItem(KEY);_db=null;load();render('fluxo'
 })();
 
 </script>
-<div id="ver" style="position:fixed;bottom:8px;left:0;right:0;text-align:center;font-size:10px;color:var(--t3);opacity:.45;z-index:99999;pointer-events:none;font-family:monospace">v1.107.510</div>
+<div id="ver" style="position:fixed;bottom:8px;left:0;right:0;text-align:center;font-size:10px;color:var(--t3);opacity:.45;z-index:99999;pointer-events:none;font-family:monospace">v1.107.511</div>
 </body>
 </html>
  
