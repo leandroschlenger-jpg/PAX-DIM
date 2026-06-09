@@ -657,21 +657,7 @@ function loginAs(key){
     var umap={l:USERS['2505'],t:USERS['0609'],p:USERS['2014']};
     var u=umap[key];
     if(!u){if(errEl)errEl.textContent='Usuário inválido: '+key;return;}
-    curUser=u;KEY='pax_fin_'+u.fbPath;
-    _db=null;_fbReady=false;_fbSynced=false;_fbRef=null;
-    if(u.id!=='leandro'){try{localStorage.removeItem(KEY);localStorage.removeItem('pax_fin_'+u.id);}catch(ex){}}
-    var ls=document.getElementById('lockscreen');
-    if(ls)ls.style.display='none';
-    document.body.classList.remove('locked');
-    if(u.id==='paulo'){document.body.classList.add('paulo-mode');document.body.classList.remove('thays-mode');}
-    else if(u.id==='thays'){document.body.classList.add('thays-mode');document.body.classList.remove('paulo-mode');}
-    else{document.body.classList.remove('paulo-mode','thays-mode');}
-    try{displayAvatar();}catch(ex){if(errEl)errEl.textContent='av:'+ex.message;return;}
-    try{initFB();}catch(ex){if(errEl)errEl.textContent='fb:'+ex.message;}
-    valHidden=true;try{var eb=document.getElementById('eyebtn');if(eb)eb.classList.remove('on');var es=document.getElementById('eyeSlash');if(es)es.style.display='block';}catch(ex2){}
-    try{updML();}catch(ex2){}
-    if(u.id==='paulo'){try{goP('home');}catch(ex2){}}
-    else{try{render('fluxo');renderLemb(load());}catch(ex){if(errEl)errEl.textContent='render:'+ex.message;}}
+    if(window._doLoginUser){window._doLoginUser(u);}
   }catch(ex){
     if(errEl)errEl.textContent='ERRO:'+(ex.message||String(ex));
   }
@@ -3067,11 +3053,22 @@ function finishQuiz(){
     curUser=u;
     KEY='pax_fin_'+u.fbPath;
     _db=null;_fbReady=false;_fbSynced=false;_fbRef=null;
+    // Apply body mode classes
+    if(u.id==='paulo'){document.body.classList.add('paulo-mode');document.body.classList.remove('thays-mode');}
+    else if(u.id==='thays'){document.body.classList.add('thays-mode');document.body.classList.remove('paulo-mode');}
+    else{document.body.classList.remove('paulo-mode','thays-mode');}
     if(u.id!=='leandro'){try{localStorage.removeItem(KEY);localStorage.removeItem('pax_fin_'+u.id);}catch(e){}}
-    document.getElementById('lockscreen').style.display='none';
+    // Hide lockscreen
+    var ls=document.getElementById('lockscreen');if(ls)ls.style.display='none';
     document.body.classList.remove('locked');
-    displayAvatar();initFB();
-    updML();render('fluxo');renderLemb(load());
+    // Eye always starts locked
+    valHidden=true;
+    try{var eb=document.getElementById('eyebtn');if(eb)eb.classList.remove('on');var es=document.getElementById('eyeSlash');if(es)es.style.display='block';}catch(e){}
+    displayAvatar();
+    initFB();
+    updML();
+    if(u.id==='paulo'){goP('home');}
+    else{render('fluxo');renderLemb(load());}
   }
 
 
@@ -3118,12 +3115,6 @@ function finishQuiz(){
   var _pmCb=document.getElementById('pmCancelCb');
   if(_pmCb)_pmCb.addEventListener('change',function(){this.checked=false;closePinModal();});
 
-  var _origToggle=window.toggleValues;
-  window.toggleValues=function(){
-    if(valHidden){openPinModal();}
-    else{if(_origToggle)_origToggle();}
-  };
-
   window.onerror=function(msg,src,line,col,err){
     var el=document.getElementById('loginErr')||document.getElementById('lockerr');
     if(el)el.textContent='JS:'+(err&&err.message||msg||'?').slice(0,80);
@@ -3155,11 +3146,12 @@ function finishQuiz(){
   window.pAddLancamento=pAddLancamento;
   window.pSelTipo=pSelTipo;
   window.pDelLancamento=pDelLancamento;
+  window._doLoginUser=_doLoginUser;
 })();
 
 </script>
-<div id="ver" style="position:fixed;bottom:8px;left:0;right:0;text-align:center;font-size:10px;color:var(--t3);opacity:.45;z-index:99999;pointer-events:none;font-family:monospace">v1.107.519</div>
+<div id="ver" style="position:fixed;bottom:8px;left:0;right:0;text-align:center;font-size:10px;color:var(--t3);opacity:.45;z-index:99999;pointer-events:none;font-family:monospace">v1.108.520</div>
 </body>
 </html>
  
-                                                                                                                                                                                                                                                                                                              
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         
