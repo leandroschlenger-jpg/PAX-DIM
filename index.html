@@ -247,28 +247,16 @@ body.paulo-mode .p-nav{display:flex}
   <div class="lockscreen" id="lockscreen">
     <div class="lock-logo">&#128274;</div>
     <div class="lock-brand">PAX<em>.</em></div>
-    <div class="lock-sub">Financeiro pessoal</div>
+    <div class="lock-sub">Digite seu PIN</div>
     <div class="lock-dots" id="lockdots">
       <div class="lock-dot" id="d0"></div>
       <div class="lock-dot" id="d1"></div>
       <div class="lock-dot" id="d2"></div>
       <div class="lock-dot" id="d3"></div>
     </div>
-    <div class="numpad">
-      <button class="npbtn" data-n="1">1</button>
-      <button class="npbtn" data-n="2">2</button>
-      <button class="npbtn" data-n="3">3</button>
-      <button class="npbtn" data-n="4">4</button>
-      <button class="npbtn" data-n="5">5</button>
-      <button class="npbtn" data-n="6">6</button>
-      <button class="npbtn" data-n="7">7</button>
-      <button class="npbtn" data-n="8">8</button>
-      <button class="npbtn" data-n="9">9</button>
-      <button class="npbtn" data-n="-1" style="font-size:14px;color:var(--t3)">limpar</button>
-      <button class="npbtn" data-n="0">0</button>
-      <button class="npbtn" data-n="-2" style="font-size:18px;color:var(--t3)">&#9003;</button>
-    </div>
-    <div class="lock-err" id="lockerr"></div>
+    <input type="tel" id="pinInput" maxlength="4" inputmode="numeric" pattern="[0-9]*" autocomplete="off" placeholder="&#8226;&#8226;&#8226;&#8226;"
+      style="font-size:32px;letter-spacing:16px;text-align:center;width:160px;padding:12px 16px;border-radius:16px;border:2px solid var(--acc);background:var(--s1);color:var(--t1);outline:none;-webkit-text-security:disc;margin-top:8px">
+    <div class="lock-err" id="lockerr" style="margin-top:12px;font-size:14px;color:var(--red);text-align:center;min-height:20px"></div>
   </div>
 <input type="file" id="avatarInput" accept="image/*" style="display:none" onchange="handleAvatarUpload(event)">
 <div id="app">
@@ -2405,37 +2393,39 @@ function importData(e){
 }
 function resetData(){localStorage.removeItem(KEY);_db=null;load();render('fluxo');renderLemb(load());toast('Dados de exemplo carregados');}
 (function(){
-  // Polyfill closest para browsers antigos
-  function _closest(el,attr){
-    while(el){if(el.getAttribute&&el.getAttribute(attr)!==null)return el;el=el.parentElement;}
-    return null;
+  // PIN via input nativo
+  var _pi=document.getElementById('pinInput');
+  if(_pi){
+    _pi.addEventListener('input',function(){
+      var v=this.value.replace(/\D/g,'');
+      this.value=v;
+      // Atualiza dots
+      for(var i=0;i<4;i++){var d=document.getElementById('d'+i);if(d){d.classList.toggle('filled',i<v.length);d.classList.remove('error');}}
+      if(v.length===4){
+        var lerr=document.getElementById('lockerr');
+        var u=USERS[v];
+        if(u){
+          curUser=u;
+          KEY='pax_fin_'+u.fbPath;
+          _db=null;_fbReady=false;_fbSynced=false;_fbRef=null;
+          if(u.id!=='leandro'){try{localStorage.removeItem(KEY);localStorage.removeItem('pax_fin_'+u.id);}catch(e){}}
+          document.getElementById('lockscreen').style.display='none';
+          document.body.classList.remove('locked');
+          if(lerr)lerr.textContent='';
+          _pi.value='';
+          displayAvatar();
+          initFB();
+          updML();render('fluxo');renderLemb(load());
+        } else {
+          if(lerr)lerr.textContent='PIN incorreto';
+          for(var j=0;j<4;j++){var dd=document.getElementById('d'+j);if(dd)dd.classList.add('error');}
+          setTimeout(function(){_pi.value='';for(var k=0;k<4;k++){var dk=document.getElementById('d'+k);if(dk){dk.classList.remove('filled','error');}}if(lerr)lerr.textContent='';},700);
+        }
+      }
+    });
+    // Auto-foca o input ao carregar
+    setTimeout(function(){try{_pi.focus();}catch(e){}},300);
   }
-  // Captura no nível do documento com capture:true — pega ANTES de qualquer overlay
-  document.addEventListener('touchstart',function(e){
-    if(!document.body.classList.contains('locked'))return;
-    var t=e.changedTouches[0];
-    // Mostra diagnóstico: qual elemento está no ponto do toque
-    var hit=document.elementFromPoint(t.clientX,t.clientY);
-    var diag=hit?(hit.tagName+'#'+hit.id+'.'+hit.className).slice(0,60):'null';
-    var lerr=document.getElementById('lockerr');
-    if(lerr)lerr.textContent='toque:'+diag;
-    // Tenta encontrar botão no elemento tocado ou ancestors
-    var btn=_closest(hit,'data-n');
-    if(btn){
-      e.preventDefault();
-      try{numpad(parseInt(btn.getAttribute('data-n'),10));}
-      catch(err){if(lerr)lerr.textContent='ERR:'+err.message;}
-    }
-  },{capture:true,passive:false});
-  document.addEventListener('click',function(e){
-    if(!document.body.classList.contains('locked'))return;
-    var btn=_closest(e.target,'data-n');
-    if(btn){
-      try{numpad(parseInt(btn.getAttribute('data-n'),10));}
-      catch(err){}
-    }
-  },{capture:true});
-  // Erro global visível
   window.onerror=function(msg){
     var el=document.getElementById('lockerr');
     if(el&&document.body.classList.contains('locked'))el.textContent=String(msg).slice(0,80);
