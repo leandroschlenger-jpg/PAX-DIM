@@ -255,17 +255,18 @@ inter-events:none}
   <div class="lockscreen" id="lockscreen">
     <div style="font-size:30px;font-weight:900;letter-spacing:-.5px;margin-bottom:4px">PAX<span style="color:var(--acc)">.</span></div>
     <div style="font-size:13px;color:var(--t3);margin-bottom:48px">Financeiro pessoal</div>
-    <form id="loginForm" onsubmit="doLogin(event);return false;" style="display:flex;flex-direction:column;gap:14px;width:100%;max-width:300px">
-      <label style="font-size:13px;font-weight:700;color:var(--t2);margin-bottom:-4px">Quem é você?</label>
-      <select id="userSelect" style="width:100%;padding:16px 14px;font-size:17px;font-weight:600;border-radius:16px;border:2px solid var(--bdr2);background:var(--s1);color:var(--t1);outline:none;appearance:none;-webkit-appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23888' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 14px center;padding-right:40px">
-        <option value="">-- Selecionar --</option>
+    <div style="width:100%;max-width:300px;display:flex;flex-direction:column;gap:10px">
+      <label style="font-size:13px;font-weight:700;color:var(--t2)">Quem é você?</label>
+      <select id="userSelect"
+        style="width:100%;padding:18px 16px;font-size:18px;font-weight:700;border-radius:16px;border:2px solid var(--acc);background:var(--s1);color:var(--t1);outline:none;-webkit-appearance:none;appearance:none"
+        onchange="if(this.value){loginAs(this.value)}">
+        <option value="">&#9660; Selecionar e entrar</option>
         <option value="l">Leandro</option>
         <option value="t">Thays</option>
         <option value="p">Paulo</option>
       </select>
-      <input type="submit" value="Entrar →" style="width:100%;padding:18px;font-size:17px;font-weight:800;border-radius:16px;border:none;background:var(--acc);color:#fff;cursor:pointer;-webkit-tap-highlight-color:rgba(0,0,0,0);touch-action:manipulation">
       <div id="loginErr" style="text-align:center;font-size:13px;color:var(--red);min-height:18px"></div>
-    </form>
+    </div>
   </div>
 <input type="file" id="avatarInput" accept="image/*" style="display:none" onchange="handleAvatarUpload(event)">
 <div id="app">
@@ -2431,33 +2432,27 @@ function resetData(){localStorage.removeItem(KEY);_db=null;load();render('fluxo'
     updML();render('fluxo');renderLemb(load());
   }
 
-  window.loginAs=function(key){_doLoginUser(_umap[key]);};
-
-  window.doLogin=function(e){
-    if(e&&e.preventDefault)e.preventDefault();
+  window.loginAs=function(key){
     var errEl=document.getElementById('loginErr');
     try{
-      var sel=document.getElementById('userSelect');
-      if(!sel||!sel.value){if(errEl)errEl.textContent='Selecione uma pessoa primeiro';return false;}
-      if(errEl)errEl.textContent='Carregando...';
-      var u=_umap[sel.value];
-      if(!u){if(errEl)errEl.textContent='Usuário inválido: '+sel.value;return false;}
-      curUser=u;
-      KEY='pax_fin_'+u.fbPath;
+      var u=_umap[key];
+      if(!u){if(errEl)errEl.textContent='Usuário inválido';return;}
+      curUser=u;KEY='pax_fin_'+u.fbPath;
       _db=null;_fbReady=false;_fbSynced=false;_fbRef=null;
       if(u.id!=='leandro'){try{localStorage.removeItem(KEY);localStorage.removeItem('pax_fin_'+u.id);}catch(ex){}}
-      try{document.getElementById('lockscreen').style.display='none';}catch(ex){if(errEl)errEl.textContent='lockscreen:'+ex.message;return false;}
+      try{document.getElementById('lockscreen').style.display='none';}catch(ex){if(errEl)errEl.textContent='ls:'+ex.message;return;}
       document.body.classList.remove('locked');
-      try{displayAvatar();}catch(ex){if(errEl)errEl.textContent='avatar:'+ex.message;}
+      try{displayAvatar();}catch(ex){if(errEl)errEl.textContent='av:'+ex.message;}
       try{initFB();}catch(ex){if(errEl)errEl.textContent='fb:'+ex.message;}
       try{updML();}catch(ex){}
       try{render('fluxo');}catch(ex){if(errEl)errEl.textContent='render:'+ex.message;}
       try{renderLemb(load());}catch(ex){}
     }catch(ex){
-      if(errEl)errEl.textContent='ERRO: '+(ex&&ex.message?ex.message:String(ex));
+      if(errEl)errEl.textContent='ERRO:'+(ex.message||ex);
     }
-    return false;
   };
+
+  window.doLogin=function(){};  // kept for compatibility
 
   // PIN modal para revelar valores
   function openPinModal(){
@@ -2517,7 +2512,7 @@ function resetData(){localStorage.removeItem(KEY);_db=null;load();render('fluxo'
 })();
 
 </script>
-<div id="ver" style="position:fixed;bottom:6px;right:10px;font-size:10px;color:var(--t3);opacity:.45;z-index:99999;pointer-events:none;font-family:monospace">v1.107.507</div>
+<div id="ver" style="position:fixed;bottom:8px;left:0;right:0;text-align:center;font-size:10px;color:var(--t3);opacity:.45;z-index:99999;pointer-events:none;font-family:monospace">v1.107.508</div>
 </body>
 </html>
  
