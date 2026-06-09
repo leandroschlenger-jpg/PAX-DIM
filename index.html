@@ -669,7 +669,9 @@ function loginAs(key){
     try{displayAvatar();}catch(ex){if(errEl)errEl.textContent='av:'+ex.message;return;}
     try{initFB();}catch(ex){if(errEl)errEl.textContent='fb:'+ex.message;}
     valHidden=true;try{var eb=document.getElementById('eyebtn');if(eb)eb.classList.remove('on');var es=document.getElementById('eyeSlash');if(es)es.style.display='block';}catch(ex2){}
-    try{updML();render('fluxo');renderLemb(load());}catch(ex){if(errEl)errEl.textContent='render:'+ex.message;}
+    try{updML();}catch(ex2){}
+    if(u.id==='paulo'){try{goP('home');}catch(ex2){}}
+    else{try{render('fluxo');renderLemb(load());}catch(ex){if(errEl)errEl.textContent='render:'+ex.message;}}
   }catch(ex){
     if(errEl)errEl.textContent='ERRO:'+(ex.message||String(ex));
   }
@@ -1155,7 +1157,6 @@ function closeMPBG(e){if(e.target===document.getElementById('mpbg'))document.get
 function updML(){document.getElementById('mlabel').textContent=mNome(curMes);}
 function go(id){
   document.querySelectorAll('.page').forEach(function(p){p.classList.remove('on');});
-  document.querySelectorAll('.pg-paulo').forEach(function(p){p.classList.remove('on');p.style.display='';});
   document.querySelectorAll('.ni').forEach(function(n){n.classList.remove('on');});
   document.getElementById('pg-'+id).classList.add('on');
   var n=document.getElementById('nav-'+id);if(n)n.classList.add('on');
@@ -2250,6 +2251,7 @@ function pGuardarNoSonho(id){
 }
 
 function render(id){
+  if(curUser&&curUser.id==='paulo'){goP('home');return;}
   var db=load();
   if(id==='fluxo')renderFluxo(db);
   else if(id==='lemb')renderLemb(db);
@@ -3148,7 +3150,7 @@ function finishQuiz(){
 })();
 
 </script>
-<div id="ver" style="position:fixed;bottom:8px;left:0;right:0;text-align:center;font-size:10px;color:var(--t3);opacity:.45;z-index:99999;pointer-events:none;font-family:monospace">v1.107.517</div>
+<div id="ver" style="position:fixed;bottom:8px;left:0;right:0;text-align:center;font-size:10px;color:var(--t3);opacity:.45;z-index:99999;pointer-events:none;font-family:monospace">v1.107.518</div>
 </body>
 </html>
  
