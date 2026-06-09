@@ -1099,27 +1099,31 @@ function initFB(){
       var uid=curUser?curUser.id:'leandro';
       var isLeandro=uid==='leandro';
       var fbOwner=fbData&&fbData._owner;
-      var fbValid=fbData&&Array.isArray(fbData.fluxo)&&(fbOwner===uid||(!fbOwner&&isLeandro));
+      // Firebase may return sparse arrays as objects — normalize
+      if(fbData&&fbData.fluxo&&!Array.isArray(fbData.fluxo)&&typeof fbData.fluxo==='object'){
+        fbData.fluxo=Object.values(fbData.fluxo);
+      }
+      var fbValid=fbData&&Array.isArray(fbData.fluxo)&&fbData.fluxo.length>0&&(fbOwner===uid||(!fbOwner&&isLeandro));
       var localTs=(_db&&_db._ts)||0;
       var fbTs=(fbData&&fbData._ts)||0;
       if(fbValid&&fbTs>=localTs){
         _db=fbData;
         try{localStorage.setItem(KEY,JSON.stringify(_db));}catch(e){}
-        if(!_fbSynced){_fbSynced=true;render(curPage);if(isLeandro)toast('Sincronizado com Firebase');}
+        if(!_fbSynced){_fbSynced=true;render(curPage);if(isLeandro)toast('Sincronizado ✓');}
       } else if(fbValid){
         _db=fbData;
         try{localStorage.setItem(KEY,JSON.stringify(_db));}catch(e){}
         if(!_fbSynced){_fbSynced=true;render(curPage);}
+      } else if(_db&&_db.fluxo&&_db.fluxo.length>0&&_db._owner===uid){
+        // Local data exists and belongs to this user — push to Firebase
+        _fbRef.set(_db).catch(function(){});
+        if(isLeandro)toast('Dados salvos no Firebase ✓');
+        if(!_fbSynced){_fbSynced=true;}
       } else if(isLeandro&&_db&&!fbTs){
         _fbRef.set(_db).catch(function(){});
         toast('Dados enviados ao Firebase');
-      } else {
-        _db=uid==='thays'?seedThays():uid==='paulo'?seedPaulo():seed();
-        _db._owner=uid;
-        try{localStorage.removeItem(KEY);}catch(e){}
-        _fbRef.set(_db).catch(function(){});
-        if(!_fbSynced){_fbSynced=true;render(curPage);}
       }
+      // NEVER seed/overwrite when Firebase has owner-matched data
       _fbSynced=true;
     }).catch(function(e){console.log('FB read error',e);_fbSynced=true;});
   }catch(e){console.log('FB init error',e);_fbSynced=true;}
