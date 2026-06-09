@@ -613,7 +613,10 @@ inter-events:none}
   </div>
   <div class="pg-paulo" id="pg-paulo-extrato">
     <div class="p-screen">
-      <div class="p-section">📋 Meus Lançamentos</div>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">
+        <div class="p-section" style="margin-bottom:0">📋 Meus Lançamentos</div>
+        <button onclick="pAddLancamento()" style="background:var(--acc);border:none;border-radius:12px;padding:10px 18px;color:#fff;font-size:14px;font-weight:800;cursor:pointer">+ Novo</button>
+      </div>
       <div id="p-extrato-list"></div>
     </div>
   </div>
