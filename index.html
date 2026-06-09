@@ -2911,249 +2911,216 @@ function importData(e){
 function resetData(){localStorage.removeItem(KEY);_db=null;load();render('fluxo');renderLemb(load());toast('Dados de exemplo carregados');}
 // ===================== PAULO QUIZ =====================
 var QUIZ_QUESTIONS = [
-  // Nível 1 - Iniciante (10 moedas)
-  {lv:0,q:'O que é uma poupança?',opts:['Dinheiro guardado para o futuro','Dinheiro para gastar hoje','Um tipo de jogo','Uma dívida'],a:0},
-  {lv:0,q:'O que acontece quando você gasta mais do que ganha?',opts:['Fica com dinheiro sobrando','Entra em dívida','Ganha mais dinheiro','Nada muda'],a:1},
-  {lv:0,q:'O que é uma despesa fixa?',opts:['Algo que você compra por impulso','Gasto que se repete todo mês','Dinheiro ganho no trabalho','Uma promoção'],a:1},
-  {lv:0,q:'Qual o melhor hábito financeiro?',opts:['Gastar tudo que ganha','Comprar sempre parcelado','Guardar parte do dinheiro todo mês','Pedir empréstimo'],a:2},
-  {lv:0,q:'O que é um orçamento?',opts:['Uma lista de desejos','Planejamento de quanto entra e sai','Um banco','Um tipo de investimento'],a:1},
-  {lv:0,q:'Para que serve uma reserva de emergência?',opts:['Pagar festa','Cobrir gastos inesperados','Comprar presentes','Viajar'],a:1},
-  // Nível 2 - Intermediário (20 moedas)
-  {lv:1,q:'O que são juros compostos?',opts:['Juros que só crescem uma vez','Juros que crescem sobre juros','Um tipo de desconto','Uma taxa do governo'],a:1},
-  {lv:1,q:'O que é inflação?',opts:['Aumento geral dos preços','Queda dos preços','Um investimento','Uma moeda'],a:0},
-  {lv:1,q:'O que é diversificação de investimentos?',opts:['Colocar tudo em um só lugar','Investir em vários tipos de ativos','Gastar em muitas lojas','Ter várias contas'],a:1},
-  {lv:1,q:'Quanto tempo deve durar uma reserva de emergência?',opts:['1 semana','1 mês','3 a 6 meses','10 anos'],a:2},
-  {lv:1,q:'O que é CDI?',opts:['Um tipo de dívida','Taxa de referência para investimentos','Uma moeda estrangeira','Um imposto'],a:1},
-  {lv:1,q:'O que são ações?',opts:['Promoções em lojas','Pedaços de uma empresa','Tipo de empréstimo','Notas de dinheiro'],a:1},
-  // Nível 3 - Avançado (30 moedas)
-  {lv:2,q:'O que é renda variável?',opts:['Salário fixo mensal','Investimento onde o retorno não é garantido','Aluguel fixo','Poupança'],a:1},
-  {lv:2,q:'O que significa P/L de uma ação?',opts:['Preço dividido pelo lucro','Prejuízo dividido pelo lucro','Preço mais lucro','Porcentagem de lucro'],a:0},
-  {lv:2,q:'O que é rebalanceamento de carteira?',opts:['Comprar mais ações','Ajustar proporção dos investimentos','Vender tudo','Abrir nova conta'],a:1},
-  {lv:2,q:'O que é o Tesouro Direto?',opts:['Banco privado','Programa de investimento em títulos do governo','App de compras','Tipo de cartão'],a:1},
-  {lv:2,q:'O que é IPCA?',opts:['Índice de preços ao consumidor','Taxa de juros bancária','Tipo de investimento','Uma moeda'],a:0},
-  {lv:2,q:'O que é um ETF?',opts:['Empréstimo a termo fixo','Fundo que replica um índice de mercado','Tipo de poupança','Cartão de crédito'],a:1}
+  {q:'O que é uma poupança?',opts:['Dinheiro guardado para o futuro','Dinheiro para gastar hoje','Um tipo de jogo','Uma dívida'],a:0},
+  {q:'O que acontece quando você gasta mais do que ganha?',opts:['Fica com dinheiro sobrando','Entra em dívida','Ganha mais dinheiro','Nada muda'],a:1},
+  {q:'O que é uma despesa fixa?',opts:['Algo que compra por impulso','Gasto que se repete todo mês','Dinheiro ganho no trabalho','Uma promoção'],a:1},
+  {q:'Qual o melhor hábito financeiro?',opts:['Gastar tudo que ganha','Comprar sempre parcelado','Guardar parte todo mês','Pedir empréstimo'],a:2},
+  {q:'O que é um orçamento?',opts:['Uma lista de desejos','Planejamento de quanto entra e sai','Um banco','Um investimento'],a:1},
+  {q:'Para que serve uma reserva de emergência?',opts:['Pagar festa','Cobrir gastos inesperados','Comprar presentes','Viajar'],a:1},
+  {q:'O que são juros compostos?',opts:['Juros que crescem só uma vez','Juros que crescem sobre juros','Um tipo de desconto','Uma taxa do governo'],a:1},
+  {q:'O que é inflação?',opts:['Aumento geral dos preços','Queda dos preços','Um investimento','Uma moeda'],a:0},
+  {q:'Quanto deve durar uma reserva de emergência?',opts:['1 semana','1 mês','3 a 6 meses','10 anos'],a:2},
+  {q:'O que são ações?',opts:['Promoções em lojas','Pedaços de uma empresa','Tipo de empréstimo','Notas de dinheiro'],a:1},
+  {q:'O que é o Tesouro Direto?',opts:['Banco privado','Investimento em títulos do governo','App de compras','Tipo de cartão'],a:1},
+  {q:'O que é IPCA?',opts:['Índice de preços ao consumidor','Taxa de juros bancária','Tipo de investimento','Uma moeda'],a:0},
+  {q:'Guardar dinheiro todo mês é...',opts:['Chato e desnecessário','Um hábito essencial para o futuro','Coisa de adulto rico','Impossível para quem tem mesada'],a:1},
+  {q:'Quando é melhor comprar algo parcelado?',opts:['Sempre, parcelas são mais fáceis','Nunca, é sempre prejuízo','Só se não tiver juros e caber no orçamento','Quando está com vontade'],a:2},
+  {q:'O que é uma meta financeira?',opts:['Um sonho sem prazo','Um objetivo com valor e prazo definidos','Uma dívida futura','Um tipo de conta'],a:1},
+  {q:'Qual a diferença entre querer e precisar?',opts:['São a mesma coisa','Precisar é necessidade, querer é desejo','Querer é mais importante','Precisar é mais caro'],a:1},
+  {q:'Se sua mesada é R$150, quanto guardar?',opts:['Nada, é pouco','Tudo é muito','Pelo menos R$15 a R$30 (10-20%)','Só guardar se sobrar'],a:2},
+  {q:'O que é um cartão de crédito?',opts:['Dinheiro grátis','Um empréstimo que pode ter juros altos','Substituto da poupança','Presente do banco'],a:1},
+  {q:'Por que comparar preços antes de comprar?',opts:['É desnecessário','Para economizar dinheiro','Para gastar mais tempo','Os preços são iguais em todo lugar'],a:1},
+  {q:'O que é custo de oportunidade?',opts:['O preço de uma oportunidade','O que você deixa de ganhar ao fazer uma escolha','Um desconto especial','Taxa cobrada pelo banco'],a:1},
+  {q:'Como funciona o rendimento da poupança?',opts:['Não rende nada','O banco paga juros sobre o valor guardado','O banco cobra por guardar','O dinheiro dobra todo mês'],a:1},
+  {q:'O que é diversificação?',opts:['Gastar em lugares diferentes','Não colocar tudo numa única opção','Ter muitas contas bancárias','Comprar marcas diferentes'],a:1},
+  {q:'Por que fazer um planejamento financeiro?',opts:['Só adultos precisam','Para saber para onde vai o dinheiro e alcançar metas','É complicado demais','Só serve para quem tem muito dinheiro'],a:1},
+  {q:'O que são investimentos?',opts:['Gastos desnecessários','Formas de fazer o dinheiro trabalhar por você','Dívidas do futuro','Tipo de poupança negativa'],a:1},
+  {q:'O que acontece se você não pagar uma dívida?',opts:['Nada muda','Os juros crescem e fica cada vez mais difícil pagar','O banco esquece','A dívida desaparece'],a:1},
+  {q:'Qual é a regra 50-30-20?',opts:['50% gastar, 30% dívidas, 20% descansar','50% necessidades, 30% desejos, 20% guardar','50% guardar, 30% gastar, 20% emprestar','50% mesada, 30% presente, 20% jogo'],a:1},
+  {q:'Sonho de consumo grande exige...',opts:['Pedir dinheiro emprestado','Poupar por bastante tempo com meta e prazo','Comprar parcelado sem pensar','Esperar aparecer um milagre'],a:1},
+  {q:'O que é taxa de juros?',opts:['Desconto dado pelo vendedor','Percentual cobrado (ou pago) sobre dinheiro','Taxa para abrir uma conta','Imposto do governo'],a:1},
+  {q:'Quando você acerta no quiz diário, você está...',opts:['Perdendo tempo','Aprendendo sobre dinheiro e ganhando recompensas','Fazendo algo sem utilidade','Apenas brincando'],a:1},
+  {q:'Qual a melhor hora para começar a poupar?',opts:['Só quando for adulto','Agora, o quanto antes!','Quando tiver muito dinheiro','Depois de comprar tudo que quer'],a:1}
 ];
-var QUIZ_LVL_NAMES=['🌱 Iniciante','⚡ Intermediário','🔥 Avançado'];
-var QUIZ_LVL_COINS=[10,20,30];
-var _quizState=null; // {questions,idx,score,coins,level}
+
+function _quizDailyIndices(today, n){
+  // Deterministic shuffle by date — same questions on same day across devices
+  var seed=parseInt(today.replace(/-/g,''));
+  var idxs=[];for(var i=0;i<QUIZ_QUESTIONS.length;i++)idxs.push(i);
+  var s=seed;
+  for(var i=idxs.length-1;i>0;i--){s=(s*1664525+1013904223)&0x7fffffff;var j=s%(i+1);var tmp=idxs[i];idxs[i]=idxs[j];idxs[j]=tmp;}
+  return idxs.slice(0,n);
+}
 
 function renderPauloQuiz(db){
   if(!db||!db.paulo)return;
-  if(!db.paulo.quiz)db.paulo.quiz={coins:0,monthCoins:0,lastMonth:'',streak:0,lastDate:'',answered:[],level:0};
-  var q=db.paulo.quiz;
   var today=new Date().toISOString().split('T')[0];
   var curMonth=today.slice(0,7);
+  var lastDay=new Date(parseInt(curMonth.slice(0,4)),parseInt(curMonth.slice(5,7)),0).getDate();
+  var todayDay=parseInt(today.slice(8,10));
+  var isLastDay=(todayDay===lastDay);
+  if(!db.paulo.quiz)db.paulo.quiz={coins:0,monthCoins:0,daysCompleted:0,lastMonth:curMonth,streak:0,lastDate:'',dailyDate:'',dailyQs:[],dailyAnswers:[]};
+  var q=db.paulo.quiz;
   // Monthly reset
-  if(q.lastMonth&&q.lastMonth!==curMonth&&q.monthCoins>0){
-    var bonus=Math.floor(q.monthCoins/5);
-    db.paulo.mesadaBonus=(db.paulo.mesadaBonus||0)+bonus;
-    if(!db.paulo.trofeus)db.paulo.trofeus=[];
-    if(bonus>0){
-      db.paulo.trofeus.push({id:uid(),emoji:'💰',titulo:'Bônus de mesada',desc:'Ganhou R$'+bonus+',00 de bônus pelo quiz de '+q.lastMonth,data:today});
-      pToast('🎉 Bônus R$'+bonus+',00 na mesada!');
+  if(q.lastMonth&&q.lastMonth!==curMonth){
+    var earned=q.daysCompleted||0;
+    if(earned>0){
+      db.paulo.mesadaBonus=(db.paulo.mesadaBonus||0)+earned;
+      if(!db.paulo.trofeus)db.paulo.trofeus=[];
+      db.paulo.trofeus.push({id:uid(),emoji:'💰',titulo:'Bônus Quiz '+q.lastMonth,desc:'Completou '+earned+' dias → R$'+earned+',00 de bônus!',data:today});
+      setTimeout(function(){pToast('🎉 R$'+earned+',00 de bônus na mesada!');},500);
     }
-    q.monthCoins=0;q.lastMonth=curMonth;save(db);
+    q.daysCompleted=0;q.monthCoins=0;q.lastMonth=curMonth;save(db);
   }
   if(!q.lastMonth)q.lastMonth=curMonth;
+  // Reset daily state for new day
+  if(q.dailyDate!==today){q.dailyDate=today;q.dailyQs=_quizDailyIndices(today,5);q.dailyAnswers=[];}
   var el=document.getElementById('p-quiz-daily');if(!el)return;
-  var alreadyPlayed=q.lastDate===today;
+  var answered=q.dailyAnswers||[];
+  var done=answered.length>=5;
+  var pctM=Math.min(100,Math.round((q.daysCompleted||0)/31*100));
   // Stats bar
-  var streakCoins=q.streak>=7?15:q.streak>=4?10:5;
-  var pctM=Math.min(100,Math.round((q.monthCoins||0)/50*100));
   var statsHtml=
-    '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:16px">'+
-      '<div style="background:var(--s2);border-radius:14px;padding:12px 8px;text-align:center">'+
-        '<div style="font-size:24px">🔥</div>'+
-        '<div style="font-size:20px;font-weight:900;color:var(--acc)">'+(q.streak||0)+'</div>'+
+    '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:14px">'+
+      '<div style="background:var(--s2);border-radius:14px;padding:10px 6px;text-align:center">'+
+        '<div style="font-size:22px">🔥</div>'+
+        '<div style="font-size:18px;font-weight:900;color:#f97316">'+(q.streak||0)+'</div>'+
         '<div style="font-size:10px;color:var(--t3)">Sequência</div>'+
       '</div>'+
-      '<div style="background:var(--s2);border-radius:14px;padding:12px 8px;text-align:center">'+
-        '<div style="font-size:24px">🪙</div>'+
-        '<div style="font-size:20px;font-weight:900;color:#f59e0b">'+(q.monthCoins||0)+'</div>'+
-        '<div style="font-size:10px;color:var(--t3)">Moedas/mês</div>'+
+      '<div style="background:var(--s2);border-radius:14px;padding:10px 6px;text-align:center">'+
+        '<div style="font-size:22px">📅</div>'+
+        '<div style="font-size:18px;font-weight:900;color:#34d399">'+(q.daysCompleted||0)+'</div>'+
+        '<div style="font-size:10px;color:var(--t3)">Dias completos</div>'+
       '</div>'+
-      '<div style="background:var(--s2);border-radius:14px;padding:12px 8px;text-align:center">'+
-        '<div style="font-size:24px">💰</div>'+
-        '<div style="font-size:20px;font-weight:900;color:#34d399">R$'+Math.floor((q.monthCoins||0)/5)+',00</div>'+
-        '<div style="font-size:10px;color:var(--t3)">Bônus acum.</div>'+
+      '<div style="background:var(--s2);border-radius:14px;padding:10px 6px;text-align:center">'+
+        '<div style="font-size:22px">💰</div>'+
+        '<div style="font-size:18px;font-weight:900;color:#fbbf24">R$'+(q.daysCompleted||0)+',00</div>'+
+        '<div style="font-size:10px;color:var(--t3)">No mês</div>'+
       '</div>'+
     '</div>'+
-    '<div style="font-size:11px;color:var(--t3);margin-bottom:4px">Progresso para R$10 extra: '+(q.monthCoins||0)+'/50 moedas</div>'+
-    '<div style="background:var(--s3);border-radius:99px;height:6px;margin-bottom:16px">'+
-      '<div style="background:#f59e0b;border-radius:99px;height:6px;width:'+pctM+'%"></div></div>';
-  if(alreadyPlayed){
+    '<div style="font-size:11px;color:var(--t3);margin-bottom:4px">'+answered.length+'/5 perguntas hoje · '+(q.daysCompleted||0)+' dias completos (R$1/dia)</div>'+
+    '<div style="display:flex;gap:4px;margin-bottom:14px">'+
+      [0,1,2,3,4].map(function(i){
+        var a=answered[i];
+        return '<div style="flex:1;height:5px;border-radius:3px;background:'+(a===undefined?'var(--s3)':a?'#34d399':'#f87171')+'"></div>';
+      }).join('')+
+    '</div>';
+  // Last day of month — show month summary
+  if(isLastDay&&done){
     el.innerHTML=statsHtml+
-      '<div style="background:var(--s2);border-radius:18px;padding:24px 16px;text-align:center;border:1.5px solid var(--acc)">'+
-        '<div style="font-size:48px;margin-bottom:8px">🌟</div>'+
-        '<div style="font-size:16px;font-weight:800;color:var(--t1);margin-bottom:4px">Desafio de hoje concluído!</div>'+
-        '<div style="font-size:13px;color:var(--t3)">Volte amanhã para manter sua sequência de '+(q.streak||0)+' dias!</div>'+
+      '<div style="background:linear-gradient(135deg,rgba(124,58,237,.2),rgba(251,191,36,.15));border:2px solid #fbbf24;border-radius:20px;padding:24px 16px;text-align:center">'+
+        '<div style="font-size:48px;margin-bottom:10px">🏆</div>'+
+        '<div style="font-size:17px;font-weight:900;color:#fbbf24;margin-bottom:6px">Resultado de '+curMonth.split('-').reverse().join('/')+'</div>'+
+        '<div style="font-size:32px;font-weight:900;color:#34d399;margin:8px 0">R$'+(q.daysCompleted||0)+',00</div>'+
+        '<div style="font-size:13px;color:var(--t3);margin-bottom:4px">'+(q.daysCompleted||0)+' dias completos × R$1,00/dia</div>'+
+        '<div style="font-size:12px;color:var(--t3)">O bônus será adicionado à mesada do próximo mês!</div>'+
       '</div>';
     return;
   }
-  // Select daily question
-  var allQ=typeof QUIZ_QUESTIONS!=='undefined'?QUIZ_QUESTIONS:[];
-  if(!allQ.length){el.innerHTML='<div style="text-align:center;padding:40px;color:var(--t3)">Perguntas não carregadas</div>';return;}
-  var qIdx=(q.answered?q.answered.length:0)%allQ.length;
-  var pergunta=allQ[qIdx];
-  // Shuffle options
-  var opts=pergunta.opts.slice();
-  var correto=opts[0];
-  // Show question
+  if(done){
+    var earnedToday=answered.filter(function(a){return a;}).length;
+    el.innerHTML=statsHtml+
+      '<div style="background:var(--s2);border-radius:18px;padding:22px 16px;text-align:center;border:1.5px solid #34d399">'+
+        '<div style="font-size:44px;margin-bottom:8px">🌟</div>'+
+        '<div style="font-size:16px;font-weight:800;color:var(--t1);margin-bottom:4px">'+earnedToday+'/5 acertos hoje!</div>'+
+        (earnedToday===5?'<div style="font-size:14px;color:#fbbf24;font-weight:700;margin-bottom:4px">+R$1,00 🎉 Dia completo!</div>':'<div style="font-size:13px;color:var(--t3);margin-bottom:4px">Responda as 5 para ganhar R$1,00/dia</div>')+
+        '<div style="font-size:13px;color:var(--t3)">Volte amanhã! Sequência: '+(q.streak||0)+' dias 🔥</div>'+
+      '</div>';
+    return;
+  }
+  // Show current question
+  var qNum=answered.length; // 0-4
+  var qIdx=q.dailyQs[qNum];
+  var pergunta=QUIZ_QUESTIONS[qIdx];
+  if(!pergunta){el.innerHTML='<div style="text-align:center;padding:40px;color:var(--t3)">Erro ao carregar pergunta</div>';return;}
   el.innerHTML=statsHtml+
-    '<div style="background:var(--s2);border-radius:18px;padding:18px;border:1.5px solid var(--acc)">'+
-      '<div style="font-size:11px;font-weight:700;text-transform:uppercase;color:var(--acc);letter-spacing:.06em;margin-bottom:8px">Desafio do dia · +'+streakCoins+'🪙 se acertar</div>'+
+    '<div style="background:var(--s2);border-radius:18px;padding:16px;border:1.5px solid var(--acc)" id="quiz-card">'+
+      '<div style="font-size:11px;font-weight:700;text-transform:uppercase;color:var(--acc);letter-spacing:.06em;margin-bottom:8px">Pergunta '+(qNum+1)+' de 5</div>'+
       '<div style="font-size:16px;font-weight:800;color:var(--t1);margin-bottom:16px;line-height:1.4">'+pergunta.q+'</div>'+
-      opts.map(function(opt,i){
-        return '<button onclick="pResponderQuiz('+qIdx+','+i+')" style="display:block;width:100%;text-align:left;padding:12px 16px;margin-bottom:8px;background:var(--s3);border:1.5px solid var(--bdr);border-radius:12px;color:var(--t1);font-size:14px;font-weight:600;cursor:pointer">'+opt+'</button>';
-      }).join('')+
+      '<div id="quiz-opts">'+
+        pergunta.opts.map(function(opt,i){
+          return '<button onclick="pResponderQuiz('+qIdx+','+i+')" style="display:block;width:100%;text-align:left;padding:12px 16px;margin-bottom:8px;background:var(--s3);border:1.5px solid var(--bdr);border-radius:12px;color:var(--t1);font-size:14px;font-weight:600;cursor:pointer">'+opt+'</button>';
+        }).join('')+
+      '</div>'+
     '</div>';
 }
+
 function pResponderQuiz(qIdx,chosenIdx){
   var db=load();
   if(!db.paulo||!db.paulo.quiz)return;
   var q=db.paulo.quiz;
   var today=new Date().toISOString().split('T')[0];
-  if(q.lastDate===today)return;
-  var allQ=typeof QUIZ_QUESTIONS!=='undefined'?QUIZ_QUESTIONS:[];
-  var pergunta=allQ[qIdx];
-  if(!pergunta)return;
-  var acertou=chosenIdx===0; // first option is always correct
-  var streakCoins=q.streak>=7?15:q.streak>=4?10:5;
-  if(acertou){
-    q.streak=(q.streak||0)+1;
-    q.coins=(q.coins||0)+streakCoins;
-    q.monthCoins=(q.monthCoins||0)+streakCoins;
-  } else {
-    q.streak=0;
+  // Already answered this question today?
+  if(q.dailyAnswers&&q.dailyAnswers.length>=(q.dailyQs||[]).indexOf(qIdx)+1&&q.dailyDate===today){
+    // check if this specific slot is answered
   }
-  q.lastDate=today;
-  if(!q.answered)q.answered=[];
-  q.answered.push({date:today,qIdx:qIdx,correct:acertou});
-  // Check trophy milestones
-  if(!db.paulo.trofeus)db.paulo.trofeus=[];
-  if(q.streak===7)db.paulo.trofeus.push({id:uid(),emoji:'🔥',titulo:'Semana em chamas!',desc:'7 dias seguidos no quiz',data:today});
-  if(q.streak===30)db.paulo.trofeus.push({id:uid(),emoji:'👑',titulo:'Mestre do quiz',desc:'30 dias seguidos!',data:today});
+  var pergunta=QUIZ_QUESTIONS[qIdx];
+  if(!pergunta)return;
+  var acertou=chosenIdx===pergunta.a;
+  // Record answer
+  if(!q.dailyAnswers)q.dailyAnswers=[];
+  q.dailyAnswers.push(acertou);
+  // Streak (only on first question of the day)
+  if(q.dailyAnswers.length===1){
+    var lastD=q.lastDate||'';
+    var yesterday=new Date(Date.now()-86400000).toISOString().split('T')[0];
+    if(lastD===yesterday)q.streak=(q.streak||0)+1;
+    else if(lastD!==today)q.streak=1;
+    q.lastDate=today;
+  }
+  // If all 5 answered, check completion
+  var allDone=q.dailyAnswers.length>=5;
+  if(allDone){
+    var allCorrect=q.dailyAnswers.filter(function(a){return a;}).length;
+    if(allCorrect===5){
+      q.daysCompleted=(q.daysCompleted||0)+1;
+      addXP(20,db);
+      setTimeout(function(){pToast('🌟 Dia completo! +R$1,00 na mesada!');},400);
+    } else {
+      addXP(allCorrect*2,db);
+    }
+    if(q.streak===7)db.paulo.trofeus.push({id:uid(),emoji:'🔥',titulo:'Semana em chamas!',desc:'7 dias seguidos no quiz!',data:today});
+    if(q.streak===30)db.paulo.trofeus.push({id:uid(),emoji:'👑',titulo:'Mestre do quiz',desc:'30 dias seguidos!',data:today});
+  }
   save(db);
-  // Show result overlay
-  var el=document.getElementById('p-quiz-daily');
-  if(!el)return;
-  var acertouHtml=
-    '<div style="background:'+(acertou?'#34d39922':'#f8717122')+';border:1.5px solid '+(acertou?'#34d399':'#f87171')+';border-radius:18px;padding:24px;text-align:center;margin-top:8px">'+
-      '<div style="font-size:48px;margin-bottom:8px">'+(acertou?'🎉':'😔')+'</div>'+
-      '<div style="font-size:16px;font-weight:800;color:var(--t1);margin-bottom:4px">'+(acertou?'Acertou!':'Errou...')+'</div>'+
-      '<div style="font-size:13px;color:var(--t3);margin-bottom:8px">'+(acertou?'+'+streakCoins+' moedas! Sequência: '+q.streak+' dias':('Sequência zerada. A resposta era: '+pergunta.opts[0]))+'</div>'+
-    '</div>';
-  // Append to question area
-  var cards=el.querySelectorAll('button');
-  cards.forEach(function(b,i){
-    b.disabled=true;
-    b.style.opacity=i===0?'1':'0.5';
-    b.style.borderColor=i===0?'#34d399':'var(--bdr)';
-    if(i===chosenIdx&&!acertou)b.style.borderColor='#f87171';
-  });
-  el.insertAdjacentHTML('beforeend',acertouHtml);
-  if(acertou)pToast('+'+streakCoins+' moedas! 🔥 '+q.streak+' dias!');
-  else pToast('😔 Errou! Tente amanhã');
-}
-
-function startQuiz(lv){
-  var db=load();
-  if(!db.paulo.quiz)db.paulo.quiz={coins:0,monthCoins:0,lastMonth:curMes,answered:[],level:0};
-  var q=db.paulo.quiz;
-  var pool=[];
-  QUIZ_QUESTIONS.forEach(function(qq,ii){if(qq.lv===lv&&q.answered.indexOf(ii)<0)pool.push({qq:qq,ii:ii});});
-  if(!pool.length){pToast('Nível completo! Tente outro.');return;}
-  // Pick up to 5 questions
-  var selected=pool.sort(function(){return Math.random()-.5}).slice(0,5);
-  _quizState={questions:selected,idx:0,score:0,coins:0,level:lv};
-  showQuizQuestion();
-}
-
-function showQuizQuestion(){
-  if(!_quizState)return;
-  var area=document.getElementById('quiz-area');
-  var lvDiv=document.getElementById('quiz-levels');
-  if(lvDiv)lvDiv.style.display='none';
-  if(area)area.style.display='block';
-  var s=_quizState;
-  if(s.idx>=s.questions.length){finishQuiz();return;}
-  var item=s.questions[s.idx];
-  var total=s.questions.length;
-  var html2='<div style="margin-bottom:16px">';
-  html2+='<div style="display:flex;justify-content:space-between;margin-bottom:12px">';
-  html2+='<div style="font-size:12px;font-weight:700;color:var(--t3)">Pergunta '+(s.idx+1)+'/'+total+'</div>';
-  html2+='<div style="font-size:12px;color:#f59e0b;font-weight:700">'+QUIZ_LVL_NAMES[s.level]+' · '+QUIZ_LVL_COINS[s.level]+'🪙</div>';
-  html2+='</div>';
-  // Progress
-  html2+='<div style="background:var(--bdr);border-radius:99px;height:4px;margin-bottom:16px">';
-  html2+='<div style="background:var(--acc);border-radius:99px;height:4px;width:'+Math.round(s.idx/total*100)+'%"></div></div>';
-  html2+='<div style="font-size:16px;font-weight:700;color:var(--t1);margin-bottom:20px;line-height:1.4">'+item.qq.q+'</div>';
-  html2+='<div style="display:flex;flex-direction:column;gap:10px">';
-  item.qq.opts.forEach(function(opt,oi){
-    html2+='<button class="npbtn" style="text-align:left;padding:14px 16px;font-size:14px;font-weight:600" onclick="answerQuiz('+oi+')">'+opt+'</button>';
-  });
-  html2+='</div></div>';
-  if(area)area.innerHTML=html2;
-}
-
-function answerQuiz(chosen){
-  if(!_quizState)return;
-  var s=_quizState;
-  var item=s.questions[s.idx];
-  var correct=chosen===item.qq.a;
-  var coins=correct?QUIZ_LVL_COINS[s.level]:0;
-  s.score+=correct?1:0;
-  s.coins+=coins;
-  // Show feedback
-  var area=document.getElementById('quiz-area');
-  var btns=area?area.querySelectorAll('.npbtn'):[];
-  btns.forEach(function(b,bi){
-    b.onclick=null;
-    if(bi===item.qq.a)b.style.background='#16a34a';
-    else if(bi===chosen&&!correct)b.style.background='#dc2626';
-    b.style.color='#fff';
-  });
-  // Show result
-  var fb=document.createElement('div');
-  fb.style.cssText='margin-top:14px;padding:12px;border-radius:12px;text-align:center;font-weight:700;font-size:15px;background:'+(correct?'rgba(22,163,74,.15)':'rgba(220,38,38,.15)')+';color:'+(correct?'#16a34a':'#dc2626');
-  fb.textContent=correct?'✅ Correto! +'+coins+'🪙':'❌ Errado! Resposta: '+item.qq.opts[item.qq.a];
-  if(area)area.appendChild(fb);
-  setTimeout(function(){
-    s.idx++;
-    // Save answered question
-    var db=load();
-    if(!db.paulo.quiz)db.paulo.quiz={coins:0,monthCoins:0,lastMonth:curMes,answered:[],level:0};
-    db.paulo.quiz.answered.push(item.ii);
-    db.paulo.quiz.monthCoins=(db.paulo.quiz.monthCoins||0)+coins;
-    db.paulo.quiz.coins=(db.paulo.quiz.coins||0)+coins;
-    // Level up check
-    var allDone=QUIZ_QUESTIONS.filter(function(qq){return qq.lv===s.level;}).every(function(qq,ii){
-      var realIdx=QUIZ_QUESTIONS.indexOf(qq);
-      return db.paulo.quiz.answered.indexOf(realIdx)>=0;
+  // ── Feedback imediato ──────────────────────────────────────────────────────
+  var optsEl=document.getElementById('quiz-opts');
+  if(optsEl){
+    var btns=optsEl.querySelectorAll('button');
+    btns.forEach(function(b,i){
+      b.onclick=null;b.disabled=true;
+      b.style.transition='background .3s,border-color .3s';
+      if(i===pergunta.a){b.style.background='rgba(52,211,153,.25)';b.style.borderColor='#34d399';b.style.color='#34d399';}
+      else if(i===chosenIdx&&!acertou){b.style.background='rgba(248,113,113,.2)';b.style.borderColor='#f87171';b.style.color='#f87171';}
+      else{b.style.opacity='.4';}
     });
-    if(allDone&&db.paulo.quiz.level<=s.level)db.paulo.quiz.level=s.level+1;
-    // XP
-    if(correct)addXP(coins,db);
-    save(db);
-    showQuizQuestion();
-  },1200);
-}
-
-function finishQuiz(){
-  if(!_quizState)return;
-  var s=_quizState;
-  var area=document.getElementById('quiz-area');
-  var html2='<div style="text-align:center;padding:20px 0">';
-  html2+='<div style="font-size:40px;margin-bottom:12px">'+(s.score===s.questions.length?'🏆':s.score>=s.questions.length/2?'⭐':'💪')+'</div>';
-  html2+='<div style="font-size:20px;font-weight:800;margin-bottom:6px">'+s.score+'/'+s.questions.length+' acertos!</div>';
-  html2+='<div style="font-size:16px;color:#f59e0b;font-weight:700;margin-bottom:20px">+'+s.coins+' 🪙 ganhas!</div>';
-  html2+='<div style="font-size:13px;color:var(--t3);margin-bottom:20px">10 moedas = R$ 1,00 no cofrinho no fim do mês</div>';
-  html2+='<button class="npbtn" style="width:100%;padding:14px;font-size:15px" onclick="goP(\'quiz\')">Ver níveis</button>';
-  html2+='</div>';
-  if(area)area.innerHTML=html2;
-  _quizState=null;
-  var db=load();
-  if(s.coins>0)pToast('+'+s.coins+'🪙 moedas do quiz!');
+  }
+  // Feedback banner
+  var card=document.getElementById('quiz-card');
+  if(card){
+    var fb=document.createElement('div');
+    fb.style.cssText='margin-top:12px;padding:14px;border-radius:14px;text-align:center;background:'+(acertou?'rgba(52,211,153,.15)':'rgba(248,113,113,.12)')+';border:1px solid '+(acertou?'#34d399':'#f87171');
+    fb.innerHTML=
+      '<div style="font-size:28px;margin-bottom:4px">'+(acertou?'🎉':'😔')+'</div>'+
+      '<div style="font-size:15px;font-weight:800;color:'+(acertou?'#34d399':'#f87171')+'">'+(acertou?'Correto!':'Errou...')+'</div>'+
+      (acertou?'':'<div style="font-size:12px;color:var(--t3);margin-top:4px">Correto: '+pergunta.opts[pergunta.a]+'</div>');
+    if(!allDone){
+      var nx=document.createElement('button');
+      nx.textContent='Próxima →';
+      nx.style.cssText='margin-top:10px;background:var(--acc);border:none;border-radius:10px;padding:10px 24px;color:#fff;font-size:14px;font-weight:800;cursor:pointer';
+      nx.onclick=function(){renderPauloQuiz(load());};
+      fb.appendChild(nx);
+    } else {
+      var nx=document.createElement('button');
+      nx.textContent='Ver resultado →';
+      nx.style.cssText='margin-top:10px;background:var(--acc);border:none;border-radius:10px;padding:10px 24px;color:#fff;font-size:14px;font-weight:800;cursor:pointer';
+      nx.onclick=function(){renderPauloQuiz(load());};
+      fb.appendChild(nx);
+    }
+    card.appendChild(fb);
+  }
+  if(acertou)pToast('✅ Correto! '+(acertou?'+XP':''));
+  else pToast('❌ Errou! A resposta era: '+pergunta.opts[pergunta.a]);
 }
 // ===================== FIM QUIZ =====================
 
@@ -3270,7 +3237,7 @@ function finishQuiz(){
 })();
 
 </script>
-<div id="ver" style="position:fixed;bottom:8px;left:0;right:0;text-align:center;font-size:10px;color:var(--t3);opacity:.45;z-index:99999;pointer-events:none;font-family:monospace">v1.111.524</div>
+<div id="ver" style="position:fixed;bottom:8px;left:0;right:0;text-align:center;font-size:10px;color:var(--t3);opacity:.45;z-index:99999;pointer-events:none;font-family:monospace">v1.112.525</div>
 </body>
 </html>
  
