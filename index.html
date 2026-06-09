@@ -595,13 +595,14 @@ inter-events:none}
   <div class="p-screen">
     <div class="p-section">⭐ Meus Sonhos</div>
     <div id="p-sonhos-list"></div>
-    <div class="p-addream" onclick="pEditSonho(null)">＋ Adicionar novo sonho</div>
+    <button id="p-add-sonho" style="width:100%;margin-top:12px;padding:14px;border-radius:14px;background:var(--acc);color:#fff;font-size:14px;font-weight:800;border:none;cursor:pointer">+ Novo Sonho</button>
   </div>
 </div>
 <div class="pg-paulo" id="pg-paulo-missoes">
   <div class="p-screen">
-    <div class="p-section">🎯 Missões do Mês</div>
+    <div class="p-section">🎯 Missões do Paulo</div>
     <div id="p-missoes-list"></div>
+    <button id="p-missoes-pais-btn" style="width:100%;margin-top:12px;padding:12px;border-radius:14px;background:var(--s2);color:var(--t3);font-size:13px;font-weight:700;border:1px solid var(--bdr);cursor:pointer">🔑 Modo Pais — Adicionar/Aprovar</button>
   </div>
 </div>
 <div class="pg-paulo" id="pg-paulo-conquistas">
@@ -615,21 +616,10 @@ inter-events:none}
     <div class="p-section">📋 Meus Lançamentos</div>
     <div id="p-extrato-list"></div>
   </div>
-  <div id="pg-paulo-quiz" class="pg-paulo" style="display:none">
+  <div id="pg-paulo-quiz" class="pg-paulo">
     <div class="p-screen">
       <div class="p-section">🧠 Quiz Financeiro</div>
-      <div id="quiz-coins-bar" style="display:flex;align-items:center;justify-content:space-between;background:var(--s1);border-radius:16px;padding:14px 16px;margin-bottom:16px;border:1px solid var(--bdr)">
-        <div>
-          <div style="font-size:11px;font-weight:700;text-transform:uppercase;color:var(--t3);letter-spacing:.06em">Moedas do mês</div>
-          <div id="quiz-coins-val" style="font-size:22px;font-weight:800;color:#f59e0b">🪙 0</div>
-        </div>
-        <div style="text-align:right">
-          <div style="font-size:11px;font-weight:700;text-transform:uppercase;color:var(--t3);letter-spacing:.06em">Bônus acumulado</div>
-          <div id="quiz-bonus-val" style="font-size:16px;font-weight:700;color:var(--grn)">R$ 0,00</div>
-        </div>
-      </div>
-      <div id="quiz-levels" style="display:flex;flex-direction:column;gap:10px;margin-bottom:16px"></div>
-      <div id="quiz-area" style="display:none"></div>
+      <div id="p-quiz-daily"></div>
     </div>
   </div>
 </div>
@@ -674,6 +664,7 @@ function loginAs(key){
     else{document.body.classList.remove('paulo-mode','thays-mode');}
     try{displayAvatar();}catch(ex){if(errEl)errEl.textContent='av:'+ex.message;return;}
     try{initFB();}catch(ex){if(errEl)errEl.textContent='fb:'+ex.message;}
+    valHidden=true;try{var eb=document.getElementById('eyebtn');if(eb)eb.classList.remove('on');var es=document.getElementById('eyeSlash');if(es)es.style.display='block';}catch(ex2){}
     try{updML();render('fluxo');renderLemb(load());}catch(ex){if(errEl)errEl.textContent='render:'+ex.message;}
   }catch(ex){
     if(errEl)errEl.textContent='ERRO:'+(ex.message||String(ex));
@@ -864,27 +855,21 @@ function seedThays(){
 function seedPaulo(){
   var base=seedVazio();base._owner='paulo';
   base.paulo={
-    xp:0,nivel:1,cofrinho:0,mesada:150,gasto:0,gasto_count:0,
+    xp:0,nivel:1,cofrinho:0,mesada:150,mesadaBonus:0,
     sonhos:[
-      {id:'s1',nome:'Novo jogo',emoji:'\u{1F3AE}',preco:300,guardado:0},
-      {id:'s2',nome:'Tenis novo',emoji:'\u{1F45F}',preco:200,guardado:0}
+      {id:'s1',nome:'Novo jogo',emoji:'\u{1F3AE}',meta:300,prazo:'2026-12',guardado:0,concluido:false},
+      {id:'s2',nome:'T\xeAnis novo',emoji:'\u{1F45F}',meta:200,prazo:'2026-09',guardado:0,concluido:false}
     ],
     missoes:[
-      {id:'m1',desc:'Guarde R$ 10 este m\xeas',xp:30,tipo:'guardar',meta:10,progresso:0,feita:false},
-      {id:'m2',desc:'Registre 3 compras',xp:20,tipo:'compra',meta:3,progresso:0,feita:false},
-      {id:'m3',desc:'Realize um sonho',xp:100,tipo:'sonho',meta:1,progresso:0,feita:false}
+      {id:'m1',titulo:'Guardar R$10 este m\xeas',desc:'Guarde R$10 no cofrinho at\xe9 fim do m\xeas',pontos:30,prazo:'2026-06-30',status:'ativa',criado:'2026-06-09',completadoEm:null},
+      {id:'m2',titulo:'N\xe3o gastar tudo',desc:'Guarde pelo menos R$20 da sua mesada',pontos:50,prazo:'2026-06-30',status:'ativa',criado:'2026-06-09',completadoEm:null}
     ],
-    conquistas:[
-      {id:'c1',nome:'Primeiro Real',desc:'Guardou o 1\xba real',emoji:'\u{1F947}',ok:false},
-      {id:'c2',nome:'Poupador',desc:'Guardou R$ 50',emoji:'\u{1F437}',ok:false},
-      {id:'c3',nome:'Sonhador',desc:'Criou um sonho',emoji:'\u{2B50}',ok:false},
-      {id:'c4',nome:'Realizador',desc:'Realizou um sonho',emoji:'\u{1F3C6}',ok:false},
-      {id:'c5',nome:'Her\xf3i',desc:'Guardou a mesada toda',emoji:'\u{1F9B8}',ok:false},
-      {id:'c6',nome:'Miss\xe3o OK',desc:'Completou uma miss\xe3o',emoji:'\u{1F3AF}',ok:false}
-    ]
+    trofeus:[],
+    quiz:{coins:0,monthCoins:0,lastMonth:'',streak:0,lastDate:'',answered:[],level:0}
   };
   return base;
 }
+
 function seed(){
   if(curUser&&curUser.id==='thays')return seedThays();
   if(curUser&&curUser.id==='paulo')return seedPaulo();
@@ -1738,7 +1723,7 @@ function checkMissoes(db){
 }
 function goP(id){
   if(id==='extrato'){
-    document.querySelectorAll('.pg-paulo').forEach(function(p){p.classList.remove('on');});
+    document.querySelectorAll('.pg-paulo').forEach(function(p){p.classList.remove('on');p.style.display='';});
     var ep=document.getElementById('pg-paulo-extrato');if(ep)ep.classList.add('on');
     document.querySelectorAll('.p-ni').forEach(function(n){n.classList.remove('on');});
     var db=load(),list=document.getElementById('p-extrato-list');
@@ -1753,7 +1738,7 @@ function goP(id){
     }).join('');
     return;
   }
-  document.querySelectorAll('.pg-paulo').forEach(function(p){p.classList.remove('on');});
+  document.querySelectorAll('.pg-paulo').forEach(function(p){p.classList.remove('on');p.style.display='';});
   document.querySelectorAll('.p-ni').forEach(function(n){n.classList.remove('on');});
   var pg=document.getElementById('pg-paulo-'+id);if(pg)pg.classList.add('on');
   var ni=document.getElementById('p-ni-'+id);if(ni)ni.classList.add('on');
@@ -1780,57 +1765,283 @@ function renderPauloHome(db){
   var gs=document.getElementById('p-gasto');if(gs)gs.textContent=fmt2(p.gasto||0);
 }
 function renderPauloSonhos(db){
-  if(!db.paulo)return;
+  if(!db.paulo){db.paulo=seedPaulo().paulo;save(db);}
   var el=document.getElementById('p-sonhos-list');if(!el)return;
-  var sonhos=db.paulo.sonhos||[];
-  if(!sonhos.length){el.innerHTML='<div style="text-align:center;color:#6b6b9a;padding:40px 0">Nenhum sonho ainda!<br><br>Adicione seu primeiro sonho abaixo \u{1F447}</div>';return;}
-  el.innerHTML=sonhos.map(function(s){
-    var pct=s.preco>0?Math.min(100,Math.round(s.guardado/s.preco*100)):0;
-    var done=s.guardado>=s.preco;
-    return '<div class="p-dream">'+
-      '<div class="p-dream-top">'+
-        '<div class="p-dream-emoji">'+s.emoji+'</div>'+
-        '<div class="p-dream-info">'+
-          '<div class="p-dream-name">'+(done?'\u2705 ':'')+s.nome+'</div>'+
-          '<div class="p-dream-price">R$ '+s.guardado.toLocaleString('pt-BR',{minimumFractionDigits:2})+' / R$ '+s.preco.toLocaleString('pt-BR',{minimumFractionDigits:2})+'</div>'+
+  var sonhos=(db.paulo.sonhos||[]);
+  var hoje=new Date();
+  function diasRestantes(prazo){
+    if(!prazo)return '';
+    var p=new Date(prazo+'-28');
+    var diff=Math.ceil((p-hoje)/(1000*60*60*24));
+    return diff>0?diff+' dias':'Prazo!';
+  }
+  if(!sonhos.length){
+    el.innerHTML='<div style="text-align:center;color:#6b6b9a;padding:40px 0;font-size:14px">⭐ Nenhum sonho ainda!<br><br>Adicione o que voc\xea quer conquistar!</div>';
+  } else {
+    el.innerHTML=sonhos.map(function(s){
+      var pct=s.meta>0?Math.min(100,Math.round((s.guardado||0)/s.meta*100)):0;
+      var done=(s.guardado||0)>=s.meta||s.concluido;
+      var falta=Math.max(0,s.meta-(s.guardado||0));
+      return '<div style="background:var(--s2);border-radius:18px;padding:16px;margin-bottom:12px;border:1.5px solid '+(done?'#34d399':'var(--bdr)')+'">'+
+        '<div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">'+
+          '<div style="font-size:34px;line-height:1">'+s.emoji+'</div>'+
+          '<div style="flex:1">'+
+            '<div style="font-size:15px;font-weight:800;color:var(--t1)">'+s.nome+'</div>'+
+            '<div style="font-size:11px;color:var(--t3);margin-top:2px">'+(done?'✅ Conclu\xeddo!':('Meta: R$ '+s.meta.toLocaleString('pt-BR',{minimumFractionDigits:2})+' · '+diasRestantes(s.prazo)))+'</div>'+
+          '</div>'+
+          (!done?'<button onclick="pGuardarNaSonho(\''+s.id+'\')" style="background:var(--acc);border:none;border-radius:12px;padding:8px 14px;color:#fff;font-size:12px;font-weight:800;cursor:pointer">+ Guardar</button>':'')+
         '</div>'+
-        '<button onclick="pEditSonho(\'' +s.id+ '\')" style="background:rgba(124,58,237,.15);border:none;border-radius:10px;padding:8px;font-size:13px;cursor:pointer;color:#a78bfa">\u270F\uFE0F</button>'+
-      '</div>'+
-      '<div class="p-pbar"><div class="p-pbar-fill'+(done?' done':'')+'" style="width:'+pct+'%"></div></div>'+
-      '<div style="display:flex;justify-content:space-between;align-items:center">'+
-        '<div class="p-dream-pct'+(done?' done':'')+'">'+pct+'%'+(done?' \u2014 Sonho realizado! \u{1F389}':'')+'</div>'+
-        (!done?'<button onclick="pGuardarNoSonho(\'' +s.id+ '\')" style="background:linear-gradient(135deg,#7c3aed,#a78bfa);border:none;border-radius:10px;padding:7px 12px;color:#fff;font-size:12px;font-weight:800;cursor:pointer">+ Guardar</button>':'')+
-      '</div>'+
-    '</div>';
-  }).join('');
+        '<div style="background:var(--s3);border-radius:99px;height:8px;margin-bottom:6px">'+
+          '<div style="background:'+(done?'#34d399':'var(--acc)')+';border-radius:99px;height:8px;width:'+pct+'%;transition:width .4s"></div></div>'+
+        '<div style="display:flex;justify-content:space-between;font-size:12px;color:var(--t3)">'+
+          '<span>R$ '+(s.guardado||0).toLocaleString('pt-BR',{minimumFractionDigits:2})+' guardado</span>'+
+          '<span>'+pct+'%'+(done?'':' · faltam R$ '+falta.toLocaleString('pt-BR',{minimumFractionDigits:2}))+'</span>'+
+        '</div>'+
+      '</div>';
+    }).join('');
+  }
+  var addEl=document.getElementById('p-add-sonho');
+  if(addEl)addEl.onclick=function(){pNovoSonho();};
 }
+
 function renderPauloMissoes(db){
-  if(!db.paulo)return;
+  if(!db.paulo){db.paulo=seedPaulo().paulo;save(db);}
   var el=document.getElementById('p-missoes-list');if(!el)return;
-  var ICONS={guardar:'\u{1F4B0}',compra:'\u{1F6D2}',sonho:'\u2B50'};
-  el.innerHTML=(db.paulo.missoes||[]).map(function(m){
-    var pct=m.meta>0?Math.min(100,Math.round(m.progresso/m.meta*100)):0;
-    return '<div class="p-mission'+(m.feita?' done':'')+'">'+
-      '<div class="p-mission-ico">'+(m.feita?'\u2705':(ICONS[m.tipo]||'\u{1F3AF}'))+'</div>'+
-      '<div class="p-mission-body">'+
-        '<div class="p-mission-title">'+m.desc+'</div>'+
-        '<div class="p-mission-xp">'+(m.feita?'Conclu\xedda! \u{1F389}':'+'+m.xp+' XP \xb7 '+m.progresso+'/'+m.meta)+'</div>'+
-        (!m.feita&&m.meta>1?'<div class="p-pbar" style="margin-top:6px"><div class="p-pbar-fill" style="width:'+pct+'%"></div></div>':'')+
-      '</div>'+
-    '</div>';
-  }).join('');
+  var missoes=(db.paulo.missoes||[]);
+  var statusLabels={ativa:'Ativa',aguardando:'Aguardando aprovação',aprovada:'Aprovada',expirada:'Expirada'};
+  var statusColors={ativa:'#f59e0b',aguardando:'#60a5fa',aprovada:'#34d399',expirada:'#6b7280'};
+  if(!missoes.length){
+    el.innerHTML='<div style="text-align:center;color:#6b6b9a;padding:40px 0;font-size:14px">🎯 Nenhuma miss\xe3o ainda.<br>Os pais v\xe3o adicionar em breve!</div>';
+  } else {
+    el.innerHTML=missoes.map(function(m){
+      var st=m.status||'ativa';
+      var cor=statusColors[st]||'#f59e0b';
+      var podeConcldir=st==='ativa';
+      return '<div style="background:var(--s2);border-radius:18px;padding:16px;margin-bottom:12px;border:1.5px solid '+(st==='aprovada'?'#34d399':'var(--bdr)')+'">'+
+        '<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px">'+
+          '<div style="font-size:14px;font-weight:800;color:var(--t1);flex:1;padding-right:8px">'+m.titulo+'</div>'+
+          '<div style="font-size:10px;font-weight:700;padding:3px 8px;border-radius:99px;background:'+cor+'22;color:'+cor+';white-space:nowrap">'+statusLabels[st]+'</div>'+
+        '</div>'+
+        '<div style="font-size:12px;color:var(--t3);margin-bottom:10px">'+m.desc+'</div>'+
+        '<div style="display:flex;justify-content:space-between;align-items:center">'+
+          '<div style="font-size:12px;color:#f59e0b;font-weight:700">🏆 '+m.pontos+' pontos'+(m.prazo?' · At\xe9 '+m.prazo.split('-').reverse().slice(0,2).join('/'):'')+'</div>'+
+          (podeConcldir?'<button onclick="pConcluirMissao(\''+m.id+'\')" style="background:var(--acc);border:none;border-radius:10px;padding:7px 14px;color:#fff;font-size:12px;font-weight:800;cursor:pointer">✓ Conclu\xed!</button>':
+           st==='aguardando'?'<div style="font-size:11px;color:#60a5fa">Aguardando pais...</div>':
+           st==='aprovada'?'<div style="font-size:11px;color:#34d399">✅ +'+m.pontos+' pts</div>':'')+
+        '</div>'+
+      '</div>';
+    }).join('');
+  }
+  // Botão modo pais
+  var paiBtn=document.getElementById('p-missoes-pais-btn');
+  if(paiBtn)paiBtn.onclick=function(){pModoParent('missoes');};
 }
+
 function renderPauloConquistas(db){
-  if(!db.paulo)return;
+  if(!db.paulo){db.paulo=seedPaulo().paulo;save(db);}
   var el=document.getElementById('p-conquistas-list');if(!el)return;
-  el.innerHTML=(db.paulo.conquistas||[]).map(function(c){
-    return '<div class="p-badge'+(c.ok?'':' locked')+'">'+
-      '<div class="p-badge-ico">'+c.emoji+'</div>'+
-      '<div class="p-badge-name">'+c.nome+'</div>'+
-      '<div class="p-badge-desc">'+(c.ok?c.desc:'???')+'</div>'+
-    '</div>';
-  }).join('');
+  var trofeus=(db.paulo.trofeus||[]);
+  var q=db.paulo.quiz||{coins:0,monthCoins:0,streak:0};
+  var missOK=(db.paulo.missoes||[]).filter(function(m){return m.status==='aprovada';});
+  var sonhosOK=(db.paulo.sonhos||[]).filter(function(s){return s.concluido||(s.guardado||0)>=s.meta;});
+  var bonus=Math.floor((q.monthCoins||0)/5);
+
+  var html2='';
+  // Quiz stats
+  html2+='<div style="background:var(--s2);border-radius:18px;padding:16px;margin-bottom:16px;border:1px solid var(--bdr)">';
+  html2+='<div style="font-size:13px;font-weight:800;color:var(--t2);margin-bottom:12px;text-transform:uppercase;letter-spacing:.05em">🧠 Quiz Financeiro</div>';
+  html2+='<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:12px">';
+  html2+='<div style="text-align:center"><div style="font-size:22px">🔥</div><div style="font-size:18px;font-weight:900;color:var(--acc)">'+(q.streak||0)+'</div><div style="font-size:10px;color:var(--t3)">Sequência</div></div>';
+  html2+='<div style="text-align:center"><div style="font-size:22px">🪙</div><div style="font-size:18px;font-weight:900;color:#f59e0b">'+(q.monthCoins||0)+'</div><div style="font-size:10px;color:var(--t3)">Moedas/mês</div></div>';
+  html2+='<div style="text-align:center"><div style="font-size:22px">💰</div><div style="font-size:18px;font-weight:900;color:#34d399">R$'+bonus+',00</div><div style="font-size:10px;color:var(--t3)">Bônus mesada</div></div>';
+  html2+='</div>';
+  // monthly progress bar
+  var pctBonus=Math.min(100,Math.round((q.monthCoins||0)/50*100));
+  html2+='<div style="font-size:11px;color:var(--t3);margin-bottom:4px">Progresso para bônus de R$10: '+(q.monthCoins||0)+'/50 moedas</div>';
+  html2+='<div style="background:var(--s3);border-radius:99px;height:6px"><div style="background:#f59e0b;border-radius:99px;height:6px;width:'+pctBonus+'%"></div></div>';
+  html2+='</div>';
+  // Missions completed
+  html2+='<div style="background:var(--s2);border-radius:18px;padding:16px;margin-bottom:16px;border:1px solid var(--bdr)">';
+  html2+='<div style="font-size:13px;font-weight:800;color:var(--t2);margin-bottom:10px;text-transform:uppercase;letter-spacing:.05em">🎯 Missões Aprovadas</div>';
+  if(!missOK.length){
+    html2+='<div style="text-align:center;color:var(--t3);font-size:13px;padding:8px">Nenhuma missão aprovada ainda</div>';
+  } else {
+    missOK.forEach(function(m){
+      html2+='<div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--bdr)"><span style="font-size:13px;color:var(--t1)">'+m.titulo+'</span><span style="font-size:12px;color:#34d399;font-weight:700">+'+m.pontos+' pts</span></div>';
+    });
+  }
+  html2+='</div>';
+  // Dreams completed
+  if(sonhosOK.length){
+    html2+='<div style="background:var(--s2);border-radius:18px;padding:16px;margin-bottom:16px;border:1px solid #34d399">';
+    html2+='<div style="font-size:13px;font-weight:800;color:var(--t2);margin-bottom:10px;text-transform:uppercase;letter-spacing:.05em">⭐ Sonhos Realizados</div>';
+    sonhosOK.forEach(function(s){
+      html2+='<div style="display:flex;align-items:center;gap:8px;padding:6px 0"><span style="font-size:20px">'+s.emoji+'</span><span style="font-size:13px;color:var(--t1)">'+s.nome+'</span><span style="margin-left:auto;font-size:12px;color:#34d399">✅</span></div>';
+    });
+    html2+='</div>';
+  }
+  // Trophies
+  if(trofeus.length){
+    html2+='<div style="background:var(--s2);border-radius:18px;padding:16px;border:1px solid var(--bdr)">';
+    html2+='<div style="font-size:13px;font-weight:800;color:var(--t2);margin-bottom:10px;text-transform:uppercase;letter-spacing:.05em">🏆 Troféus</div>';
+    trofeus.forEach(function(t){
+      html2+='<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--bdr)"><span style="font-size:24px">'+t.emoji+'</span><div><div style="font-size:13px;font-weight:700;color:var(--t1)">'+t.titulo+'</div><div style="font-size:11px;color:var(--t3)">'+t.desc+'</div></div></div>';
+    });
+    html2+='</div>';
+  }
+  el.innerHTML=html2;
 }
+
+function pConcluirMissao(id){
+  var db=load();if(!db.paulo||!db.paulo.missoes)return;
+  var m=db.paulo.missoes.find(function(x){return x.id===id;});
+  if(!m||m.status!=='ativa')return;
+  m.status='aguardando';
+  m.completadoEm=new Date().toISOString().split('T')[0];
+  save(db);renderPauloMissoes(db);
+  pToast('Missão enviada para aprovação dos pais!');
+}
+function pModoParent(context){
+  document.getElementById('stitle').textContent='🔑 Acesso dos Pais';
+  document.getElementById('sbody').innerHTML=
+    '<div style="text-align:center;font-size:13px;color:var(--t3);margin-bottom:16px">Digite seu PIN para gerenciar</div>'+
+    '<input id="p-parent-pin" type="tel" inputmode="numeric" maxlength="4" class="ainp" placeholder="PIN" style="font-size:28px;letter-spacing:10px;text-align:center" autocomplete="off">'+
+    '<div id="p-parent-err" style="min-height:16px;font-size:12px;color:var(--red);text-align:center;margin-top:8px"></div>';
+  var btn=document.createElement('button');btn.className='savebtn';btn.textContent='Entrar como pai/mãe';
+  btn.onclick=function(){
+    var pin=document.getElementById('p-parent-pin').value;
+    if(pin!=='2505'&&pin!=='0609'){
+      document.getElementById('p-parent-err').textContent='PIN inválido';return;
+    }
+    closeSH();
+    if(context==='missoes')pPaisMissoes();
+    if(context==='sonho_add')pPaisAddSonho();
+  };
+  document.getElementById('sbody').appendChild(btn);
+  document.getElementById('sbg').classList.add('on');
+  setTimeout(function(){var i=document.getElementById('p-parent-pin');if(i)i.focus();},300);
+}
+function pPaisMissoes(){
+  var db=load();if(!db.paulo)db.paulo=seedPaulo().paulo;
+  var pendentes=(db.paulo.missoes||[]).filter(function(m){return m.status==='aguardando';});
+  document.getElementById('stitle').textContent='🎯 Gerenciar Missões';
+  var html2='';
+  if(pendentes.length){
+    html2+='<div style="font-size:12px;font-weight:700;color:var(--t3);margin-bottom:8px;text-transform:uppercase">Aguardando Aprovação</div>';
+    pendentes.forEach(function(m){
+      html2+='<div style="background:var(--s2);border-radius:12px;padding:12px;margin-bottom:8px">'+
+        '<div style="font-size:13px;font-weight:700;margin-bottom:6px">'+m.titulo+'</div>'+
+        '<div style="display:flex;gap:8px">'+
+          '<button onclick="pAprovarMissao(\''+m.id+'\')" style="flex:1;padding:8px;background:#34d39922;color:#34d399;border:1px solid #34d399;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer">✅ Aprovar</button>'+
+          '<button onclick="pRejeitarMissao(\''+m.id+'\')" style="flex:1;padding:8px;background:#f8717122;color:#f87171;border:1px solid #f87171;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer">❌ Rejeitar</button>'+
+        '</div></div>';
+    });
+  }
+  html2+='<div style="font-size:12px;font-weight:700;color:var(--t3);margin:12px 0 8px;text-transform:uppercase">Nova Missão</div>';
+  html2+='<input id="pm-titulo" type="text" class="ainp" placeholder="Título da missão" style="margin-bottom:8px">'+
+    '<input id="pm-desc" type="text" class="ainp" placeholder="Descrição" style="margin-bottom:8px">'+
+    '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px">'+
+      '<input id="pm-pts" type="number" class="ainp" placeholder="Pontos (ex: 30)">'+
+      '<input id="pm-prazo" type="date" class="ainp">'+
+    '</div>';
+  document.getElementById('sbody').innerHTML=html2;
+  var btn=document.createElement('button');btn.className='savebtn';btn.textContent='+ Adicionar Missão';
+  btn.onclick=function(){
+    var t=document.getElementById('pm-titulo').value.trim();
+    var d=document.getElementById('pm-desc').value.trim();
+    var p=parseInt(document.getElementById('pm-pts').value)||20;
+    var pr=document.getElementById('pm-prazo').value;
+    if(!t){toast('Digite um título');return;}
+    var db=load();if(!db.paulo.missoes)db.paulo.missoes=[];
+    db.paulo.missoes.push({id:uid(),titulo:t,desc:d,pontos:p,prazo:pr,status:'ativa',criado:new Date().toISOString().split('T')[0],completadoEm:null});
+    save(db);closeSH();renderPauloMissoes(db);pToast('Missão adicionada!');
+  };
+  document.getElementById('sbody').appendChild(btn);
+  document.getElementById('sbg').classList.add('on');
+}
+function pAprovarMissao(id){
+  var db=load();if(!db.paulo)return;
+  var m=db.paulo.missoes.find(function(x){return x.id===id;});
+  if(!m)return;
+  m.status='aprovada';
+  db.paulo.coins=(db.paulo.coins||0)+m.pontos;
+  if(!db.paulo.trofeus)db.paulo.trofeus=[];
+  db.paulo.trofeus.push({id:uid(),emoji:'🎯',titulo:'Missão concluída',desc:m.titulo+' (+'+m.pontos+' pts)',data:new Date().toISOString().split('T')[0]});
+  save(db);closeSH();
+  setTimeout(function(){pPaisMissoes();},100);
+  pToast('Missão aprovada! +'+m.pontos+' pts');
+}
+function pRejeitarMissao(id){
+  var db=load();if(!db.paulo)return;
+  var m=db.paulo.missoes.find(function(x){return x.id===id;});
+  if(!m)return;
+  m.status='ativa';m.completadoEm=null;
+  save(db);closeSH();
+  setTimeout(function(){pPaisMissoes();},100);
+  pToast('Missão devolvida para Paulo');
+}
+function pNovoSonho(){
+  document.getElementById('stitle').textContent='⭐ Novo Sonho';
+  var emojis=['\u{1F3AE}','\u{1F45F}','\u{1F4F1}','\u{1F6B2}','\u{1F3B5}','\u{1F4DA}','\u{1F48E}','\u{1F680}','\u{1F3C6}','\u{1F3A8}'];
+  document.getElementById('sbody').innerHTML=
+    '<div class="field"><label>Nome do sonho</label><input id="ps-nome" type="text" class="ainp" placeholder="Ex: Novo jogo, Viagem..."></div>'+
+    '<div class="field"><label>Emoji</label><div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:4px">'+
+      emojis.map(function(e){return '<button type="button" onclick="pSelEmojiSonho(this,\''+e+'\')" style="font-size:22px;background:var(--s2);border:2px solid var(--bdr);border-radius:10px;padding:6px 10px;cursor:pointer">'+e+'</button>';}).join('')+
+    '</div><input id="ps-emoji" type="hidden" value="'+emojis[0]+'"></div>'+
+    '<div class="field"><label>Valor meta (R$)</label><input id="ps-meta" type="text" inputmode="decimal" class="ainp" placeholder="0,00" oninput="moneyMask(this)"></div>'+
+    '<div class="field"><label>Prazo (mês)</label><input id="ps-prazo" type="month" class="ainp"></div>';
+  var btn=document.createElement('button');btn.className='savebtn';btn.textContent='Criar Sonho ⭐';
+  btn.onclick=function(){
+    var nome=document.getElementById('ps-nome').value.trim();
+    var emoji=document.getElementById('ps-emoji').value;
+    var meta=parseMoney(document.getElementById('ps-meta').value);
+    var prazo=document.getElementById('ps-prazo').value;
+    if(!nome||!meta||!prazo){toast('Preencha todos os campos');return;}
+    var db=load();if(!db.paulo.sonhos)db.paulo.sonhos=[];
+    db.paulo.sonhos.push({id:uid(),nome:nome,emoji:emoji,meta:meta,prazo:prazo,guardado:0,concluido:false});
+    save(db);closeSH();renderPauloSonhos(db);pToast('Sonho criado! ⭐');
+  };
+  document.getElementById('sbody').appendChild(btn);
+  document.getElementById('sbg').classList.add('on');
+  setTimeout(function(){document.getElementById('ps-nome').focus();},300);
+}
+function pSelEmojiSonho(btn,emoji){
+  document.querySelectorAll('#sbody button[type=button]').forEach(function(b){b.style.borderColor='var(--bdr)';});
+  btn.style.borderColor='var(--acc)';
+  document.getElementById('ps-emoji').value=emoji;
+}
+function pGuardarNaSonho(id){
+  var db=load();if(!db.paulo||!db.paulo.sonhos)return;
+  var s=db.paulo.sonhos.find(function(x){return x.id===id;});if(!s)return;
+  var falta=Math.max(0,s.meta-(s.guardado||0));
+  document.getElementById('stitle').textContent=s.emoji+' Guardar para '+s.nome;
+  document.getElementById('sbody').innerHTML=
+    '<div style="text-align:center;margin-bottom:16px">'+
+      '<div style="font-size:48px">'+s.emoji+'</div>'+
+      '<div style="font-size:13px;color:var(--t3);margin-top:8px">Faltam R$ '+falta.toLocaleString('pt-BR',{minimumFractionDigits:2})+'</div>'+
+    '</div>'+
+    '<input id="p-sonho-val" type="text" inputmode="decimal" class="ainp" placeholder="0,00" oninput="moneyMask(this)" style="font-size:22px">';
+  var btn=document.createElement('button');btn.className='savebtn';btn.textContent='Guardar neste sonho';
+  btn.onclick=function(){
+    var v=parseMoney(document.getElementById('p-sonho-val').value);
+    if(!v||v<=0){toast('Digite um valor');return;}
+    var db2=load();
+    var idx=db2.paulo.sonhos.findIndex(function(x){return x.id===id;});if(idx<0)return;
+    db2.paulo.sonhos[idx].guardado=Math.min(db2.paulo.sonhos[idx].meta,(db2.paulo.sonhos[idx].guardado||0)+v);
+    var done=db2.paulo.sonhos[idx].guardado>=db2.paulo.sonhos[idx].meta;
+    if(done){
+      db2.paulo.sonhos[idx].concluido=true;
+      if(!db2.paulo.trofeus)db2.paulo.trofeus=[];
+      db2.paulo.trofeus.push({id:uid(),emoji:'⭐',titulo:'Sonho realizado!',desc:s.nome+' concluído!',data:new Date().toISOString().split('T')[0]});
+    }
+    save(db2);closeSH();renderPauloSonhos(db2);
+    pToast(done?'Sonho realizado! ⭐':'+R$ '+v.toLocaleString('pt-BR',{minimumFractionDigits:2})+' guardado!');
+  };
+  document.getElementById('sbody').appendChild(btn);
+  document.getElementById('sbg').classList.add('on');
+  setTimeout(function(){document.getElementById('p-sonho-val').focus();},300);
+}
+
 function pGuardar(){
   document.getElementById('stitle').textContent='\u{1F4B0} Guardar Dinheiro';
   document.getElementById('sbody').innerHTML=
@@ -2535,57 +2746,121 @@ var _quizState=null; // {questions,idx,score,coins,level}
 
 function renderPauloQuiz(db){
   if(!db||!db.paulo)return;
-  var q=db.paulo.quiz||(db.paulo.quiz={coins:0,monthCoins:0,lastMonth:'',answered:[],level:0});
-  // Check monthly reset
-  var nowMonth=curMes;
-  if(q.lastMonth && q.lastMonth!==nowMonth){
-    // New month: convert coins to bonus, reset
-    if(q.monthCoins>0){
-      var bonus=Math.floor(q.monthCoins/10)*1; // 10 coins = R$1
-      db.paulo.cofrinho=(db.paulo.cofrinho||0)+bonus;
-      pToast('🎉 Quiz bônus: R$ '+bonus+',00 no cofrinho!');
+  if(!db.paulo.quiz)db.paulo.quiz={coins:0,monthCoins:0,lastMonth:'',streak:0,lastDate:'',answered:[],level:0};
+  var q=db.paulo.quiz;
+  var today=new Date().toISOString().split('T')[0];
+  var curMonth=today.slice(0,7);
+  // Monthly reset
+  if(q.lastMonth&&q.lastMonth!==curMonth&&q.monthCoins>0){
+    var bonus=Math.floor(q.monthCoins/5);
+    db.paulo.mesadaBonus=(db.paulo.mesadaBonus||0)+bonus;
+    if(!db.paulo.trofeus)db.paulo.trofeus=[];
+    if(bonus>0){
+      db.paulo.trofeus.push({id:uid(),emoji:'\U0001f4b0',titulo:'Bônus de mesada',desc:'Ganhou R$'+bonus+',00 de bônus pelo quiz de '+q.lastMonth,data:today});
+      pToast('\U0001f389 Bônus R$'+bonus+',00 na mesada!');
     }
-    q.monthCoins=0;q.answered=[];q.lastMonth=nowMonth;
-    save(db);
+    q.monthCoins=0;q.lastMonth=curMonth;save(db);
   }
-  if(!q.lastMonth)q.lastMonth=nowMonth;
-
-  // Update coins display
-  var cv=document.getElementById('quiz-coins-val');
-  var bv=document.getElementById('quiz-bonus-val');
-  if(cv)cv.textContent='🪙 '+q.monthCoins;
-  if(bv)bv.textContent='R$ '+(Math.floor(q.monthCoins/10)).toFixed(2).replace('.',',');
-
-  // Show level cards
-  var lvDiv=document.getElementById('quiz-levels');
-  if(!lvDiv)return;
-  var html2='';
-  for(var lv=0;lv<3;lv++){
-    var avail=QUIZ_QUESTIONS.filter(function(qq){return qq.lv===lv&&q.answered.indexOf(QUIZ_QUESTIONS.indexOf(qq))<0;});
-    var done=QUIZ_QUESTIONS.filter(function(qq,ii){return qq.lv===lv&&q.answered.indexOf(ii)>=0;}).length;
-    var total=QUIZ_QUESTIONS.filter(function(qq){return qq.lv===lv;}).length;
-    var locked=lv>0&&q.level<lv;
-    html2+='<div style="background:var(--s1);border-radius:16px;padding:16px;border:1.5px solid '+(locked?'var(--bdr)':'var(--acc)')+';opacity:'+(locked?'.5':'1')+'">';
-    html2+='<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">';
-    html2+='<div style="font-size:15px;font-weight:800">'+QUIZ_LVL_NAMES[lv]+'</div>';
-    html2+='<div style="font-size:12px;color:var(--t3)">'+done+'/'+total+' feitas · '+QUIZ_LVL_COINS[lv]+'🪙 cada</div>';
-    html2+='</div>';
-    // Progress bar
-    html2+='<div style="background:var(--bdr);border-radius:99px;height:6px;margin-bottom:10px">';
-    html2+='<div style="background:var(--acc);border-radius:99px;height:6px;width:'+(total>0?Math.round(done/total*100):0)+'%"></div></div>';
-    if(!locked&&avail.length>0){
-      html2+='<button class="npbtn" style="width:100%;padding:12px;font-size:14px" onclick="startQuiz('+lv+')">▶ Jogar '+QUIZ_LVL_NAMES[lv]+'</button>';
-    } else if(avail.length===0){
-      html2+='<div style="text-align:center;font-size:13px;color:var(--grn);font-weight:700">✅ Nível completo!</div>';
-    } else {
-      html2+='<div style="text-align:center;font-size:12px;color:var(--t3)">🔒 Complete o nível anterior</div>';
-    }
-    html2+='</div>';
+  if(!q.lastMonth)q.lastMonth=curMonth;
+  var el=document.getElementById('p-quiz-daily');if(!el)return;
+  var alreadyPlayed=q.lastDate===today;
+  // Stats bar
+  var streakCoins=q.streak>=7?15:q.streak>=4?10:5;
+  var pctM=Math.min(100,Math.round((q.monthCoins||0)/50*100));
+  var statsHtml=
+    '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:16px">'+
+      '<div style="background:var(--s2);border-radius:14px;padding:12px 8px;text-align:center">'+
+        '<div style="font-size:24px">\U0001f525</div>'+
+        '<div style="font-size:20px;font-weight:900;color:var(--acc)">'+(q.streak||0)+'</div>'+
+        '<div style="font-size:10px;color:var(--t3)">Sequência</div>'+
+      '</div>'+
+      '<div style="background:var(--s2);border-radius:14px;padding:12px 8px;text-align:center">'+
+        '<div style="font-size:24px">\U0001fa99</div>'+
+        '<div style="font-size:20px;font-weight:900;color:#f59e0b">'+(q.monthCoins||0)+'</div>'+
+        '<div style="font-size:10px;color:var(--t3)">Moedas/mês</div>'+
+      '</div>'+
+      '<div style="background:var(--s2);border-radius:14px;padding:12px 8px;text-align:center">'+
+        '<div style="font-size:24px">\U0001f4b0</div>'+
+        '<div style="font-size:20px;font-weight:900;color:#34d399">R$'+Math.floor((q.monthCoins||0)/5)+',00</div>'+
+        '<div style="font-size:10px;color:var(--t3)">Bônus acum.</div>'+
+      '</div>'+
+    '</div>'+
+    '<div style="font-size:11px;color:var(--t3);margin-bottom:4px">Progresso para R$10 extra: '+(q.monthCoins||0)+'/50 moedas</div>'+
+    '<div style="background:var(--s3);border-radius:99px;height:6px;margin-bottom:16px">'+
+      '<div style="background:#f59e0b;border-radius:99px;height:6px;width:'+pctM+'%"></div></div>';
+  if(alreadyPlayed){
+    el.innerHTML=statsHtml+
+      '<div style="background:var(--s2);border-radius:18px;padding:24px 16px;text-align:center;border:1.5px solid var(--acc)">'+
+        '<div style="font-size:48px;margin-bottom:8px">\U0001f31f</div>'+
+        '<div style="font-size:16px;font-weight:800;color:var(--t1);margin-bottom:4px">Desafio de hoje concluído!</div>'+
+        '<div style="font-size:13px;color:var(--t3)">Volte amanhã para manter sua sequência de '+(q.streak||0)+' dias!</div>'+
+      '</div>';
+    return;
   }
-  lvDiv.innerHTML=html2;
-  document.getElementById('quiz-area').style.display='none';
-  document.getElementById('quiz-levels').style.display='flex';
-  document.getElementById('quiz-levels').style.flexDirection='column';
+  // Select daily question
+  var allQ=typeof QUIZ_QUESTIONS!=='undefined'?QUIZ_QUESTIONS:[];
+  if(!allQ.length){el.innerHTML='<div style="text-align:center;padding:40px;color:var(--t3)">Perguntas não carregadas</div>';return;}
+  var qIdx=(q.answered?q.answered.length:0)%allQ.length;
+  var pergunta=allQ[qIdx];
+  // Shuffle options
+  var opts=pergunta.opts.slice();
+  var correto=opts[0];
+  // Show question
+  el.innerHTML=statsHtml+
+    '<div style="background:var(--s2);border-radius:18px;padding:18px;border:1.5px solid var(--acc)">'+
+      '<div style="font-size:11px;font-weight:700;text-transform:uppercase;color:var(--acc);letter-spacing:.06em;margin-bottom:8px">Desafio do dia · +'+streakCoins+'\U0001fa99 se acertar</div>'+
+      '<div style="font-size:16px;font-weight:800;color:var(--t1);margin-bottom:16px;line-height:1.4">'+pergunta.q+'</div>'+
+      opts.map(function(opt,i){
+        return '<button onclick="pResponderQuiz('+qIdx+','+i+')" style="display:block;width:100%;text-align:left;padding:12px 16px;margin-bottom:8px;background:var(--s3);border:1.5px solid var(--bdr);border-radius:12px;color:var(--t1);font-size:14px;font-weight:600;cursor:pointer">'+opt+'</button>';
+      }).join('')+
+    '</div>';
+}
+function pResponderQuiz(qIdx,chosenIdx){
+  var db=load();
+  if(!db.paulo||!db.paulo.quiz)return;
+  var q=db.paulo.quiz;
+  var today=new Date().toISOString().split('T')[0];
+  if(q.lastDate===today)return;
+  var allQ=typeof QUIZ_QUESTIONS!=='undefined'?QUIZ_QUESTIONS:[];
+  var pergunta=allQ[qIdx];
+  if(!pergunta)return;
+  var acertou=chosenIdx===0; // first option is always correct
+  var streakCoins=q.streak>=7?15:q.streak>=4?10:5;
+  if(acertou){
+    q.streak=(q.streak||0)+1;
+    q.coins=(q.coins||0)+streakCoins;
+    q.monthCoins=(q.monthCoins||0)+streakCoins;
+  } else {
+    q.streak=0;
+  }
+  q.lastDate=today;
+  if(!q.answered)q.answered=[];
+  q.answered.push({date:today,qIdx:qIdx,correct:acertou});
+  // Check trophy milestones
+  if(!db.paulo.trofeus)db.paulo.trofeus=[];
+  if(q.streak===7)db.paulo.trofeus.push({id:uid(),emoji:'\U0001f525',titulo:'Semana em chamas!',desc:'7 dias seguidos no quiz',data:today});
+  if(q.streak===30)db.paulo.trofeus.push({id:uid(),emoji:'\U0001f451',titulo:'Mestre do quiz',desc:'30 dias seguidos!',data:today});
+  save(db);
+  // Show result overlay
+  var el=document.getElementById('p-quiz-daily');
+  if(!el)return;
+  var acertouHtml=
+    '<div style="background:'+(acertou?'#34d39922':'#f8717122')+';border:1.5px solid '+(acertou?'#34d399':'#f87171')+';border-radius:18px;padding:24px;text-align:center;margin-top:8px">'+
+      '<div style="font-size:48px;margin-bottom:8px">'+(acertou?'\U0001f389':'\U0001f614')+'</div>'+
+      '<div style="font-size:16px;font-weight:800;color:var(--t1);margin-bottom:4px">'+(acertou?'Acertou!':'Errou...')+'</div>'+
+      '<div style="font-size:13px;color:var(--t3);margin-bottom:8px">'+(acertou?'+'+streakCoins+' moedas! Sequência: '+q.streak+' dias':('Sequência zerada. A resposta era: '+pergunta.opts[0]))+'</div>'+
+    '</div>';
+  // Append to question area
+  var cards=el.querySelectorAll('button');
+  cards.forEach(function(b,i){
+    b.disabled=true;
+    b.style.opacity=i===0?'1':'0.5';
+    b.style.borderColor=i===0?'#34d399':'var(--bdr)';
+    if(i===chosenIdx&&!acertou)b.style.borderColor='#f87171';
+  });
+  el.insertAdjacentHTML('beforeend',acertouHtml);
+  if(acertou)pToast('+'+streakCoins+' moedas! \U0001f525 '+q.streak+' dias!');
+  else pToast('\U0001f614 Errou! Tente amanhã');
 }
 
 function startQuiz(lv){
@@ -2767,18 +3042,25 @@ function finishQuiz(){
     updML();
   }catch(e){}
 
-  // Expose Paulo/quiz functions globally so onclick attributes work
+  // Expose Paulo functions globally
   window.goP=goP;
-  window.startQuiz=startQuiz;
-  window.showQuizQuestion=showQuizQuestion;
-  window.answerQuiz=answerQuiz;
-  window.finishQuiz=finishQuiz;
   window.renderPauloHome=renderPauloHome;
+  window.renderPauloSonhos=renderPauloSonhos;
+  window.renderPauloMissoes=renderPauloMissoes;
+  window.renderPauloConquistas=renderPauloConquistas;
   window.renderPauloQuiz=renderPauloQuiz;
+  window.pConcluirMissao=pConcluirMissao;
+  window.pModoParent=pModoParent;
+  window.pAprovarMissao=pAprovarMissao;
+  window.pRejeitarMissao=pRejeitarMissao;
+  window.pNovoSonho=pNovoSonho;
+  window.pGuardarNaSonho=pGuardarNaSonho;
+  window.pSelEmojiSonho=pSelEmojiSonho;
+  window.pResponderQuiz=pResponderQuiz;
 })();
 
 </script>
-<div id="ver" style="position:fixed;bottom:8px;left:0;right:0;text-align:center;font-size:10px;color:var(--t3);opacity:.45;z-index:99999;pointer-events:none;font-family:monospace">v1.107.513</div>
+<div id="ver" style="position:fixed;bottom:8px;left:0;right:0;text-align:center;font-size:10px;color:var(--t3);opacity:.45;z-index:99999;pointer-events:none;font-family:monospace">v1.107.514</div>
 </body>
 </html>
  
