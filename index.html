@@ -255,7 +255,7 @@ inter-events:none}
   <div class="lockscreen" id="lockscreen">
     <div style="font-size:30px;font-weight:900;letter-spacing:-.5px;margin-bottom:4px">PAX<span style="color:var(--acc)">.</span></div>
     <div style="font-size:13px;color:var(--t3);margin-bottom:48px">Financeiro pessoal</div>
-    <form id="loginForm" onsubmit="return doLogin()" style="display:flex;flex-direction:column;gap:14px;width:100%;max-width:300px">
+    <form id="loginForm" onsubmit="doLogin(event);return false;" style="display:flex;flex-direction:column;gap:14px;width:100%;max-width:300px">
       <label style="font-size:13px;font-weight:700;color:var(--t2);margin-bottom:-4px">Quem é você?</label>
       <select id="userSelect" style="width:100%;padding:16px 14px;font-size:17px;font-weight:600;border-radius:16px;border:2px solid var(--bdr2);background:var(--s1);color:var(--t1);outline:none;appearance:none;-webkit-appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23888' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 14px center;padding-right:40px">
         <option value="">-- Selecionar --</option>
@@ -2433,12 +2433,29 @@ function resetData(){localStorage.removeItem(KEY);_db=null;load();render('fluxo'
 
   window.loginAs=function(key){_doLoginUser(_umap[key]);};
 
-  window.doLogin=function(){
-    var sel=document.getElementById('userSelect');
-    var err=document.getElementById('loginErr');
-    if(!sel||!sel.value){if(err)err.textContent='Selecione uma pessoa primeiro';return false;}
-    if(err)err.textContent='';
-    _doLoginUser(_umap[sel.value]);
+  window.doLogin=function(e){
+    if(e&&e.preventDefault)e.preventDefault();
+    var errEl=document.getElementById('loginErr');
+    try{
+      var sel=document.getElementById('userSelect');
+      if(!sel||!sel.value){if(errEl)errEl.textContent='Selecione uma pessoa primeiro';return false;}
+      if(errEl)errEl.textContent='Carregando...';
+      var u=_umap[sel.value];
+      if(!u){if(errEl)errEl.textContent='Usuário inválido: '+sel.value;return false;}
+      curUser=u;
+      KEY='pax_fin_'+u.fbPath;
+      _db=null;_fbReady=false;_fbSynced=false;_fbRef=null;
+      if(u.id!=='leandro'){try{localStorage.removeItem(KEY);localStorage.removeItem('pax_fin_'+u.id);}catch(ex){}}
+      try{document.getElementById('lockscreen').style.display='none';}catch(ex){if(errEl)errEl.textContent='lockscreen:'+ex.message;return false;}
+      document.body.classList.remove('locked');
+      try{displayAvatar();}catch(ex){if(errEl)errEl.textContent='avatar:'+ex.message;}
+      try{initFB();}catch(ex){if(errEl)errEl.textContent='fb:'+ex.message;}
+      try{updML();}catch(ex){}
+      try{render('fluxo');}catch(ex){if(errEl)errEl.textContent='render:'+ex.message;}
+      try{renderLemb(load());}catch(ex){}
+    }catch(ex){
+      if(errEl)errEl.textContent='ERRO: '+(ex&&ex.message?ex.message:String(ex));
+    }
     return false;
   };
 
