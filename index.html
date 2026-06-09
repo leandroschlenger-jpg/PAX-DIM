@@ -656,7 +656,6 @@ function numpad(n){
           }
           document.getElementById('lockscreen').style.display='none';
           document.body.classList.remove('locked');
-          document.getElementById('lockerr').textContent='';
           displayAvatar();
           if(u.id==='paulo'){document.body.classList.add('paulo-mode');document.body.classList.remove('thays-mode');}
           else if(u.id==='thays'){document.body.classList.add('thays-mode');document.body.classList.remove('paulo-mode');}
@@ -665,13 +664,12 @@ function numpad(n){
           initFB();
         } else {
           document.querySelectorAll('.lock-dot').forEach(function(d){d.classList.add('error');});
-          document.getElementById('lockerr').textContent='Senha incorreta';
           setTimeout(function(){
             pinEntered='';updateDots();
             document.querySelectorAll('.lock-dot').forEach(function(d){d.classList.remove('error');});
           },800);
         }
-      },200);
+      }catch(e){}},200);
     }
   }
 }
@@ -702,7 +700,7 @@ function openAvatarMenu(){
   document.getElementById('sbody').innerHTML=
     '<div style="display:flex;flex-direction:column;align-items:center;gap:12px;padding:8px 0">'+
     '<div style="width:80px;height:80px;border-radius:50%;overflow:hidden;background:var(--s2);display:flex;align-items:center;justify-content:center;font-size:32px;font-weight:800;color:var(--acc)">'+(stored?'<img src="'+stored+'" style="width:100%;height:100%;object-fit:cover">':curUser.nome.charAt(0).toUpperCase())+'</div>'+
-    '<button onclick="document.getElementById('avatarInput').click()" style="padding:10px 24px;border-radius:20px;background:var(--acc);color:#fff;font-weight:700;font-size:14px;border:none;width:100%">📷 Mudar foto de perfil</button>'+
+    '<button onclick="document.getElementById(\'avatarInput\').click()" style="padding:10px 24px;border-radius:20px;background:var(--acc);color:#fff;font-weight:700;font-size:14px;border:none;width:100%">📷 Mudar foto de perfil</button>'+
     (stored?'<button onclick="removeAvatar()" style="padding:10px 24px;border-radius:20px;background:var(--s2);color:var(--t2);font-weight:700;font-size:14px;border:1px solid var(--bdr);width:100%">🗑 Remover foto</button>':'')+
     '<hr style="border:none;border-top:1px solid var(--bdr);width:100%;margin:4px 0">'+
     '<button onclick="closeSH();setTimeout(trocarUsuario,200)" style="padding:10px 24px;border-radius:20px;background:var(--s3);color:var(--t2);font-weight:700;font-size:14px;border:1px solid var(--bdr);width:100%">🔄 Trocar usuário</button>'+
@@ -2002,7 +2000,7 @@ function renderResumo(db){
     '<div style="height:1px;background:var(--bdr);margin:14px 0"></div>'+
     '<div class="prow"><span>Investimentos + Saldos</span><span style="color:var(--yel);font-weight:700">'+fmt(db.investimentos.reduce(function(s,i){return s+i.valorAtual;},0)+((db.distrib||[]).reduce(function(s,d){return s+(d.valor||0);},0)))+'</span></div>'+
     '<div style="font-size:11px;color:var(--t3);margin-bottom:14px">Acoes, Fundos e Distribuicao de Saldos</div>'+
-    (function(){
+    (function(){try{
       // Month-over-month arrows for last 2 months with data
       var meses2=Object.keys(ms).sort();
       if(meses2.length<2)return'';
@@ -2515,7 +2513,7 @@ function resetData(){localStorage.removeItem(KEY);_db=null;load();render('fluxo'
 })();
 
 </script>
-<div id="ver" style="position:fixed;bottom:8px;left:0;right:0;text-align:center;font-size:10px;color:var(--t3);opacity:.45;z-index:99999;pointer-events:none;font-family:monospace">v1.107.509</div>
+<div id="ver" style="position:fixed;bottom:8px;left:0;right:0;text-align:center;font-size:10px;color:var(--t3);opacity:.45;z-index:99999;pointer-events:none;font-family:monospace">v1.107.510</div>
 </body>
 </html>
  
