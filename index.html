@@ -255,24 +255,17 @@ inter-events:none}
   <div class="lockscreen" id="lockscreen">
     <div style="font-size:30px;font-weight:900;letter-spacing:-.5px;margin-bottom:4px">PAX<span style="color:var(--acc)">.</span></div>
     <div style="font-size:13px;color:var(--t3);margin-bottom:48px">Financeiro pessoal</div>
-    <div style="font-size:15px;font-weight:700;color:var(--t2);margin-bottom:20px">Quem é você?</div>
-    <div style="display:flex;flex-direction:column;gap:12px;width:100%;max-width:320px">
-      <div class="ls-card" onclick="loginAs('l')" style="--av:#6366f1">
-        <div class="ls-av">L</div>
-        <div class="ls-info"><div class="ls-name">Leandro</div><div class="ls-sub">Conta pessoal</div></div>
-        <div class="ls-arr">&#8594;</div>
-      </div>
-      <div class="ls-card" onclick="loginAs('t')" style="--av:#ec4899">
-        <div class="ls-av">T</div>
-        <div class="ls-info"><div class="ls-name">Thays</div><div class="ls-sub">Conta pessoal</div></div>
-        <div class="ls-arr">&#8594;</div>
-      </div>
-      <div class="ls-card" onclick="loginAs('p')" style="--av:#10b981">
-        <div class="ls-av">P</div>
-        <div class="ls-info"><div class="ls-name">Paulo</div><div class="ls-sub">Modo aventura &#9733;</div></div>
-        <div class="ls-arr">&#8594;</div>
-      </div>
-    </div>
+    <form id="loginForm" onsubmit="return doLogin()" style="display:flex;flex-direction:column;gap:14px;width:100%;max-width:300px">
+      <label style="font-size:13px;font-weight:700;color:var(--t2);margin-bottom:-4px">Quem é você?</label>
+      <select id="userSelect" style="width:100%;padding:16px 14px;font-size:17px;font-weight:600;border-radius:16px;border:2px solid var(--bdr2);background:var(--s1);color:var(--t1);outline:none;appearance:none;-webkit-appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23888' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 14px center;padding-right:40px">
+        <option value="">-- Selecionar --</option>
+        <option value="l">Leandro</option>
+        <option value="t">Thays</option>
+        <option value="p">Paulo</option>
+      </select>
+      <input type="submit" value="Entrar →" style="width:100%;padding:18px;font-size:17px;font-weight:800;border-radius:16px;border:none;background:var(--acc);color:#fff;cursor:pointer;-webkit-tap-highlight-color:rgba(0,0,0,0);touch-action:manipulation">
+      <div id="loginErr" style="text-align:center;font-size:13px;color:var(--red);min-height:18px"></div>
+    </form>
   </div>
 <input type="file" id="avatarInput" accept="image/*" style="display:none" onchange="handleAvatarUpload(event)">
 <div id="app">
@@ -2424,10 +2417,9 @@ function importData(e){
 }
 function resetData(){localStorage.removeItem(KEY);_db=null;load();render('fluxo');renderLemb(load());toast('Dados de exemplo carregados');}
 (function(){
-  // Login direto por card
-  window.loginAs=function(key){
-    var umap={l:USERS['2505'],t:USERS['0609'],p:USERS['2014']};
-    var u=umap[key];
+  var _umap={l:USERS['2505'],t:USERS['0609'],p:USERS['2014']};
+
+  function _doLoginUser(u){
     if(!u)return;
     curUser=u;
     KEY='pax_fin_'+u.fbPath;
@@ -2435,15 +2427,24 @@ function resetData(){localStorage.removeItem(KEY);_db=null;load();render('fluxo'
     if(u.id!=='leandro'){try{localStorage.removeItem(KEY);localStorage.removeItem('pax_fin_'+u.id);}catch(e){}}
     document.getElementById('lockscreen').style.display='none';
     document.body.classList.remove('locked');
-    displayAvatar();
-    initFB();
+    displayAvatar();initFB();
     updML();render('fluxo');renderLemb(load());
+  }
+
+  window.loginAs=function(key){_doLoginUser(_umap[key]);};
+
+  window.doLogin=function(){
+    var sel=document.getElementById('userSelect');
+    var err=document.getElementById('loginErr');
+    if(!sel||!sel.value){if(err)err.textContent='Selecione uma pessoa primeiro';return false;}
+    if(err)err.textContent='';
+    _doLoginUser(_umap[sel.value]);
+    return false;
   };
 
-  // PIN modal para revelar valores (olhinho)
+  // PIN modal para revelar valores
   function openPinModal(){
-    var m=document.getElementById('pinModal');
-    if(!m)return;
+    var m=document.getElementById('pinModal');if(!m)return;
     m.style.display='flex';
     var inp=document.getElementById('pmInput');
     if(inp){inp.value='';setTimeout(function(){try{inp.focus();}catch(e){}},200);}
@@ -2451,8 +2452,7 @@ function resetData(){localStorage.removeItem(KEY);_db=null;load();render('fluxo'
     var err=document.getElementById('pmErr');if(err)err.textContent='';
   }
   function closePinModal(){
-    var m=document.getElementById('pinModal');
-    if(m)m.style.display='none';
+    var m=document.getElementById('pinModal');if(m)m.style.display='none';
     var inp=document.getElementById('pmInput');if(inp)inp.value='';
     _pmUpdDots(0,false);
   }
@@ -2466,19 +2466,16 @@ function resetData(){localStorage.removeItem(KEY);_db=null;load();render('fluxo'
   if(_pmInp){
     _pmInp.addEventListener('input',function(){
       var v=this.value.replace(/\D/g,'').slice(0,4);
-      this.value=v;
-      _pmUpdDots(v.length,false);
+      this.value=v;_pmUpdDots(v.length,false);
       var err=document.getElementById('pmErr');
       if(v.length===4){
         if(curUser&&USERS[v]&&USERS[v].id===curUser.id){
-          closePinModal();
-          valHidden=false;
+          closePinModal();valHidden=false;
           var eb=document.getElementById('eyebtn');if(eb)eb.classList.add('on');
           var sl=document.getElementById('eyeSlash');if(sl)sl.style.display='none';
           render(curPage||'resumo');
         } else {
-          if(err)err.textContent='PIN incorreto';
-          _pmUpdDots(4,true);
+          if(err)err.textContent='PIN incorreto';_pmUpdDots(4,true);
           setTimeout(function(){if(_pmInp)_pmInp.value='';_pmUpdDots(0,false);if(err)err.textContent='';},700);
         }
       }
@@ -2487,17 +2484,13 @@ function resetData(){localStorage.removeItem(KEY);_db=null;load();render('fluxo'
   var _pmCb=document.getElementById('pmCancelCb');
   if(_pmCb)_pmCb.addEventListener('change',function(){this.checked=false;closePinModal();});
 
-  // Intercepta toggleValues para exigir PIN ao revelar
   var _origToggle=window.toggleValues;
   window.toggleValues=function(){
-    if(valHidden){
-      openPinModal();
-    } else {
-      if(_origToggle)_origToggle();
-    }
+    if(valHidden){openPinModal();}
+    else{if(_origToggle)_origToggle();}
   };
 
-  window.onerror=function(msg){return false;};
+  window.onerror=function(){return false;};
   try{
     load();
     var _m=new Date();
