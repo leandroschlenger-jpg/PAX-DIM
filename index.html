@@ -618,6 +618,25 @@ inter-events:none}
 <script>
 
 var USERS={'2505':{id:'leandro',fbPath:'leandro',nome:'Leandro'},'0609':{id:'thays',fbPath:'thays2',nome:'Thays'},'2014':{id:'paulo',fbPath:'paulo',nome:'Paulo'}};
+function loginAs(key){
+  var errEl=document.getElementById('loginErr');
+  try{
+    var umap={l:USERS['2505'],t:USERS['0609'],p:USERS['2014']};
+    var u=umap[key];
+    if(!u){if(errEl)errEl.textContent='Usuário inválido: '+key;return;}
+    curUser=u;KEY='pax_fin_'+u.fbPath;
+    _db=null;_fbReady=false;_fbSynced=false;_fbRef=null;
+    if(u.id!=='leandro'){try{localStorage.removeItem(KEY);localStorage.removeItem('pax_fin_'+u.id);}catch(ex){}}
+    var ls=document.getElementById('lockscreen');
+    if(ls)ls.style.display='none';
+    document.body.classList.remove('locked');
+    try{displayAvatar();}catch(ex){if(errEl)errEl.textContent='av:'+ex.message;return;}
+    try{initFB();}catch(ex){if(errEl)errEl.textContent='fb:'+ex.message;}
+    try{updML();render('fluxo');renderLemb(load());}catch(ex){if(errEl)errEl.textContent='render:'+ex.message;}
+  }catch(ex){
+    if(errEl)errEl.textContent='ERRO:'+(ex.message||String(ex));
+  }
+}
 var curUser=null,pinEntered='';
 function numpad(n){
   if(n===-1){pinEntered='';updateDots();}
@@ -2432,27 +2451,7 @@ function resetData(){localStorage.removeItem(KEY);_db=null;load();render('fluxo'
     updML();render('fluxo');renderLemb(load());
   }
 
-  window.loginAs=function(key){
-    var errEl=document.getElementById('loginErr');
-    try{
-      var u=_umap[key];
-      if(!u){if(errEl)errEl.textContent='Usuário inválido';return;}
-      curUser=u;KEY='pax_fin_'+u.fbPath;
-      _db=null;_fbReady=false;_fbSynced=false;_fbRef=null;
-      if(u.id!=='leandro'){try{localStorage.removeItem(KEY);localStorage.removeItem('pax_fin_'+u.id);}catch(ex){}}
-      try{document.getElementById('lockscreen').style.display='none';}catch(ex){if(errEl)errEl.textContent='ls:'+ex.message;return;}
-      document.body.classList.remove('locked');
-      try{displayAvatar();}catch(ex){if(errEl)errEl.textContent='av:'+ex.message;}
-      try{initFB();}catch(ex){if(errEl)errEl.textContent='fb:'+ex.message;}
-      try{updML();}catch(ex){}
-      try{render('fluxo');}catch(ex){if(errEl)errEl.textContent='render:'+ex.message;}
-      try{renderLemb(load());}catch(ex){}
-    }catch(ex){
-      if(errEl)errEl.textContent='ERRO:'+(ex.message||ex);
-    }
-  };
 
-  window.doLogin=function(){};  // kept for compatibility
 
   // PIN modal para revelar valores
   function openPinModal(){
@@ -2502,7 +2501,11 @@ function resetData(){localStorage.removeItem(KEY);_db=null;load();render('fluxo'
     else{if(_origToggle)_origToggle();}
   };
 
-  window.onerror=function(){return false;};
+  window.onerror=function(msg,src,line,col,err){
+    var el=document.getElementById('loginErr')||document.getElementById('lockerr');
+    if(el)el.textContent='JS:'+(err&&err.message||msg||'?').slice(0,80);
+    return false;
+  };
   try{
     load();
     var _m=new Date();
