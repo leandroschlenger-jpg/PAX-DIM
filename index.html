@@ -2006,7 +2006,7 @@ function pPaisMissoes(){
   var db=load();if(!db.paulo)db.paulo=seedPaulo().paulo;
   var missoes=db.paulo.missoes||[];
   var pendentes=missoes.filter(function(m){return m.status==='aguardando';});
-  document.getElementById('stitle').textContent='\U0001f3af Gerenciar Missões';
+  document.getElementById('stitle').textContent='🎯 Gerenciar Missões';
   var html2='';
   if(pendentes.length){
     html2+='<div style="font-size:12px;font-weight:700;color:#60a5fa;margin-bottom:8px;text-transform:uppercase;letter-spacing:.04em">⏳ Aguardando Aprovação</div>';
@@ -2026,7 +2026,7 @@ function pPaisMissoes(){
         '<div style="flex:1;min-width:0"><div style="font-size:13px;font-weight:700;color:var(--t1)">'+m.titulo+'</div>'+
         '<div style="font-size:11px;color:var(--t3)">'+m.pontos+' pts · '+m.status+'</div></div>'+
         '<button onclick="pEditarMissao(\''+m.id+'\')" style="background:var(--s3);border:1px solid var(--bdr);border-radius:8px;padding:6px 10px;color:var(--t2);font-size:13px;cursor:pointer">✏️</button>'+
-        '<button onclick="pExcluirMissao(\''+m.id+'\')" style="background:#f8717111;border:1px solid #f87171;border-radius:8px;padding:6px 10px;color:#f87171;font-size:13px;cursor:pointer">\U0001f5d1</button>'+
+        '<button onclick="pExcluirMissao(\''+m.id+'\')" style="background:#f8717111;border:1px solid #f87171;border-radius:8px;padding:6px 10px;color:#f87171;font-size:13px;cursor:pointer">🗑</button>'+
       '</div>';
     });
   }
@@ -2088,7 +2088,7 @@ function pEditarSonho(id){
   var db=load();if(!db.paulo)return;
   if(!db.paulo.sonhos)db.paulo.sonhos=[];
   var s=id?db.paulo.sonhos.find(function(x){return x.id===id;}):null;
-  var EMOJIS=['\U0001f3ae','\U0001f45f','\U0001f3b8','⚽','\U0001f4f1','\U0001f6b2','\U0001f3a8','\U0001f3ac','\U0001f4da','\U0001f355','\U0001f381','✈️','\U0001f3c6','\U0001f3af','\U0001f3a7'];
+  var EMOJIS=['🎮','👟','🎸','⚽','📱','🚲','🎨','🎬','📚','🍕','🎁','✈️','🏆','🎯','🎧'];
   document.getElementById('stitle').textContent=s?'✏️ Editar Sonho':'⭐ Novo Sonho';
   var curEmoji=s?s.emoji:EMOJIS[0];
   var metaVal=s&&s.meta?s.meta.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2}):'';
@@ -2101,7 +2101,7 @@ function pEditarSonho(id){
     '<div class="field"><label>Valor meta (R$)</label><input id="p-s-meta" type="text" inputmode="decimal" class="ainp" placeholder="0,00" oninput="moneyMask(this)" style="font-size:22px" value="'+metaVal+'"></div>'+
     '<div class="field"><label>Prazo (mês)</label><input id="p-s-prazo" type="month" class="ainp" value="'+(s&&s.prazo?s.prazo:'')+'"></div>';
   if(s){
-    var del=document.createElement('button');del.className='delbtn';del.textContent='\U0001f5d1 Excluir este sonho';
+    var del=document.createElement('button');del.className='delbtn';del.textContent='🗑 Excluir este sonho';
     del.onclick=function(){var db2=load();db2.paulo.sonhos=db2.paulo.sonhos.filter(function(x){return x.id!==id;});save(db2);closeSH();renderPauloSonhos(db2);pToast('Sonho excluído');};
     document.getElementById('sbody').appendChild(del);
   }
