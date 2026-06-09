@@ -1058,7 +1058,7 @@ function load(){
   if(_db)return _db;
   try{
     var r=localStorage.getItem(KEY);
-    if(r){var p=JSON.parse(r);if(p&&Array.isArray(p.fluxo)){_db=p;return _db;}}
+    if(r){var p=JSON.parse(r);if(p&&Array.isArray(p.fluxo)){_db=p;if(_normalizeFuturo(_db))try{localStorage.setItem(KEY,JSON.stringify(_db));}catch(e){}return _db;}}
     if(!curUser||curUser.id==='leandro'){
       for(var k=0;k<OLD_KEYS.length;k++){
         var oldv=localStorage.getItem(OLD_KEYS[k]);
@@ -1071,6 +1071,13 @@ function load(){
   if(!_fbRef||_fbSynced){save(_db);}
   else{try{localStorage.setItem(KEY,JSON.stringify(_db));}catch(e){}}
   return _db;
+}
+function _normalizeFuturo(db){
+  // Lançamentos de meses futuros jamais ficam como OK
+  var hm=_hoje.getFullYear()+'-'+('0'+(_hoje.getMonth()+1)).slice(-2);
+  var changed=false;
+  (db.fluxo||[]).forEach(function(t){if(t.mes>hm&&t.status==='OK'){t.status='Pendente';changed=true;}});
+  return changed;
 }
 function save(db){
   _db=db;
@@ -1108,10 +1115,12 @@ function initFB(){
       var fbTs=(fbData&&fbData._ts)||0;
       if(fbValid&&fbTs>=localTs){
         _db=fbData;
+        _normalizeFuturo(_db);
         try{localStorage.setItem(KEY,JSON.stringify(_db));}catch(e){}
         if(!_fbSynced){_fbSynced=true;render(curPage);if(isLeandro)toast('Sincronizado ✓');}
       } else if(fbValid){
         _db=fbData;
+        _normalizeFuturo(_db);
         try{localStorage.setItem(KEY,JSON.stringify(_db));}catch(e){}
         if(!_fbSynced){_fbSynced=true;render(curPage);}
       } else if(_db&&_db.fluxo&&_db.fluxo.length>0&&_db._owner===uid){
@@ -1504,9 +1513,13 @@ function saveTx(){
     var origTotal=orig.recId?(orig.recTotal==='?'?9999:Number(orig.recTotal)||1):1;
     var novos=vezes-origTotal;
     if(rec!=='nao'&&novos>0){
+      var _hm2=_hoje.getFullYear()+'-'+('0'+(_hoje.getMonth()+1)).slice(-2);
       for(var j=origTotal+1;j<=vezes;j++){
         var d=addMes(base.data,j-1);
-        db.fluxo.push(Object.assign({},base,{id:uid(),data:d,mes:d.slice(0,7),recId:rid,recIdx:j,recTotal:rec==='indef'?'?':vezes}));
+        var eMes2=d.slice(0,7);
+        var eNew=Object.assign({},base,{id:uid(),data:d,mes:eMes2,recId:rid,recIdx:j,recTotal:rec==='indef'?'?':vezes});
+        if(eMes2>_hm2)eNew.status='Pendente';
+        db.fluxo.push(eNew);
       }
       toast('Atualizado + '+novos+' novos lancamentos');
     } else {
@@ -1517,9 +1530,12 @@ function saveTx(){
     if(rec==='fixa')vezes=Math.max(1,parseInt(document.getElementById('fqtd').value)||1);
     else if(rec==='indef')vezes=120;
     var rid=vezes>1?uid():null;
+    var _hm=_hoje.getFullYear()+'-'+('0'+(_hoje.getMonth()+1)).slice(-2);
     for(var j=0;j<vezes;j++){
       var d=j===0?data:addMes(data,j);
-      var e=Object.assign({},base,{id:uid(),data:d,mes:d.slice(0,7)});
+      var eMes=d.slice(0,7);
+      var e=Object.assign({},base,{id:uid(),data:d,mes:eMes});
+      if(eMes>_hm)e.status='Pendente';
       if(rid){e.recId=rid;e.recIdx=j+1;e.recTotal=rec==='indef'?'?':vezes;}
       db.fluxo.push(e);
     }
@@ -3254,7 +3270,7 @@ function finishQuiz(){
 })();
 
 </script>
-<div id="ver" style="position:fixed;bottom:8px;left:0;right:0;text-align:center;font-size:10px;color:var(--t3);opacity:.45;z-index:99999;pointer-events:none;font-family:monospace">v1.110.523</div>
+<div id="ver" style="position:fixed;bottom:8px;left:0;right:0;text-align:center;font-size:10px;color:var(--t3);opacity:.45;z-index:99999;pointer-events:none;font-family:monospace">v1.111.524</div>
 </body>
 </html>
  
