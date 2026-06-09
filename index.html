@@ -240,36 +240,38 @@ body.paulo-mode .p-nav{display:flex}
 .p-input{background:var(--s2);border:1.5px solid var(--bdr2);border-radius:14px;padding:14px 16px;font-size:18px;font-weight:800;color:var(--t1);width:100%;box-sizing:border-box;margin-bottom:14px;display:block}
 .p-addream{background:rgba(124,58,237,.1);border:2px dashed rgba(124,58,237,.3);border-radius:16px;padding:16px;text-align:center;color:#a78bfa;font-size:14px;font-weight:700;cursor:pointer;margin-bottom:10px}
 .p-toast{display:none;position:fixed;top:76px;left:50%;transform:translateX(-50%);background:linear-gradient(135deg,#7c3aed,#a78bfa);color:#fff;padding:12px 24px;border-radius:999px;font-size:13px;font-weight:800;z-index:9999;white-space:nowrap;po
-.user-sel-grid{display:flex;gap:16px;flex-wrap:wrap;justify-content:center}
-.user-sel-card{display:flex;flex-direction:column;align-items:center;gap:10px;padding:20px 16px;border-radius:20px;background:var(--s1);border:2px solid var(--bdr);cursor:pointer;min-width:88px;transition:all .15s;-webkit-tap-highlight-color:rgba(0,0,0,0)}
-.u-radio:checked+.user-sel-card{border-color:var(--acc);background:var(--s2)}
-.user-sel-av{width:56px;height:56px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:800;color:#fff}
-.user-sel-name{font-size:14px;font-weight:700;color:var(--t1)}
+.ls-card{display:flex;align-items:center;gap:16px;padding:16px 18px;border-radius:20px;background:var(--s1);border:1.5px solid var(--bdr);cursor:pointer;-webkit-tap-highlight-color:rgba(0,0,0,0);touch-action:manipulation;transition:background .12s}
+.ls-card:active{background:var(--s2)}
+.ls-av{width:52px;height:52px;border-radius:50%;background:var(--av,#888);display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:800;color:#fff;flex-shrink:0}
+.ls-info{flex:1}
+.ls-name{font-size:16px;font-weight:700;color:var(--t1)}
+.ls-sub{font-size:12px;color:var(--t3);margin-top:2px}
+.ls-arr{font-size:20px;color:var(--t3);font-weight:300}
 inter-events:none}
 </style>
 </head>
 <body class="locked">
 <!-- LOCK -->
   <div class="lockscreen" id="lockscreen">
-    <div class="lock-brand" style="font-size:28px;font-weight:900;letter-spacing:-.5px;margin-bottom:6px">PAX<em style="font-style:normal;color:var(--acc)">.</em></div>
-    <div style="font-size:14px;color:var(--t3);margin-bottom:40px">Financeiro pessoal</div>
-    <div style="font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--t3);margin-bottom:20px">Quem é você?</div>
-    <div class="user-sel-grid">
-      <input type="radio" name="pax_u" id="pu_l" class="u-radio" style="display:none">
-      <label for="pu_l" class="user-sel-card">
-        <div class="user-sel-av" style="background:#6366f1">L</div>
-        <div class="user-sel-name">Leandro</div>
-      </label>
-      <input type="radio" name="pax_u" id="pu_t" class="u-radio" style="display:none">
-      <label for="pu_t" class="user-sel-card">
-        <div class="user-sel-av" style="background:#ec4899">T</div>
-        <div class="user-sel-name">Thays</div>
-      </label>
-      <input type="radio" name="pax_u" id="pu_p" class="u-radio" style="display:none">
-      <label for="pu_p" class="user-sel-card">
-        <div class="user-sel-av" style="background:#10b981">P</div>
-        <div class="user-sel-name">Paulo</div>
-      </label>
+    <div style="font-size:30px;font-weight:900;letter-spacing:-.5px;margin-bottom:4px">PAX<span style="color:var(--acc)">.</span></div>
+    <div style="font-size:13px;color:var(--t3);margin-bottom:48px">Financeiro pessoal</div>
+    <div style="font-size:15px;font-weight:700;color:var(--t2);margin-bottom:20px">Quem é você?</div>
+    <div style="display:flex;flex-direction:column;gap:12px;width:100%;max-width:320px">
+      <div class="ls-card" onclick="loginAs('l')" style="--av:#6366f1">
+        <div class="ls-av">L</div>
+        <div class="ls-info"><div class="ls-name">Leandro</div><div class="ls-sub">Conta pessoal</div></div>
+        <div class="ls-arr">&#8594;</div>
+      </div>
+      <div class="ls-card" onclick="loginAs('t')" style="--av:#ec4899">
+        <div class="ls-av">T</div>
+        <div class="ls-info"><div class="ls-name">Thays</div><div class="ls-sub">Conta pessoal</div></div>
+        <div class="ls-arr">&#8594;</div>
+      </div>
+      <div class="ls-card" onclick="loginAs('p')" style="--av:#10b981">
+        <div class="ls-av">P</div>
+        <div class="ls-info"><div class="ls-name">Paulo</div><div class="ls-sub">Modo aventura &#9733;</div></div>
+        <div class="ls-arr">&#8594;</div>
+      </div>
     </div>
   </div>
 <input type="file" id="avatarInput" accept="image/*" style="display:none" onchange="handleAvatarUpload(event)">
@@ -2422,33 +2424,27 @@ function importData(e){
 }
 function resetData(){localStorage.removeItem(KEY);_db=null;load();render('fluxo');renderLemb(load());toast('Dados de exemplo carregados');}
 (function(){
-  // Mapa de usuario por radio id
-  var _umap={pu_l:USERS['2505'],pu_t:USERS['0609'],pu_p:USERS['2014']};
-
-  // Login direto ao selecionar usuario (sem PIN)
-  var _radios=document.querySelectorAll('.u-radio');
-  for(var i=0;i<_radios.length;i++){
-    _radios[i].addEventListener('change',function(){
-      var u=_umap[this.id];
-      if(!u)return;
-      curUser=u;
-      KEY='pax_fin_'+u.fbPath;
-      _db=null;_fbReady=false;_fbSynced=false;_fbRef=null;
-      if(u.id!=='leandro'){try{localStorage.removeItem(KEY);localStorage.removeItem('pax_fin_'+u.id);}catch(e){}}
-      document.getElementById('lockscreen').style.display='none';
-      document.body.classList.remove('locked');
-      displayAvatar();
-      initFB();
-      updML();render('fluxo');renderLemb(load());
-    });
-  }
+  // Login direto por card
+  window.loginAs=function(key){
+    var umap={l:USERS['2505'],t:USERS['0609'],p:USERS['2014']};
+    var u=umap[key];
+    if(!u)return;
+    curUser=u;
+    KEY='pax_fin_'+u.fbPath;
+    _db=null;_fbReady=false;_fbSynced=false;_fbRef=null;
+    if(u.id!=='leandro'){try{localStorage.removeItem(KEY);localStorage.removeItem('pax_fin_'+u.id);}catch(e){}}
+    document.getElementById('lockscreen').style.display='none';
+    document.body.classList.remove('locked');
+    displayAvatar();
+    initFB();
+    updML();render('fluxo');renderLemb(load());
+  };
 
   // PIN modal para revelar valores (olhinho)
-  var _pmOpen=false;
   function openPinModal(){
     var m=document.getElementById('pinModal');
     if(!m)return;
-    m.style.display='flex';_pmOpen=true;
+    m.style.display='flex';
     var inp=document.getElementById('pmInput');
     if(inp){inp.value='';setTimeout(function(){try{inp.focus();}catch(e){}},200);}
     _pmUpdDots(0,false);
@@ -2457,7 +2453,6 @@ function resetData(){localStorage.removeItem(KEY);_db=null;load();render('fluxo'
   function closePinModal(){
     var m=document.getElementById('pinModal');
     if(m)m.style.display='none';
-    _pmOpen=false;
     var inp=document.getElementById('pmInput');if(inp)inp.value='';
     _pmUpdDots(0,false);
   }
@@ -2477,11 +2472,10 @@ function resetData(){localStorage.removeItem(KEY);_db=null;load();render('fluxo'
       if(v.length===4){
         if(curUser&&USERS[v]&&USERS[v].id===curUser.id){
           closePinModal();
-          // Revela valores
           valHidden=false;
           var eb=document.getElementById('eyebtn');if(eb)eb.classList.add('on');
-          document.querySelectorAll('.val,.fval,.sval').forEach(function(el){el.style.filter='';});
           var sl=document.getElementById('eyeSlash');if(sl)sl.style.display='none';
+          render(curPage||'resumo');
         } else {
           if(err)err.textContent='PIN incorreto';
           _pmUpdDots(4,true);
@@ -2490,7 +2484,6 @@ function resetData(){localStorage.removeItem(KEY);_db=null;load();render('fluxo'
       }
     });
   }
-  // Cancelar via checkbox
   var _pmCb=document.getElementById('pmCancelCb');
   if(_pmCb)_pmCb.addEventListener('change',function(){this.checked=false;closePinModal();});
 
@@ -2498,24 +2491,13 @@ function resetData(){localStorage.removeItem(KEY);_db=null;load();render('fluxo'
   var _origToggle=window.toggleValues;
   window.toggleValues=function(){
     if(valHidden){
-      // Quer revelar: pede PIN
       openPinModal();
     } else {
-      // Quer esconder: libera direto
-      if(_origToggle)_origToggle();else{
-        valHidden=true;
-        var eb=document.getElementById('eyebtn');if(eb)eb.classList.remove('on');
-        var sl=document.getElementById('eyeSlash');if(sl)sl.style.display='';
-        render(curPage||'resumo');
-      }
+      if(_origToggle)_origToggle();
     }
   };
 
-  window.onerror=function(msg){
-    var el=document.getElementById('lockerr');
-    if(el&&document.body.classList.contains('locked'))el.textContent=String(msg).slice(0,80);
-    return false;
-  };
+  window.onerror=function(msg){return false;};
   try{
     load();
     var _m=new Date();
