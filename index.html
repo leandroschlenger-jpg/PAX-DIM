@@ -32,7 +32,7 @@ button{font-family:inherit;cursor:pointer;border:none;background:none}
 @keyframes pi{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
 /* LOCK SCREEN */
 .lockscreen{min-height:100dvh;min-height:100vh;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px 20px}body.locked #app{display:none!important}
-body.locked .nav,body.locked #fab,body.locked .topbar,body.locked .p-nav,body.locked .pg-paulo{display:none!important}
+body.locked .nav,body.locked #fab,body.locked .topbar,body.locked .p-tabs,body.locked .pg-paulo{display:none!important}
 .lock-logo{font-size:48px;margin-bottom:8px}
 .lock-brand{font-size:28px;font-weight:800;margin-bottom:4px}
 .lock-brand em{color:var(--acc);font-style:normal}
@@ -192,12 +192,14 @@ body.paulo-mode .topbar{background:linear-gradient(135deg,#161625,#1e1a35);borde
 body.paulo-mode .nav{display:none!important}
 body.paulo-mode #fab{display:none!important}
 .pg-paulo{display:none}.pg-paulo.on{display:block}
-.p-nav{display:none;position:fixed;bottom:0;left:0;right:0;background:rgba(15,15,26,.97);border-top:1px solid rgba(124,58,237,.25);padding:0 0 env(safe-area-inset-bottom,0px);z-index:200}
-body.paulo-mode .p-nav{display:flex}
-.p-ni{flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;padding:8px 4px 6px;font-size:10px;font-weight:700;color:#6b6b9a;cursor:pointer;border:none;background:none;transition:color .2s}
-.p-ni.on{color:#a78bfa}
-.p-ni .ic{font-size:22px;line-height:1}
-.p-screen{padding:16px 16px calc(80px + env(safe-area-inset-bottom,0px))}
+.p-tabs{display:none;flex-shrink:0;background:rgba(15,15,26,.98);border-bottom:2px solid rgba(124,58,237,.25);overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+.p-tabs::-webkit-scrollbar{display:none}
+body.paulo-mode .p-tabs{display:flex}
+.p-tab{flex-shrink:0;display:flex;flex-direction:column;align-items:center;gap:3px;padding:10px 18px 8px;font-size:11px;font-weight:800;color:#6b6b9a;cursor:pointer;border:none;background:none;transition:color .15s;min-width:64px;position:relative;letter-spacing:.02em;text-transform:uppercase}
+.p-tab.on{color:#a78bfa}
+.p-tab.on::after{content:'';position:absolute;bottom:0;left:10%;right:10%;height:3px;background:#a78bfa;border-radius:99px 99px 0 0}
+.p-tab .ic{font-size:20px;line-height:1}
+.p-screen{padding:16px 16px 40px}
 .p-xpbar-wrap{background:rgba(124,58,237,.15);border-radius:8px;height:10px;overflow:hidden;margin:8px 0}
 .p-xpbar{height:100%;background:linear-gradient(90deg,#7c3aed,#a78bfa);border-radius:8px;transition:width .6s}
 .p-hero{background:linear-gradient(135deg,#1e1a35,#251e45);border-radius:24px;padding:24px;margin-bottom:16px;text-align:center}
@@ -314,7 +316,15 @@ inter-events:none}
       <div id="userAvatar" onclick="openAvatarMenu()" style="display:none;width:34px;height:34px;border-radius:50%;background:var(--acc);color:#fff;font-size:14px;font-weight:800;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0" title="Trocar usuario"></div>
     </div>
   </header>
-  <div id="screen">
+<nav class="p-tabs" id="p-nav">
+  <button class="p-tab on" id="p-ni-home" onclick="goP('home')"><span class="ic">🏠</span>Início</button>
+  <button class="p-tab" id="p-ni-sonhos" onclick="goP('sonhos')"><span class="ic">⭐</span>Sonhos</button>
+  <button class="p-tab" id="p-ni-missoes" onclick="goP('missoes')"><span class="ic">🎯</span>Missões</button>
+  <button class="p-tab" id="p-ni-conquistas" onclick="goP('conquistas')"><span class="ic">🏆</span>Troféus</button>
+  <button class="p-tab" id="p-ni-quiz" onclick="goP('quiz')"><span class="ic">🧠</span>Quiz</button>
+  <button class="p-tab" id="p-ni-extrato" onclick="goP('extrato')"><span class="ic">📋</span>Extrato</button>
+</nav>
+    <div id="screen">
 
 
   <div id="pg-fluxo" class="page">
@@ -624,13 +634,7 @@ inter-events:none}
   </div>
 </div>
 <!-- PAULO NAV -->
-<nav class="p-nav" id="p-nav">
-  <button class="p-ni on" id="p-ni-home" onclick="goP('home')"><span class="ic">🏠</span>Início</button>
-  <button class="p-ni" id="p-ni-sonhos" onclick="goP('sonhos')"><span class="ic">⭐</span>Sonhos</button>
-  <button class="p-ni" id="p-ni-missoes" onclick="goP('missoes')"><span class="ic">🎯</span>Missões</button>
-  <button class="p-ni" id="p-ni-conquistas" onclick="goP('conquistas')"><span class="ic">🏆</span>Troféus</button>
-  <button class="p-ni" id="p-ni-quiz" onclick="goP('quiz')"><span class="ic">🧠</span>Quiz</button>
-</nav>
+
 <button class="fab" id="fab" onclick="openAdd()">+</button>
 <div class="sbg" id="sbg" onclick="closeSBG(event)">
   <div class="sh"><div class="shnd"></div>
@@ -1725,7 +1729,7 @@ function goP(id){
   if(id==='extrato'){
     document.querySelectorAll('.pg-paulo').forEach(function(p){p.classList.remove('on');p.style.display='';});
     var ep=document.getElementById('pg-paulo-extrato');if(ep)ep.classList.add('on');
-    document.querySelectorAll('.p-ni').forEach(function(n){n.classList.remove('on');});
+    document.querySelectorAll('.p-tab').forEach(function(n){n.classList.remove('on');});
     var db=load(),list=document.getElementById('p-extrato-list');
     if(!list)return;
     var txs=(db.fluxo||[]).filter(function(t){return t.mes===curMes;}).slice().reverse();
@@ -1739,7 +1743,7 @@ function goP(id){
     return;
   }
   document.querySelectorAll('.pg-paulo').forEach(function(p){p.classList.remove('on');p.style.display='';});
-  document.querySelectorAll('.p-ni').forEach(function(n){n.classList.remove('on');});
+  document.querySelectorAll('.p-tab').forEach(function(n){n.classList.remove('on');});
   var pg=document.getElementById('pg-paulo-'+id);if(pg)pg.classList.add('on');
   var ni=document.getElementById('p-ni-'+id);if(ni)ni.classList.add('on');
   document.getElementById('screen').scrollTop=0;
@@ -3060,7 +3064,7 @@ function finishQuiz(){
 })();
 
 </script>
-<div id="ver" style="position:fixed;bottom:8px;left:0;right:0;text-align:center;font-size:10px;color:var(--t3);opacity:.45;z-index:99999;pointer-events:none;font-family:monospace">v1.107.514</div>
+<div id="ver" style="position:fixed;bottom:8px;left:0;right:0;text-align:center;font-size:10px;color:var(--t3);opacity:.45;z-index:99999;pointer-events:none;font-family:monospace">v1.107.516</div>
 </body>
 </html>
  
