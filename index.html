@@ -247,28 +247,16 @@ body.paulo-mode .p-nav{display:flex}
   <div class="lockscreen" id="lockscreen">
     <div class="lock-logo">&#128274;</div>
     <div class="lock-brand">PAX<em>.</em></div>
-    <div class="lock-sub">Financeiro pessoal</div>
+    <div class="lock-sub">Digite o PIN</div>
     <div class="lock-dots" id="lockdots">
       <div class="lock-dot" id="d0"></div>
       <div class="lock-dot" id="d1"></div>
       <div class="lock-dot" id="d2"></div>
       <div class="lock-dot" id="d3"></div>
     </div>
-    <div class="numpad">
-      <button class="npbtn" data-n="1">1</button>
-      <button class="npbtn" data-n="2">2</button>
-      <button class="npbtn" data-n="3">3</button>
-      <button class="npbtn" data-n="4">4</button>
-      <button class="npbtn" data-n="5">5</button>
-      <button class="npbtn" data-n="6">6</button>
-      <button class="npbtn" data-n="7">7</button>
-      <button class="npbtn" data-n="8">8</button>
-      <button class="npbtn" data-n="9">9</button>
-      <button class="npbtn" data-n="-1" style="font-size:14px;color:var(--t3)">limpar</button>
-      <button class="npbtn" data-n="0">0</button>
-      <button class="npbtn" data-n="-2" style="font-size:18px;color:var(--t3)">&#9003;</button>
-    </div>
-    <div class="lock-err" id="lockerr"></div>
+    <input id="pinInput" type="password" inputmode="numeric" pattern="[0-9]*" maxlength="4" autocomplete="off"
+      style="width:160px;height:56px;font-size:28px;letter-spacing:12px;text-align:center;border:2px solid var(--acc);border-radius:16px;background:var(--s1);color:var(--t1);outline:none;padding:0 12px;margin-top:4px">
+    <div class="lock-err" id="lockerr" style="margin-top:12px;min-height:18px;font-size:14px;color:var(--red);text-align:center"></div>
   </div>
 <input type="file" id="avatarInput" accept="image/*" style="display:none" onchange="handleAvatarUpload(event)">
 <div id="app">
@@ -2405,30 +2393,39 @@ function importData(e){
 }
 function resetData(){localStorage.removeItem(KEY);_db=null;load();render('fluxo');renderLemb(load());toast('Dados de exemplo carregados');}
 (function(){
-  // Numpad via touchend (mais confiável que click no iOS)
-  function _npFire(n){
-    try{numpad(n);}
-    catch(err){var el=document.getElementById('lockerr');if(el)el.textContent='ERR:'+err.message;}
+  var _pi=document.getElementById('pinInput');
+  function _updDots(len,err){
+    for(var i=0;i<4;i++){
+      var d=document.getElementById('d'+i);
+      if(d){d.classList.toggle('filled',i<len);d.classList.toggle('error',!!err);}
+    }
   }
-  var _np=document.querySelector('.numpad');
-  if(_np){
-    _np.addEventListener('touchend',function(e){
-      e.preventDefault();
-      var t=e.changedTouches[0];
-      var el=document.elementFromPoint(t.clientX,t.clientY);
-      while(el&&el!==_np){
-        if(el.getAttribute&&el.getAttribute('data-n')!==null){_npFire(parseInt(el.getAttribute('data-n'),10));return;}
-        el=el.parentElement;
-      }
-    },{passive:false});
-    // fallback desktop
-    _np.addEventListener('click',function(e){
-      var el=e.target;
-      while(el&&el!==_np){
-        if(el.getAttribute&&el.getAttribute('data-n')!==null){_npFire(parseInt(el.getAttribute('data-n'),10));return;}
-        el=el.parentElement;
+  if(_pi){
+    _pi.addEventListener('input',function(){
+      var v=this.value.replace(/\D/g,'').slice(0,4);
+      this.value=v;
+      _updDots(v.length,false);
+      var lerr=document.getElementById('lockerr');
+      if(v.length===4){
+        var u=USERS[v];
+        if(u){
+          curUser=u;KEY='pax_fin_'+u.fbPath;
+          _db=null;_fbReady=false;_fbSynced=false;_fbRef=null;
+          if(u.id!=='leandro'){try{localStorage.removeItem(KEY);localStorage.removeItem('pax_fin_'+u.id);}catch(e){}}
+          document.getElementById('lockscreen').style.display='none';
+          document.body.classList.remove('locked');
+          if(lerr)lerr.textContent='';
+          _pi.value='';_updDots(0,false);
+          displayAvatar();initFB();
+          updML();render('fluxo');renderLemb(load());
+        } else {
+          if(lerr)lerr.textContent='PIN incorreto';
+          _updDots(4,true);
+          setTimeout(function(){_pi.value='';_updDots(0,false);if(lerr)lerr.textContent='';},700);
+        }
       }
     });
+    setTimeout(function(){try{_pi.focus();}catch(e){}},400);
   }
   window.onerror=function(msg){
     var el=document.getElementById('lockerr');
