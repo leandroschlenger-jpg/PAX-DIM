@@ -254,7 +254,7 @@ body.paulo-mode .p-nav{display:flex}
       <div class="lock-dot" id="d2"></div>
       <div class="lock-dot" id="d3"></div>
     </div>
-    <input id="pinInput" type="password" inputmode="numeric" pattern="[0-9]*" maxlength="4" autocomplete="off"
+    <input id="pinInput" type="tel" inputmode="numeric" pattern="[0-9]*" maxlength="4" autocomplete="off" autocorrect="off" autocapitalize="none"
       style="width:160px;height:56px;font-size:28px;letter-spacing:12px;text-align:center;border:2px solid var(--acc);border-radius:16px;background:var(--s1);color:var(--t1);outline:none;padding:0 12px;margin-top:4px">
     <div class="lock-err" id="lockerr" style="margin-top:12px;min-height:18px;font-size:14px;color:var(--red);text-align:center"></div>
   </div>
@@ -2406,6 +2406,8 @@ function resetData(){localStorage.removeItem(KEY);_db=null;load();render('fluxo'
       this.value=v;
       _updDots(v.length,false);
       var lerr=document.getElementById('lockerr');
+      // debug: mostra quantos dígitos entraram
+      if(lerr)lerr.textContent=v.length+'/4';
       if(v.length===4){
         var u=USERS[v];
         if(u){
@@ -2419,9 +2421,9 @@ function resetData(){localStorage.removeItem(KEY);_db=null;load();render('fluxo'
           displayAvatar();initFB();
           updML();render('fluxo');renderLemb(load());
         } else {
-          if(lerr)lerr.textContent='PIN incorreto';
+          if(lerr)lerr.textContent='PIN incorreto ('+v+')';
           _updDots(4,true);
-          setTimeout(function(){_pi.value='';_updDots(0,false);if(lerr)lerr.textContent='';},700);
+          setTimeout(function(){_pi.value='';_updDots(0,false);if(lerr)lerr.textContent='';},1000);
         }
       }
     });
