@@ -2405,31 +2405,38 @@ function importData(e){
 }
 function resetData(){localStorage.removeItem(KEY);_db=null;load();render('fluxo');renderLemb(load());toast('Dados de exemplo carregados');}
 (function(){
-  // Wire numpad - touchstart com preventDefault cancela click/pointerdown subsequentes
-  var _np=document.querySelector('.numpad');
-  if(_np){
-    function _fire(btn){
-      if(!btn)return;
-      var n=btn.getAttribute('data-n');
-      if(n===null)return;
-      try{numpad(parseInt(n,10));}
-      catch(err){var el=document.getElementById('lockerr');if(el)el.textContent='ERR:'+err.message;}
-    }
-    // Mobile: touchstart é o mais confiável
-    _np.addEventListener('touchstart',function(e){
-      e.preventDefault(); // cancela click e pointerdown sintéticos
-      var t=e.changedTouches[0];
-      var el=document.elementFromPoint(t.clientX,t.clientY);
-      _fire(el&&el.closest?el.closest('[data-n]'):el);
-    },{passive:false});
-    // Desktop fallback (não dispara após touchstart+preventDefault)
-    _np.addEventListener('click',function(e){
-      var btn=e.target.closest?e.target.closest('[data-n]'):e.target;
-      _fire(btn);
-    });
+  // Polyfill closest para browsers antigos
+  function _closest(el,attr){
+    while(el){if(el.getAttribute&&el.getAttribute(attr)!==null)return el;el=el.parentElement;}
+    return null;
   }
-  // Erro visível na tela de senha
-  window.onerror=function(msg,src,line){
+  // Captura no nível do documento com capture:true — pega ANTES de qualquer overlay
+  document.addEventListener('touchstart',function(e){
+    if(!document.body.classList.contains('locked'))return;
+    var t=e.changedTouches[0];
+    // Mostra diagnóstico: qual elemento está no ponto do toque
+    var hit=document.elementFromPoint(t.clientX,t.clientY);
+    var diag=hit?(hit.tagName+'#'+hit.id+'.'+hit.className).slice(0,60):'null';
+    var lerr=document.getElementById('lockerr');
+    if(lerr)lerr.textContent='toque:'+diag;
+    // Tenta encontrar botão no elemento tocado ou ancestors
+    var btn=_closest(hit,'data-n');
+    if(btn){
+      e.preventDefault();
+      try{numpad(parseInt(btn.getAttribute('data-n'),10));}
+      catch(err){if(lerr)lerr.textContent='ERR:'+err.message;}
+    }
+  },{capture:true,passive:false});
+  document.addEventListener('click',function(e){
+    if(!document.body.classList.contains('locked'))return;
+    var btn=_closest(e.target,'data-n');
+    if(btn){
+      try{numpad(parseInt(btn.getAttribute('data-n'),10));}
+      catch(err){}
+    }
+  },{capture:true});
+  // Erro global visível
+  window.onerror=function(msg){
     var el=document.getElementById('lockerr');
     if(el&&document.body.classList.contains('locked'))el.textContent=String(msg).slice(0,80);
     return false;
