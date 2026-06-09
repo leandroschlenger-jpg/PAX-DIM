@@ -2405,29 +2405,37 @@ function importData(e){
 }
 function resetData(){localStorage.removeItem(KEY);_db=null;load();render('fluxo');renderLemb(load());toast('Dados de exemplo carregados');}
 (function(){
-  // Wire up numpad buttons — works for touch AND click
+  // Wire numpad - touchstart com preventDefault cancela click/pointerdown subsequentes
   var _np=document.querySelector('.numpad');
   if(_np){
-    function _npHandler(e){
-      e.preventDefault();
-      var btn=e.target.closest('[data-n]');
-      if(btn){
-        try{numpad(parseInt(btn.getAttribute('data-n'),10));}
-        catch(err){var el=document.getElementById('lockerr');if(el)el.textContent='ERR:'+err.message;}
-      }
+    function _fire(btn){
+      if(!btn)return;
+      var n=btn.getAttribute('data-n');
+      if(n===null)return;
+      try{numpad(parseInt(n,10));}
+      catch(err){var el=document.getElementById('lockerr');if(el)el.textContent='ERR:'+err.message;}
     }
-    _np.addEventListener('touchstart',_npHandler,{passive:false});
-    _np.addEventListener('pointerdown',_npHandler,{passive:false});
-    _np.addEventListener('click',_npHandler);
+    // Mobile: touchstart é o mais confiável
+    _np.addEventListener('touchstart',function(e){
+      e.preventDefault(); // cancela click e pointerdown sintéticos
+      var t=e.changedTouches[0];
+      var el=document.elementFromPoint(t.clientX,t.clientY);
+      _fire(el&&el.closest?el.closest('[data-n]'):el);
+    },{passive:false});
+    // Desktop fallback (não dispara após touchstart+preventDefault)
+    _np.addEventListener('click',function(e){
+      var btn=e.target.closest?e.target.closest('[data-n]'):e.target;
+      _fire(btn);
+    });
   }
-  // Global error display on lockscreen
-  window.onerror=function(msg){
+  // Erro visível na tela de senha
+  window.onerror=function(msg,src,line){
     var el=document.getElementById('lockerr');
-    if(el&&document.body.classList.contains('locked'))el.textContent=msg;
+    if(el&&document.body.classList.contains('locked'))el.textContent=String(msg).slice(0,80);
     return false;
   };
   try{
-    load(); // migrates old data automatically, never loses user changes
+    load();
     var _m=new Date();
     curMes=_m.getFullYear()+'-'+('0'+(_m.getMonth()+1)).slice(-2);
     updML();render('resumo');renderLemb(load());
