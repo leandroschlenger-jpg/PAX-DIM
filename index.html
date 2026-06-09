@@ -1728,27 +1728,35 @@ function checkMissoes(db){
   });
 }
 function goP(id){
-  if(id==='extrato'){
-    document.querySelectorAll('.page').forEach(function(p){p.classList.remove('on');});
-    document.querySelectorAll('.pg-paulo').forEach(function(p){p.classList.remove('on');p.style.display='';});
-    var ep=document.getElementById('pg-paulo-extrato');if(ep)ep.classList.add('on');
+  try{
+    // Hide all regular pages
+    document.querySelectorAll('.page').forEach(function(p){p.style.display='none';p.classList.remove('on');});
+    // Hide all Paulo pages
+    document.querySelectorAll('.pg-paulo').forEach(function(p){p.style.display='none';p.classList.remove('on');});
+    // Remove tab highlights
     document.querySelectorAll('.p-tab').forEach(function(n){n.classList.remove('on');});
-    var niE=document.getElementById('p-ni-extrato');if(niE)niE.classList.add('on');
-    renderPauloExtrato();
-    return;
+    // Show target page with both class AND inline style
+    var pgId=id==='extrato'?'pg-paulo-extrato':'pg-paulo-'+id;
+    var pg=document.getElementById(pgId);
+    if(pg){pg.style.display='block';pg.classList.add('on');}
+    // Highlight tab
+    var tabId=id==='extrato'?'p-ni-extrato':'p-ni-'+id;
+    var ni=document.getElementById(tabId);if(ni)ni.classList.add('on');
+    // Scroll to top
+    var scr=document.getElementById('screen');if(scr)scr.scrollTop=0;
+    // Render content
+    var db=load();
+    if(id==='home')renderPauloHome(db);
+    else if(id==='sonhos')renderPauloSonhos(db);
+    else if(id==='missoes')renderPauloMissoes(db);
+    else if(id==='conquistas')renderPauloConquistas(db);
+    else if(id==='quiz')renderPauloQuiz(db);
+    else if(id==='extrato')renderPauloExtrato();
+  }catch(e){
+    var le=document.getElementById('lockerr')||document.getElementById('loginErr');
+    if(le)le.textContent='goP err:'+e.message;
+    console.error('goP',id,e);
   }
-  document.querySelectorAll('.page').forEach(function(p){p.classList.remove('on');});
-  document.querySelectorAll('.pg-paulo').forEach(function(p){p.classList.remove('on');p.style.display='';});
-  document.querySelectorAll('.p-tab').forEach(function(n){n.classList.remove('on');});
-  var pg=document.getElementById('pg-paulo-'+id);if(pg)pg.classList.add('on');
-  var ni=document.getElementById('p-ni-'+id);if(ni)ni.classList.add('on');
-  var scr=document.getElementById('screen');if(scr)scr.scrollTop=0;
-  var db=load();
-  if(id==='home')renderPauloHome(db);
-  else if(id==='sonhos')renderPauloSonhos(db);
-  else if(id==='missoes')renderPauloMissoes(db);
-  else if(id==='conquistas')renderPauloConquistas(db);
-  else if(id==='quiz')renderPauloQuiz(db);
 }
 function renderPauloHome(db){
   if(!db.paulo){db.paulo=seedPaulo().paulo;save(db);}
@@ -3150,7 +3158,7 @@ function finishQuiz(){
 })();
 
 </script>
-<div id="ver" style="position:fixed;bottom:8px;left:0;right:0;text-align:center;font-size:10px;color:var(--t3);opacity:.45;z-index:99999;pointer-events:none;font-family:monospace">v1.107.518</div>
+<div id="ver" style="position:fixed;bottom:8px;left:0;right:0;text-align:center;font-size:10px;color:var(--t3);opacity:.45;z-index:99999;pointer-events:none;font-family:monospace">v1.107.519</div>
 </body>
 </html>
  
