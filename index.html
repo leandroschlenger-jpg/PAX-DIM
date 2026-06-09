@@ -583,8 +583,8 @@ inter-events:none}
         <div style="font-size:11px;color:#6b6b9a;margin-top:4px" id="p-xp-label">0 XP</div>
       </div>
       <div class="p-2col">
-        <div class="p-stat"><div class="sv" id="p-mesada">R$ 150,00</div><div class="sl">mesada 💸</div></div>
-        <div class="p-stat"><div class="sv" id="p-gasto">R$ 0,00</div><div class="sl">gastei 🛒</div></div>
+        <div class="p-stat"><div class="sv" id="p-mesada">R$ 150,00</div><div class="sl">saldo 💸</div></div>
+        <div class="p-stat"><div class="sv" id="p-gasto">R$ 0,00</div><div class="sl">gastei este mês 🛒</div></div>
       </div>
       <button class="p-btn purple" onclick="pGuardar()">💰 Guardar dinheiro</button>
       <button class="p-btn gold" onclick="pRegistrarCompra()">🛒 Registrar compra</button>
@@ -1766,8 +1766,42 @@ function goP(id){
     console.error('goP',id,e);
   }
 }
+function _ensureMesadaPaulo(db){
+  // Auto-lança mesada do mês corrente se ainda não existe
+  if(!db.paulo)return false;
+  var p=db.paulo;
+  var mesada=p.mesada||150;
+  var bonus=p.mesadaBonus||0;
+  var hm=_hoje.getFullYear()+'-'+('0'+(_hoje.getMonth()+1)).slice(-2);
+  var jaTemMesada=(db.fluxo||[]).some(function(t){
+    return t.mes===hm&&t.conta==='Mesada'&&t.categoria==='Mesada';
+  });
+  if(!jaTemMesada){
+    if(!db.fluxo)db.fluxo=[];
+    var valor=mesada+(bonus>0?bonus:0);
+    db.fluxo.push({
+      id:uid(),mes:hm,data:hm+'-01',operacao:'Entrada',
+      valor:mesada,conta:'Mesada',
+      descricao:'Mesada '+(hm.split('-').reverse().join('/')),
+      categoria:'Mesada',status:'OK',forma:''
+    });
+    if(bonus>0){
+      db.fluxo.push({
+        id:uid(),mes:hm,data:hm+'-01',operacao:'Entrada',
+        valor:bonus,conta:'Mesada',
+        descricao:'Bônus Quiz '+(hm.split('-').reverse().join('/')),
+        categoria:'Mesada',status:'OK',forma:''
+      });
+      p.mesadaBonus=0;
+    }
+    return true;
+  }
+  return false;
+}
 function renderPauloHome(db){
   if(!db.paulo){db.paulo=seedPaulo().paulo;save(db);}
+  // Garante lançamento da mesada no mês corrente
+  if(_ensureMesadaPaulo(db))save(db);
   var p=db.paulo;
   var xp=p.xp||0,nivel=pGetNivel(xp),nome=NIVEL_NOMES[nivel];
   var xpBase=NIVEL_XP[nivel],xpProx=pXpNext(nivel),xpRange=xpProx-xpBase,xpCur=xp-xpBase;
@@ -1776,9 +1810,15 @@ function renderPauloHome(db){
   var pb=document.getElementById('p-xpbar');if(pb)pb.style.width=pct+'%';
   var xl=document.getElementById('p-xp-label');if(xl)xl.textContent=xp+' XP \xb7 faltam '+(xpProx-xp)+' para o pr\xf3ximo n\xedvel';
   var fmt2=function(v){return'R$ '+((v||0).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2}));};
+  // Saldo calculado do fluxo do mês
+  var hm=_hoje.getFullYear()+'-'+('0'+(_hoje.getMonth()+1)).slice(-2);
+  var txsMes=(db.fluxo||[]).filter(function(t){return t.mes===hm;});
+  var entradas=txsMes.filter(function(t){return t.operacao==='Entrada';}).reduce(function(s,t){return s+t.valor;},0);
+  var saidas=txsMes.filter(function(t){return t.operacao==='Saida';}).reduce(function(s,t){return s+t.valor;},0);
+  var saldo=entradas-saidas;
   var cf=document.getElementById('p-cofrinho');if(cf)cf.textContent=fmt2(p.cofrinho||0);
-  var me=document.getElementById('p-mesada');if(me)me.textContent=fmt2(p.mesada||150);
-  var gs=document.getElementById('p-gasto');if(gs)gs.textContent=fmt2(p.gasto||0);
+  var me=document.getElementById('p-mesada');if(me)me.textContent=fmt2(saldo);
+  var gs=document.getElementById('p-gasto');if(gs)gs.textContent=fmt2(saidas);
 }
 function renderPauloSonhos(db){
   if(!db.paulo){db.paulo=seedPaulo().paulo;save(db);}
@@ -3234,10 +3274,11 @@ function pResponderQuiz(qIdx,chosenIdx){
   window.pPaisMissoes=pPaisMissoes;
   window.pEditarMissao=pEditarMissao;
   window.pExcluirMissao=pExcluirMissao;
+  window._ensureMesadaPaulo=_ensureMesadaPaulo;
 })();
 
 </script>
-<div id="ver" style="position:fixed;bottom:8px;left:0;right:0;text-align:center;font-size:10px;color:var(--t3);opacity:.45;z-index:99999;pointer-events:none;font-family:monospace">v1.112.525</div>
+<div id="ver" style="position:fixed;bottom:8px;left:0;right:0;text-align:center;font-size:10px;color:var(--t3);opacity:.45;z-index:99999;pointer-events:none;font-family:monospace">v1.113.526</div>
 </body>
 </html>
  
