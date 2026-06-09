@@ -1782,7 +1782,10 @@ function renderPauloSonhos(db){
             '<div style="font-size:15px;font-weight:800;color:var(--t1)">'+s.nome+'</div>'+
             '<div style="font-size:11px;color:var(--t3);margin-top:2px">'+(done?'✅ Conclu\xeddo!':('Meta: R$ '+s.meta.toLocaleString('pt-BR',{minimumFractionDigits:2})+' · '+diasRestantes(s.prazo)))+'</div>'+
           '</div>'+
-          (!done?'<button onclick="pGuardarNaSonho(\''+s.id+'\')" style="background:var(--acc);border:none;border-radius:12px;padding:8px 14px;color:#fff;font-size:12px;font-weight:800;cursor:pointer">+ Guardar</button>':'')+
+          '<div style="display:flex;gap:6px">'+
+            (!done?'<button onclick="pGuardarNaSonho(\''+s.id+'\')" style="background:var(--acc);border:none;border-radius:12px;padding:8px 14px;color:#fff;font-size:12px;font-weight:800;cursor:pointer">+ Guardar</button>':'')+
+            '<button onclick="pEditSonho(\''+s.id+'\')" style="background:var(--s3);border:1px solid var(--bdr);border-radius:12px;padding:8px 12px;color:var(--t3);font-size:13px;cursor:pointer">✏️</button>'+
+          '</div>'+
         '</div>'+
         '<div style="background:var(--s3);border-radius:99px;height:8px;margin-bottom:6px">'+
           '<div style="background:'+(done?'#34d399':'var(--acc)')+';border-radius:99px;height:8px;width:'+pct+'%;transition:width .4s"></div></div>'+
@@ -1794,7 +1797,7 @@ function renderPauloSonhos(db){
     }).join('');
   }
   var addEl=document.getElementById('p-add-sonho');
-  if(addEl)addEl.onclick=function(){pNovoSonho();};
+  if(addEl)addEl.onclick=function(){pEditSonho(null);};
 }
 
 function renderPauloMissoes(db){
@@ -2001,13 +2004,14 @@ function pModoParent(context){
 }
 function pPaisMissoes(){
   var db=load();if(!db.paulo)db.paulo=seedPaulo().paulo;
-  var pendentes=(db.paulo.missoes||[]).filter(function(m){return m.status==='aguardando';});
+  var missoes=db.paulo.missoes||[];
+  var pendentes=missoes.filter(function(m){return m.status==='aguardando';});
   document.getElementById('stitle').textContent='🎯 Gerenciar Missões';
   var html2='';
   if(pendentes.length){
-    html2+='<div style="font-size:12px;font-weight:700;color:var(--t3);margin-bottom:8px;text-transform:uppercase">Aguardando Aprovação</div>';
+    html2+='<div style="font-size:12px;font-weight:700;color:#60a5fa;margin-bottom:8px;text-transform:uppercase;letter-spacing:.04em">⏳ Aguardando Aprovação</div>';
     pendentes.forEach(function(m){
-      html2+='<div style="background:var(--s2);border-radius:12px;padding:12px;margin-bottom:8px">'+
+      html2+='<div style="background:var(--s2);border-radius:12px;padding:12px;margin-bottom:8px;border:1px solid #60a5fa44">'+
         '<div style="font-size:13px;font-weight:700;margin-bottom:6px">'+m.titulo+'</div>'+
         '<div style="display:flex;gap:8px">'+
           '<button onclick="pAprovarMissao(\''+m.id+'\')" style="flex:1;padding:8px;background:#34d39922;color:#34d399;border:1px solid #34d399;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer">✅ Aprovar</button>'+
@@ -2015,8 +2019,22 @@ function pPaisMissoes(){
         '</div></div>';
     });
   }
-  html2+='<div style="font-size:12px;font-weight:700;color:var(--t3);margin:12px 0 8px;text-transform:uppercase">Nova Missão</div>';
-  html2+='<input id="pm-titulo" type="text" class="ainp" placeholder="Título da missão" style="margin-bottom:8px">'+
+  if(missoes.length){
+    html2+='<div style="font-size:12px;font-weight:700;color:var(--t3);margin:12px 0 8px;text-transform:uppercase;letter-spacing:.04em">Todas as Missões</div>';
+    missoes.forEach(function(m){
+      html2+='<div style="background:var(--s2);border-radius:12px;padding:10px 12px;margin-bottom:6px;display:flex;align-items:center;gap:8px">'+
+        '<div style="flex:1;min-width:0">'+
+          '<div style="font-size:13px;font-weight:700;color:var(--t1)">'+m.titulo+'</div>'+
+          '<div style="font-size:11px;color:var(--t3)">'+m.pontos+' pts · '+m.status+'</div>'+
+        '</div>'+
+        '<button onclick="pEditarMissao(\''+m.id+'\')" style="background:var(--s3);border:1px solid var(--bdr);border-radius:8px;padding:6px 10px;color:var(--t2);font-size:13px;cursor:pointer">✏️</button>'+
+        '<button onclick="pExcluirMissao(\''+m.id+'\')" style="background:#f8717111;border:1px solid #f87171;border-radius:8px;padding:6px 10px;color:#f87171;font-size:13px;cursor:pointer">🗑</button>'+
+      '</div>';
+    });
+  }
+  html2+='<div style="font-size:12px;font-weight:700;color:var(--t3);margin:16px 0 8px;text-transform:uppercase;letter-spacing:.04em">➕ Nova Missão</div>';
+  html2+=
+    '<input id="pm-titulo" type="text" class="ainp" placeholder="Título da missão" style="margin-bottom:8px">'+
     '<input id="pm-desc" type="text" class="ainp" placeholder="Descrição" style="margin-bottom:8px">'+
     '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px">'+
       '<input id="pm-pts" type="number" class="ainp" placeholder="Pontos (ex: 30)">'+
@@ -2030,12 +2048,45 @@ function pPaisMissoes(){
     var p=parseInt(document.getElementById('pm-pts').value)||20;
     var pr=document.getElementById('pm-prazo').value;
     if(!t){toast('Digite um título');return;}
-    var db=load();if(!db.paulo.missoes)db.paulo.missoes=[];
-    db.paulo.missoes.push({id:uid(),titulo:t,desc:d,pontos:p,prazo:pr,status:'ativa',criado:new Date().toISOString().split('T')[0],completadoEm:null});
-    save(db);closeSH();renderPauloMissoes(db);pToast('Missão adicionada!');
+    var db2=load();if(!db2.paulo.missoes)db2.paulo.missoes=[];
+    db2.paulo.missoes.push({id:uid(),titulo:t,desc:d,pontos:p,prazo:pr,status:'ativa',criado:new Date().toISOString().split('T')[0],completadoEm:null});
+    save(db2);closeSH();renderPauloMissoes(db2);pToast('Missão adicionada!');
   };
   document.getElementById('sbody').appendChild(btn);
   document.getElementById('sbg').classList.add('on');
+}
+function pEditarMissao(id){
+  var db=load();if(!db.paulo||!db.paulo.missoes)return;
+  var m=db.paulo.missoes.find(function(x){return x.id===id;});if(!m)return;
+  document.getElementById('stitle').textContent='✏️ Editar Missão';
+  document.getElementById('sbody').innerHTML=
+    '<input id="pe-titulo" type="text" class="ainp" placeholder="Título" value="'+m.titulo+'" style="margin-bottom:8px">'+
+    '<input id="pe-desc" type="text" class="ainp" placeholder="Descrição" value="'+(m.desc||'')+'" style="margin-bottom:8px">'+
+    '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px">'+
+      '<input id="pe-pts" type="number" class="ainp" placeholder="Pontos" value="'+(m.pontos||20)+'">'+
+      '<input id="pe-prazo" type="date" class="ainp" value="'+(m.prazo||'')+'">'+
+    '</div>';
+  var btn=document.createElement('button');btn.className='savebtn';btn.textContent='Salvar alterações';
+  btn.onclick=function(){
+    var t=document.getElementById('pe-titulo').value.trim();
+    if(!t){toast('Digite um título');return;}
+    var db2=load();
+    var idx=db2.paulo.missoes.findIndex(function(x){return x.id===id;});
+    if(idx<0)return;
+    db2.paulo.missoes[idx].titulo=t;
+    db2.paulo.missoes[idx].desc=document.getElementById('pe-desc').value.trim();
+    db2.paulo.missoes[idx].pontos=parseInt(document.getElementById('pe-pts').value)||20;
+    db2.paulo.missoes[idx].prazo=document.getElementById('pe-prazo').value;
+    save(db2);closeSH();renderPauloMissoes(db2);pToast('Missão atualizada!');
+  };
+  document.getElementById('sbody').appendChild(btn);
+  document.getElementById('sbg').classList.add('on');
+  setTimeout(function(){document.getElementById('pe-titulo').focus();},300);
+}
+function pExcluirMissao(id){
+  var db=load();if(!db.paulo||!db.paulo.missoes)return;
+  db.paulo.missoes=db.paulo.missoes.filter(function(x){return x.id!==id;});
+  save(db);closeSH();renderPauloMissoes(db);pToast('Missão excluída');
 }
 function pAprovarMissao(id){
   var db=load();if(!db.paulo)return;
@@ -2163,51 +2214,53 @@ function pRegistrarCompra(){
   document.getElementById('sbg').classList.add('on');
   setTimeout(function(){document.getElementById('p-compra-desc').focus();},300);
 }
-function pSelEmoji(btn,idx){
-  document.querySelectorAll('#p-emoji-grid button').forEach(function(b){b.style.background='rgba(124,58,237,.1)';});
-  btn.style.background='rgba(124,58,237,.4)';
+function pSelEmoji(btn){
+  document.querySelectorAll('#p-emoji-grid button').forEach(function(b){b.style.background='rgba(124,58,237,.08)';b.style.borderColor='rgba(124,58,237,.2)';});
+  btn.style.background='rgba(124,58,237,.3)';btn.style.borderColor='var(--acc)';
   document.getElementById('p-s-emoji').value=btn.getAttribute('data-emoji');
 }
 function pEditSonho(id){
   var db=load();if(!db.paulo)return;
   if(!db.paulo.sonhos)db.paulo.sonhos=[];
   var s=id?db.paulo.sonhos.find(function(x){return x.id===id;}):null;
-  var EMOJIS=['\u{1F3AE}','\u{1F45F}','\u{1F3B8}','\u26BD','\u{1F4F1}','\u{1F6B2}','\u{1F3A8}','\u{1F3AC}','\u{1F4DA}','\u{1F355}','\u{1F381}','\u2708\uFE0F'];
-  document.getElementById('stitle').textContent=s?'Editar Sonho':'Novo Sonho \u2B50';
+  var EMOJIS=['\uD83C\uDFAE','\uD83D\uDC5F','\uD83C\uDFB8','\u26BD','\uD83D\uDCF1','\uD83D\uDEB2','\uD83C\uDFA8','\uD83C\uDFAC','\uD83D\uDCDA','\uD83C\uDF55','\uD83C\uDF81','\u2708\uFE0F','\uD83C\uDFC6','\uD83C\uDFAF','\uD83C\uDFA7'];
+  document.getElementById('stitle').textContent=s?'\u270F\uFE0F Editar Sonho':'\u2B50 Novo Sonho';
   var curEmoji=s?s.emoji:EMOJIS[0];
+  var metaVal=s&&s.meta?s.meta.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2}):'';
   document.getElementById('sbody').innerHTML=
-    '<div class="field"><label>Nome do sonho</label><input id="p-s-nome" type="text" class="ainp" placeholder="Ex: Novo t\xeanis" value="'+(s?s.nome:'')+'"></div>'+
+    '<div class="field"><label>Nome do sonho</label><input id="p-s-nome" type="text" class="ainp" placeholder="Ex: Novo t\u00EAnis" value="'+(s?s.nome:'')+'"></div>'+
     '<div class="field"><label>Emoji</label>'+
-    '<div id="p-emoji-grid" style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:16px">'+
-      EMOJIS.map(function(e,i){
-        return '<button type="button" onclick="pSelEmoji(this,'+i+')" data-emoji="'+e+'" style="font-size:22px;padding:8px;border:1px solid rgba(124,58,237,.3);border-radius:10px;background:'+(e===curEmoji?'rgba(124,58,237,.4)':'rgba(124,58,237,.1)')+';cursor:pointer">'+e+'</button>';
+    '<div id="p-emoji-grid" style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:8px">'+
+      EMOJIS.map(function(e){
+        return '<button type="button" onclick="pSelEmoji(this)" data-emoji="'+e+'" style="font-size:22px;padding:8px;border:2px solid '+(e===curEmoji?'var(--acc)':'rgba(124,58,237,.2)')+';border-radius:10px;background:'+(e===curEmoji?'rgba(124,58,237,.3)':'rgba(124,58,237,.08)')+';cursor:pointer">'+e+'</button>';
       }).join('')+
     '</div><input id="p-s-emoji" type="hidden" value="'+curEmoji+'"></div>'+
-    '<div class="field"><label>Pre\xe7o (R$)</label><input id="p-s-preco" type="text" inputmode="decimal" class="ainp" placeholder="0,00" oninput="moneyMask(this)" style="font-size:22px" value="'+(s&&s.preco?s.preco.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2}):'')+'"></div>';
+    '<div class="field"><label>Valor meta (R$)</label><input id="p-s-meta" type="text" inputmode="decimal" class="ainp" placeholder="0,00" oninput="moneyMask(this)" style="font-size:22px" value="'+metaVal+'"></div>'+
+    '<div class="field"><label>Prazo (m\u00EAs)</label><input id="p-s-prazo" type="month" class="ainp" value="'+(s&&s.prazo?s.prazo:'')+'"></div>';
   if(s){
-    var del=document.createElement('button');del.className='delbtn';del.textContent='Excluir este sonho';
+    var del=document.createElement('button');del.className='delbtn';del.textContent='\uD83D\uDDD1 Excluir este sonho';
     del.onclick=function(){
-      if(!confirm('Excluir?'))return;
-      var db=load();db.paulo.sonhos=db.paulo.sonhos.filter(function(x){return x.id!==id;});
-      save(db);closeSH();goP('sonhos');
+      var db2=load();db2.paulo.sonhos=db2.paulo.sonhos.filter(function(x){return x.id!==id;});
+      save(db2);closeSH();renderPauloSonhos(db2);pToast('Sonho exclu\u00EDdo');
     };
     document.getElementById('sbody').appendChild(del);
   }
-  var btn=document.createElement('button');btn.className='savebtn';btn.textContent='Salvar Sonho \u2B50';
+  var btn=document.createElement('button');btn.className='savebtn';btn.textContent=s?'Salvar altera\u00E7\u00F5es \u2B50':'Criar Sonho \u2B50';
   btn.onclick=function(){
     var nome=document.getElementById('p-s-nome').value.trim();
     var emoji=document.getElementById('p-s-emoji').value||'\u2B50';
-    var preco=parseMoney(document.getElementById('p-s-preco').value);
-    if(!nome||!preco){toast('Preencha nome e pre\xe7o');return;}
-    var db=load();if(!db.paulo)db.paulo=seedPaulo().paulo;if(!db.paulo.sonhos)db.paulo.sonhos=[];
+    var meta=parseMoney(document.getElementById('p-s-meta').value);
+    var prazo=document.getElementById('p-s-prazo').value;
+    if(!nome||!meta||!prazo){toast('Preencha nome, valor e prazo');return;}
+    var db2=load();if(!db2.paulo)db2.paulo=seedPaulo().paulo;if(!db2.paulo.sonhos)db2.paulo.sonhos=[];
     if(s){
-      var idx=db.paulo.sonhos.findIndex(function(x){return x.id===id;});
-      if(idx>=0){db.paulo.sonhos[idx].nome=nome;db.paulo.sonhos[idx].emoji=emoji;db.paulo.sonhos[idx].preco=preco;}
+      var idx=db2.paulo.sonhos.findIndex(function(x){return x.id===id;});
+      if(idx>=0){db2.paulo.sonhos[idx].nome=nome;db2.paulo.sonhos[idx].emoji=emoji;db2.paulo.sonhos[idx].meta=meta;db2.paulo.sonhos[idx].prazo=prazo;}
     } else {
-      db.paulo.sonhos.push({id:uid(),nome:nome,emoji:emoji,preco:preco,guardado:0});
-      addXP(15,db);pToast('+15 XP! Sonho criado \u2B50');
+      db2.paulo.sonhos.push({id:uid(),nome:nome,emoji:emoji,meta:meta,prazo:prazo,guardado:0,concluido:false});
+      addXP(15,db2);pToast('+15 XP! Sonho criado \u2B50');
     }
-    checkConquistas(db);save(db);closeSH();goP('sonhos');
+    checkConquistas(db2);save(db2);closeSH();renderPauloSonhos(db2);
   };
   document.getElementById('sbody').appendChild(btn);
   document.getElementById('sbg').classList.add('on');
@@ -2835,8 +2888,8 @@ function renderPauloQuiz(db){
     db.paulo.mesadaBonus=(db.paulo.mesadaBonus||0)+bonus;
     if(!db.paulo.trofeus)db.paulo.trofeus=[];
     if(bonus>0){
-      db.paulo.trofeus.push({id:uid(),emoji:'\U0001f4b0',titulo:'Bônus de mesada',desc:'Ganhou R$'+bonus+',00 de bônus pelo quiz de '+q.lastMonth,data:today});
-      pToast('\U0001f389 Bônus R$'+bonus+',00 na mesada!');
+      db.paulo.trofeus.push({id:uid(),emoji:'💰',titulo:'Bônus de mesada',desc:'Ganhou R$'+bonus+',00 de bônus pelo quiz de '+q.lastMonth,data:today});
+      pToast('🎉 Bônus R$'+bonus+',00 na mesada!');
     }
     q.monthCoins=0;q.lastMonth=curMonth;save(db);
   }
@@ -2849,17 +2902,17 @@ function renderPauloQuiz(db){
   var statsHtml=
     '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:16px">'+
       '<div style="background:var(--s2);border-radius:14px;padding:12px 8px;text-align:center">'+
-        '<div style="font-size:24px">\U0001f525</div>'+
+        '<div style="font-size:24px">🔥</div>'+
         '<div style="font-size:20px;font-weight:900;color:var(--acc)">'+(q.streak||0)+'</div>'+
         '<div style="font-size:10px;color:var(--t3)">Sequência</div>'+
       '</div>'+
       '<div style="background:var(--s2);border-radius:14px;padding:12px 8px;text-align:center">'+
-        '<div style="font-size:24px">\U0001fa99</div>'+
+        '<div style="font-size:24px">🪙</div>'+
         '<div style="font-size:20px;font-weight:900;color:#f59e0b">'+(q.monthCoins||0)+'</div>'+
         '<div style="font-size:10px;color:var(--t3)">Moedas/mês</div>'+
       '</div>'+
       '<div style="background:var(--s2);border-radius:14px;padding:12px 8px;text-align:center">'+
-        '<div style="font-size:24px">\U0001f4b0</div>'+
+        '<div style="font-size:24px">💰</div>'+
         '<div style="font-size:20px;font-weight:900;color:#34d399">R$'+Math.floor((q.monthCoins||0)/5)+',00</div>'+
         '<div style="font-size:10px;color:var(--t3)">Bônus acum.</div>'+
       '</div>'+
@@ -2870,7 +2923,7 @@ function renderPauloQuiz(db){
   if(alreadyPlayed){
     el.innerHTML=statsHtml+
       '<div style="background:var(--s2);border-radius:18px;padding:24px 16px;text-align:center;border:1.5px solid var(--acc)">'+
-        '<div style="font-size:48px;margin-bottom:8px">\U0001f31f</div>'+
+        '<div style="font-size:48px;margin-bottom:8px">🌟</div>'+
         '<div style="font-size:16px;font-weight:800;color:var(--t1);margin-bottom:4px">Desafio de hoje concluído!</div>'+
         '<div style="font-size:13px;color:var(--t3)">Volte amanhã para manter sua sequência de '+(q.streak||0)+' dias!</div>'+
       '</div>';
@@ -2887,7 +2940,7 @@ function renderPauloQuiz(db){
   // Show question
   el.innerHTML=statsHtml+
     '<div style="background:var(--s2);border-radius:18px;padding:18px;border:1.5px solid var(--acc)">'+
-      '<div style="font-size:11px;font-weight:700;text-transform:uppercase;color:var(--acc);letter-spacing:.06em;margin-bottom:8px">Desafio do dia · +'+streakCoins+'\U0001fa99 se acertar</div>'+
+      '<div style="font-size:11px;font-weight:700;text-transform:uppercase;color:var(--acc);letter-spacing:.06em;margin-bottom:8px">Desafio do dia · +'+streakCoins+'🪙 se acertar</div>'+
       '<div style="font-size:16px;font-weight:800;color:var(--t1);margin-bottom:16px;line-height:1.4">'+pergunta.q+'</div>'+
       opts.map(function(opt,i){
         return '<button onclick="pResponderQuiz('+qIdx+','+i+')" style="display:block;width:100%;text-align:left;padding:12px 16px;margin-bottom:8px;background:var(--s3);border:1.5px solid var(--bdr);border-radius:12px;color:var(--t1);font-size:14px;font-weight:600;cursor:pointer">'+opt+'</button>';
@@ -2917,15 +2970,15 @@ function pResponderQuiz(qIdx,chosenIdx){
   q.answered.push({date:today,qIdx:qIdx,correct:acertou});
   // Check trophy milestones
   if(!db.paulo.trofeus)db.paulo.trofeus=[];
-  if(q.streak===7)db.paulo.trofeus.push({id:uid(),emoji:'\U0001f525',titulo:'Semana em chamas!',desc:'7 dias seguidos no quiz',data:today});
-  if(q.streak===30)db.paulo.trofeus.push({id:uid(),emoji:'\U0001f451',titulo:'Mestre do quiz',desc:'30 dias seguidos!',data:today});
+  if(q.streak===7)db.paulo.trofeus.push({id:uid(),emoji:'🔥',titulo:'Semana em chamas!',desc:'7 dias seguidos no quiz',data:today});
+  if(q.streak===30)db.paulo.trofeus.push({id:uid(),emoji:'👑',titulo:'Mestre do quiz',desc:'30 dias seguidos!',data:today});
   save(db);
   // Show result overlay
   var el=document.getElementById('p-quiz-daily');
   if(!el)return;
   var acertouHtml=
     '<div style="background:'+(acertou?'#34d39922':'#f8717122')+';border:1.5px solid '+(acertou?'#34d399':'#f87171')+';border-radius:18px;padding:24px;text-align:center;margin-top:8px">'+
-      '<div style="font-size:48px;margin-bottom:8px">'+(acertou?'\U0001f389':'\U0001f614')+'</div>'+
+      '<div style="font-size:48px;margin-bottom:8px">'+(acertou?'🎉':'😔')+'</div>'+
       '<div style="font-size:16px;font-weight:800;color:var(--t1);margin-bottom:4px">'+(acertou?'Acertou!':'Errou...')+'</div>'+
       '<div style="font-size:13px;color:var(--t3);margin-bottom:8px">'+(acertou?'+'+streakCoins+' moedas! Sequência: '+q.streak+' dias':('Sequência zerada. A resposta era: '+pergunta.opts[0]))+'</div>'+
     '</div>';
@@ -2938,8 +2991,8 @@ function pResponderQuiz(qIdx,chosenIdx){
     if(i===chosenIdx&&!acertou)b.style.borderColor='#f87171';
   });
   el.insertAdjacentHTML('beforeend',acertouHtml);
-  if(acertou)pToast('+'+streakCoins+' moedas! \U0001f525 '+q.streak+' dias!');
-  else pToast('\U0001f614 Errou! Tente amanhã');
+  if(acertou)pToast('+'+streakCoins+' moedas! 🔥 '+q.streak+' dias!');
+  else pToast('😔 Errou! Tente amanhã');
 }
 
 function startQuiz(lv){
@@ -3067,90 +3120,4 @@ function finishQuiz(){
     initFB();
     updML();
     if(u.id==='paulo'){goP('home');}
-    else{render('fluxo');renderLemb(load());}
-  }
-
-
-
-  // PIN modal para revelar valores
-  function openPinModal(){
-    var m=document.getElementById('pinModal');if(!m)return;
-    m.style.display='flex';
-    var inp=document.getElementById('pmInput');
-    if(inp){inp.value='';setTimeout(function(){try{inp.focus();}catch(e){}},200);}
-    _pmUpdDots(0,false);
-    var err=document.getElementById('pmErr');if(err)err.textContent='';
-  }
-  function closePinModal(){
-    var m=document.getElementById('pinModal');if(m)m.style.display='none';
-    var inp=document.getElementById('pmInput');if(inp)inp.value='';
-    _pmUpdDots(0,false);
-  }
-  function _pmUpdDots(len,err){
-    for(var i=0;i<4;i++){
-      var d=document.getElementById('pm'+i);
-      if(d){d.classList.toggle('filled',i<len);d.classList.toggle('error',!!err);}
-    }
-  }
-  var _pmInp=document.getElementById('pmInput');
-  if(_pmInp){
-    _pmInp.addEventListener('input',function(){
-      var v=this.value.replace(/\D/g,'').slice(0,4);
-      this.value=v;_pmUpdDots(v.length,false);
-      var err=document.getElementById('pmErr');
-      if(v.length===4){
-        if(curUser&&USERS[v]&&USERS[v].id===curUser.id){
-          closePinModal();valHidden=false;
-          var eb=document.getElementById('eyebtn');if(eb)eb.classList.add('on');
-          var sl=document.getElementById('eyeSlash');if(sl)sl.style.display='none';
-          render(curPage||'resumo');
-        } else {
-          if(err)err.textContent='PIN incorreto';_pmUpdDots(4,true);
-          setTimeout(function(){if(_pmInp)_pmInp.value='';_pmUpdDots(0,false);if(err)err.textContent='';},700);
-        }
-      }
-    });
-  }
-  var _pmCb=document.getElementById('pmCancelCb');
-  if(_pmCb)_pmCb.addEventListener('change',function(){this.checked=false;closePinModal();});
-
-  window.onerror=function(msg,src,line,col,err){
-    var el=document.getElementById('loginErr')||document.getElementById('lockerr');
-    if(el)el.textContent='JS:'+(err&&err.message||msg||'?').slice(0,80);
-    return false;
-  };
-  try{
-    load();
-    var _m=new Date();
-    curMes=_m.getFullYear()+'-'+('0'+(_m.getMonth()+1)).slice(-2);
-    updML();
-  }catch(e){}
-
-  // Expose Paulo functions globally
-  window.goP=goP;
-  window.renderPauloHome=renderPauloHome;
-  window.renderPauloSonhos=renderPauloSonhos;
-  window.renderPauloMissoes=renderPauloMissoes;
-  window.renderPauloConquistas=renderPauloConquistas;
-  window.renderPauloQuiz=renderPauloQuiz;
-  window.pConcluirMissao=pConcluirMissao;
-  window.pModoParent=pModoParent;
-  window.pAprovarMissao=pAprovarMissao;
-  window.pRejeitarMissao=pRejeitarMissao;
-  window.pNovoSonho=pNovoSonho;
-  window.pGuardarNaSonho=pGuardarNaSonho;
-  window.pSelEmojiSonho=pSelEmojiSonho;
-  window.pResponderQuiz=pResponderQuiz;
-  window.renderPauloExtrato=renderPauloExtrato;
-  window.pAddLancamento=pAddLancamento;
-  window.pSelTipo=pSelTipo;
-  window.pDelLancamento=pDelLancamento;
-  window._doLoginUser=_doLoginUser;
-})();
-
-</script>
-<div id="ver" style="position:fixed;bottom:8px;left:0;right:0;text-align:center;font-size:10px;color:var(--t3);opacity:.45;z-index:99999;pointer-events:none;font-family:monospace">v1.109.521</div>
-</body>
-</html>
- 
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  
+    else{render('fluxo');renderLemb
