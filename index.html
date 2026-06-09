@@ -572,6 +572,57 @@ inter-events:none}
       </div>
     </div>
   </div>
+  <!-- PAULO GAME PAGES -->
+  <div class="pg-paulo" id="pg-paulo-home">
+    <div class="p-screen">
+      <div class="p-hero">
+        <div class="p-level" id="p-level-label">NÍVEL 1 · NOVATO</div>
+        <div class="p-coins" id="p-cofrinho">R$ 0,00</div>
+        <div class="p-coinslbl">no cofrinho 🐷</div>
+        <div class="p-xpbar-wrap"><div class="p-xpbar" id="p-xpbar" style="width:0%"></div></div>
+        <div style="font-size:11px;color:#6b6b9a;margin-top:4px" id="p-xp-label">0 XP</div>
+      </div>
+      <div class="p-2col">
+        <div class="p-stat"><div class="sv" id="p-mesada">R$ 150,00</div><div class="sl">mesada 💸</div></div>
+        <div class="p-stat"><div class="sv" id="p-gasto">R$ 0,00</div><div class="sl">gastei 🛒</div></div>
+      </div>
+      <button class="p-btn purple" onclick="pGuardar()">💰 Guardar dinheiro</button>
+      <button class="p-btn gold" onclick="pRegistrarCompra()">🛒 Registrar compra</button>
+      <button class="p-btn" style="background:var(--s2);color:var(--t1);border:1px solid var(--bdr)" onclick="goP('extrato')">📋 Lançamentos</button>
+    </div>
+  </div>
+  <div class="pg-paulo" id="pg-paulo-sonhos">
+    <div class="p-screen">
+      <div class="p-section">⭐ Meus Sonhos</div>
+      <div id="p-sonhos-list"></div>
+      <button id="p-add-sonho" style="width:100%;margin-top:12px;padding:14px;border-radius:14px;background:var(--acc);color:#fff;font-size:14px;font-weight:800;border:none;cursor:pointer">+ Novo Sonho</button>
+    </div>
+  </div>
+  <div class="pg-paulo" id="pg-paulo-missoes">
+    <div class="p-screen">
+      <div class="p-section">🎯 Missões do Paulo</div>
+      <div id="p-missoes-list"></div>
+      <button id="p-missoes-pais-btn" style="width:100%;margin-top:12px;padding:12px;border-radius:14px;background:var(--s2);color:var(--t3);font-size:13px;font-weight:700;border:1px solid var(--bdr);cursor:pointer">🔑 Modo Pais — Adicionar/Aprovar</button>
+    </div>
+  </div>
+  <div class="pg-paulo" id="pg-paulo-conquistas">
+    <div class="p-screen">
+      <div class="p-section">🏆 Conquistas</div>
+      <div class="p-badge-grid" id="p-conquistas-list"></div>
+    </div>
+  </div>
+  <div class="pg-paulo" id="pg-paulo-extrato">
+    <div class="p-screen">
+      <div class="p-section">📋 Meus Lançamentos</div>
+      <div id="p-extrato-list"></div>
+    </div>
+  </div>
+  <div class="pg-paulo" id="pg-paulo-quiz">
+    <div class="p-screen">
+      <div class="p-section">🧠 Quiz Financeiro</div>
+      <div id="p-quiz-daily"></div>
+    </div>
+  </div>
   </div>
   <nav class="nav">
     <button class="ni on" id="nav-resumo" onclick="go('resumo')"><span class="ic">&#9711;</span>Resumo</button>
@@ -582,58 +633,6 @@ inter-events:none}
   </nav>
 </div>
 
-<!-- PAULO GAME PAGES -->
-<div class="pg-paulo" id="pg-paulo-home">
-  <div class="p-screen">
-    <div class="p-hero">
-      <div class="p-level" id="p-level-label">NÍVEL 1 · NOVATO</div>
-      <div class="p-coins" id="p-cofrinho">R$ 0,00</div>
-      <div class="p-coinslbl">no cofrinho 🐷</div>
-      <div class="p-xpbar-wrap"><div class="p-xpbar" id="p-xpbar" style="width:0%"></div></div>
-      <div style="font-size:11px;color:#6b6b9a;margin-top:4px" id="p-xp-label">0 XP</div>
-    </div>
-    <div class="p-2col">
-      <div class="p-stat"><div class="sv" id="p-mesada">R$ 150,00</div><div class="sl">mesada 💸</div></div>
-      <div class="p-stat"><div class="sv" id="p-gasto">R$ 0,00</div><div class="sl">gastei 🛒</div></div>
-    </div>
-    <button class="p-btn purple" onclick="pGuardar()">💰 Guardar dinheiro</button>
-    <button class="p-btn gold" onclick="pRegistrarCompra()">🛒 Registrar compra</button>
-    <button class="p-btn" style="background:var(--s2);color:var(--t1);border:1px solid var(--bdr)" onclick="goP('extrato')">📋 Lançamentos</button>
-  </div>
-</div>
-<div class="pg-paulo" id="pg-paulo-sonhos">
-  <div class="p-screen">
-    <div class="p-section">⭐ Meus Sonhos</div>
-    <div id="p-sonhos-list"></div>
-    <button id="p-add-sonho" style="width:100%;margin-top:12px;padding:14px;border-radius:14px;background:var(--acc);color:#fff;font-size:14px;font-weight:800;border:none;cursor:pointer">+ Novo Sonho</button>
-  </div>
-</div>
-<div class="pg-paulo" id="pg-paulo-missoes">
-  <div class="p-screen">
-    <div class="p-section">🎯 Missões do Paulo</div>
-    <div id="p-missoes-list"></div>
-    <button id="p-missoes-pais-btn" style="width:100%;margin-top:12px;padding:12px;border-radius:14px;background:var(--s2);color:var(--t3);font-size:13px;font-weight:700;border:1px solid var(--bdr);cursor:pointer">🔑 Modo Pais — Adicionar/Aprovar</button>
-  </div>
-</div>
-<div class="pg-paulo" id="pg-paulo-conquistas">
-  <div class="p-screen">
-    <div class="p-section">🏆 Conquistas</div>
-    <div class="p-badge-grid" id="p-conquistas-list"></div>
-  </div>
-</div>
-<div class="pg-paulo" id="pg-paulo-extrato">
-  <div class="p-screen">
-    <div class="p-section">📋 Meus Lançamentos</div>
-    <div id="p-extrato-list"></div>
-  </div>
-  <div id="pg-paulo-quiz" class="pg-paulo">
-    <div class="p-screen">
-      <div class="p-section">🧠 Quiz Financeiro</div>
-      <div id="p-quiz-daily"></div>
-    </div>
-  </div>
-</div>
-<!-- PAULO NAV -->
 
 <button class="fab" id="fab" onclick="openAdd()">+</button>
 <div class="sbg" id="sbg" onclick="closeSBG(event)">
@@ -3150,8 +3149,8 @@ function finishQuiz(){
 })();
 
 </script>
-<div id="ver" style="position:fixed;bottom:8px;left:0;right:0;text-align:center;font-size:10px;color:var(--t3);opacity:.45;z-index:99999;pointer-events:none;font-family:monospace">v1.108.520</div>
+<div id="ver" style="position:fixed;bottom:8px;left:0;right:0;text-align:center;font-size:10px;color:var(--t3);opacity:.45;z-index:99999;pointer-events:none;font-family:monospace">v1.109.521</div>
 </body>
 </html>
  
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  
