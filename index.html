@@ -1087,7 +1087,7 @@ function load(){
       }
     }
   }catch(e){}
-  _db=seed();
+  _db=curUser&&curUser.id==='thays'?seedThays():curUser&&curUser.id==='paulo'?seedPaulo():seed();
   // Só salva se Firebase não está carregando (evita sobrescrever dados reais)
   if(!_fbRef||_fbSynced){save(_db);}
   else{try{localStorage.setItem(KEY,JSON.stringify(_db));}catch(e){}}
@@ -2766,10 +2766,19 @@ function finishQuiz(){
     curMes=_m.getFullYear()+'-'+('0'+(_m.getMonth()+1)).slice(-2);
     updML();
   }catch(e){}
+
+  // Expose Paulo/quiz functions globally so onclick attributes work
+  window.goP=goP;
+  window.startQuiz=startQuiz;
+  window.showQuizQuestion=showQuizQuestion;
+  window.answerQuiz=answerQuiz;
+  window.finishQuiz=finishQuiz;
+  window.renderPauloHome=renderPauloHome;
+  window.renderPauloQuiz=renderPauloQuiz;
 })();
 
 </script>
-<div id="ver" style="position:fixed;bottom:8px;left:0;right:0;text-align:center;font-size:10px;color:var(--t3);opacity:.45;z-index:99999;pointer-events:none;font-family:monospace">v1.107.512</div>
+<div id="ver" style="position:fixed;bottom:8px;left:0;right:0;text-align:center;font-size:10px;color:var(--t3);opacity:.45;z-index:99999;pointer-events:none;font-family:monospace">v1.107.513</div>
 </body>
 </html>
  
