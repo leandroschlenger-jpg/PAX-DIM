@@ -255,18 +255,18 @@ body.paulo-mode .p-nav{display:flex}
       <div class="lock-dot" id="d3"></div>
     </div>
     <div class="numpad">
-      <button class="npbtn" onpointerdown="numpad(1)">1</button>
-      <button class="npbtn" onpointerdown="numpad(2)">2</button>
-      <button class="npbtn" onpointerdown="numpad(3)">3</button>
-      <button class="npbtn" onpointerdown="numpad(4)">4</button>
-      <button class="npbtn" onpointerdown="numpad(5)">5</button>
-      <button class="npbtn" onpointerdown="numpad(6)">6</button>
-      <button class="npbtn" onpointerdown="numpad(7)">7</button>
-      <button class="npbtn" onpointerdown="numpad(8)">8</button>
-      <button class="npbtn" onpointerdown="numpad(9)">9</button>
-      <button class="npbtn" onpointerdown="numpad(-1)" style="font-size:14px;color:var(--t3)">limpar</button>
-      <button class="npbtn" onpointerdown="numpad(0)">0</button>
-      <button class="npbtn" onpointerdown="numpad(-2)" style="font-size:18px;color:var(--t3)">&#9003;</button>
+      <button class="npbtn" data-n="1">1</button>
+      <button class="npbtn" data-n="2">2</button>
+      <button class="npbtn" data-n="3">3</button>
+      <button class="npbtn" data-n="4">4</button>
+      <button class="npbtn" data-n="5">5</button>
+      <button class="npbtn" data-n="6">6</button>
+      <button class="npbtn" data-n="7">7</button>
+      <button class="npbtn" data-n="8">8</button>
+      <button class="npbtn" data-n="9">9</button>
+      <button class="npbtn" data-n="-1" style="font-size:14px;color:var(--t3)">limpar</button>
+      <button class="npbtn" data-n="0">0</button>
+      <button class="npbtn" data-n="-2" style="font-size:18px;color:var(--t3)">&#9003;</button>
     </div>
     <div class="lock-err" id="lockerr"></div>
   </div>
@@ -2405,10 +2405,36 @@ function importData(e){
 }
 function resetData(){localStorage.removeItem(KEY);_db=null;load();render('fluxo');renderLemb(load());toast('Dados de exemplo carregados');}
 (function(){
-  load(); // migrates old data automatically, never loses user changes
-  var _m=new Date();
-  curMes=_m.getFullYear()+'-'+('0'+(_m.getMonth()+1)).slice(-2);
-  updML();render('resumo');renderLemb(load());
+  // Wire up numpad buttons — works for touch AND click
+  var _np=document.querySelector('.numpad');
+  if(_np){
+    function _npHandler(e){
+      e.preventDefault();
+      var btn=e.target.closest('[data-n]');
+      if(btn){
+        try{numpad(parseInt(btn.getAttribute('data-n'),10));}
+        catch(err){var el=document.getElementById('lockerr');if(el)el.textContent='ERR:'+err.message;}
+      }
+    }
+    _np.addEventListener('touchstart',_npHandler,{passive:false});
+    _np.addEventListener('pointerdown',_npHandler,{passive:false});
+    _np.addEventListener('click',_npHandler);
+  }
+  // Global error display on lockscreen
+  window.onerror=function(msg){
+    var el=document.getElementById('lockerr');
+    if(el&&document.body.classList.contains('locked'))el.textContent=msg;
+    return false;
+  };
+  try{
+    load(); // migrates old data automatically, never loses user changes
+    var _m=new Date();
+    curMes=_m.getFullYear()+'-'+('0'+(_m.getMonth()+1)).slice(-2);
+    updML();render('resumo');renderLemb(load());
+  }catch(e){
+    var el=document.getElementById('lockerr');
+    if(el)el.textContent='init:'+e.message;
+  }
 })();
 
 </script>
