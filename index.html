@@ -244,19 +244,19 @@ body.paulo-mode .p-nav{display:flex}
 </head>
 <body class="locked">
 <!-- LOCK -->
-  <div class="lockscreen" id="lockscreen">
+  <div class="lockscreen" id="lockscreen" onclick="document.getElementById('pinInput').focus()">
     <div class="lock-logo">&#128274;</div>
     <div class="lock-brand">PAX<em>.</em></div>
-    <div class="lock-sub">Digite seu PIN</div>
-    <div class="lock-dots" id="lockdots">
+    <div class="lock-sub">Toque para digitar o PIN</div>
+    <div class="lock-dots" id="lockdots" style="position:relative;cursor:pointer">
       <div class="lock-dot" id="d0"></div>
       <div class="lock-dot" id="d1"></div>
       <div class="lock-dot" id="d2"></div>
       <div class="lock-dot" id="d3"></div>
+      <input type="tel" id="pinInput" maxlength="4" inputmode="numeric" pattern="[0-9]*" autocomplete="off"
+        style="position:absolute;inset:-20px;opacity:0;width:calc(100% + 40px);height:calc(100% + 40px);cursor:pointer;font-size:16px">
     </div>
-    <input type="tel" id="pinInput" maxlength="4" inputmode="numeric" pattern="[0-9]*" autocomplete="off" placeholder="&#8226;&#8226;&#8226;&#8226;"
-      style="font-size:32px;letter-spacing:16px;text-align:center;width:160px;padding:12px 16px;border-radius:16px;border:2px solid var(--acc);background:var(--s1);color:var(--t1);outline:none;-webkit-text-security:disc;margin-top:8px">
-    <div class="lock-err" id="lockerr" style="margin-top:12px;font-size:14px;color:var(--red);text-align:center;min-height:20px"></div>
+    <div class="lock-err" id="lockerr" style="margin-top:16px;font-size:14px;color:var(--red);text-align:center;min-height:20px"></div>
   </div>
 <input type="file" id="avatarInput" accept="image/*" style="display:none" onchange="handleAvatarUpload(event)">
 <div id="app">
