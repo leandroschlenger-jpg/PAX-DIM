@@ -2667,7 +2667,7 @@ function renderDistrib(db){
   '<div class="lrow" style="border-top:1px solid var(--bdr2);margin-top:4px"><div class="lb"><div class="lt" style="font-weight:800">Total</div></div><div class="lr"><div class="lv yellow" style="font-weight:800">R$ '+tot.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2})+'</div></div></div>';
 }
 function renderInv(db){
-  if(!db.distrib){db.distrib=[{id:uid(),nome:'Partilha',valor:8117.87},{id:uid(),nome:'Leo',valor:1014.31},{id:uid(),nome:'Apto (a receber)',valor:40323.58},{id:uid(),nome:'Reserva rotativo',valor:1980.04},{id:uid(),nome:'Casamento',valor:10018.92},{id:uid(),nome:'Cartao de credito',valor:0}];save(db);}
+  if(!db.distrib){db.distrib=[{id:uid(),nome:'Partilha',valor:8117.87},{id:uid(),nome:'Leo',valor:1014.31},{id:uid(),nome:'Apto (a receber)',valor:40323.58},{id:uid(),nome:'Reserva rotativo',valor:1980.04},{id:uid(),nome:'Casamento',valor:10018.92},{id:uid(),nome:'Cartao de credito',valor:0}];if(_fbSynced)save(db);}
   renderDistrib(db);
   var tot=(db.investimentos||[]).reduce(function(s,i){return s+i.valorAtual;},0);
   document.getElementById('iTotal').textContent=fmt(tot);document.getElementById('iSub').textContent=db.investimentos.length+' ativos';
@@ -3396,7 +3396,7 @@ function pResetQuizHoje(){
 })();
 
 </script>
-<div id="ver" style="position:fixed;bottom:8px;left:0;right:0;text-align:center;font-size:10px;color:var(--t3);opacity:.45;z-index:99999;pointer-events:none;font-family:monospace">v1.116.535</div>
+<div id="ver" style="position:fixed;bottom:8px;left:0;right:0;text-align:center;font-size:10px;color:var(--t3);opacity:.45;z-index:99999;pointer-events:none;font-family:monospace">v1.116.536</div>
 </body>
 </html>
  
