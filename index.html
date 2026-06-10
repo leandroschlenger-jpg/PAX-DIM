@@ -1067,9 +1067,8 @@ function load(){
     }
   }catch(e){}
   _db=curUser&&curUser.id==='thays'?seedThays():curUser&&curUser.id==='paulo'?seedPaulo():seed();
-  // Só salva se Firebase não está carregando (evita sobrescrever dados reais)
-  if(!_fbRef||_fbSynced){save(_db);}
-  else{try{localStorage.setItem(KEY,JSON.stringify(_db));}catch(e){}}
+  // Nunca salva seed no Firebase — só localmente como fallback
+  try{localStorage.setItem(KEY,JSON.stringify(_db));}catch(e){}
   return _db;
 }
 function _normalizeFuturo(db){
@@ -1113,26 +1112,35 @@ function initFB(){
       var fbValid=fbData&&Array.isArray(fbData.fluxo)&&fbData.fluxo.length>0&&(fbOwner===uid||(!fbOwner&&isLeandro));
       var localTs=(_db&&_db._ts)||0;
       var fbTs=(fbData&&fbData._ts)||0;
-      if(fbValid&&fbTs>=localTs){
+      var now=Date.now();
+      // Cap timestamps muito no futuro (clock skew)
+      var fbTsCap=fbTs>now+86400000?now:fbTs;
+      var lcTsCap=localTs>now+86400000?now:localTs;
+      if(fbValid&&fbTsCap>=lcTsCap){
+        // Firebase mais recente — usa e normaliza
         _db=fbData;
-        _normalizeFuturo(_db);
+        var chg=_normalizeFuturo(_db);
+        if(chg){_db._ts=now;_fbRef.set(_db).catch(function(){});}
         try{localStorage.setItem(KEY,JSON.stringify(_db));}catch(e){}
         if(!_fbSynced){_fbSynced=true;render(curPage);if(isLeandro)toast('Sincronizado ✓');}
+      } else if(fbValid&&lcTsCap>fbTsCap){
+        // Local mais recente (edição antes do Firebase carregar) — mantém, envia ao FB
+        _db._ts=now;
+        _fbRef.set(_db).catch(function(){});
+        try{localStorage.setItem(KEY,JSON.stringify(_db));}catch(e){}
+        if(!_fbSynced){_fbSynced=true;render(curPage);}
       } else if(fbValid){
         _db=fbData;
         _normalizeFuturo(_db);
         try{localStorage.setItem(KEY,JSON.stringify(_db));}catch(e){}
         if(!_fbSynced){_fbSynced=true;render(curPage);}
-      } else if(_db&&_db.fluxo&&_db.fluxo.length>0&&_db._owner===uid){
-        // Local data exists and belongs to this user — push to Firebase
+      } else if(_db&&_db.fluxo&&_db.fluxo.length>0&&(_db._owner===uid||(!_db._owner&&isLeandro))){
+        // Firebase sem dados válidos — envia local
+        _db._ts=now;_db._owner=uid;
         _fbRef.set(_db).catch(function(){});
-        if(isLeandro)toast('Dados salvos no Firebase ✓');
+        if(isLeandro)toast('Dados enviados ao Firebase ✓');
         if(!_fbSynced){_fbSynced=true;}
-      } else if(isLeandro&&_db&&!fbTs){
-        _fbRef.set(_db).catch(function(){});
-        toast('Dados enviados ao Firebase');
       }
-      // NEVER seed/overwrite when Firebase has owner-matched data
       _fbSynced=true;
     }).catch(function(e){console.log('FB read error',e);_fbSynced=true;});
   }catch(e){console.log('FB init error',e);_fbSynced=true;}
@@ -3185,7 +3193,7 @@ function pResponderQuiz(qIdx,chosenIdx){
     if(u.id==='paulo'){document.body.classList.add('paulo-mode');document.body.classList.remove('thays-mode');}
     else if(u.id==='thays'){document.body.classList.add('thays-mode');document.body.classList.remove('paulo-mode');}
     else{document.body.classList.remove('paulo-mode','thays-mode');}
-    if(u.id!=='leandro'){try{localStorage.removeItem(KEY);localStorage.removeItem('pax_fin_'+u.id);}catch(e){}}
+    // localStorage preservado — merge do Firebase resolve conflitos
     // Hide lockscreen
     var ls=document.getElementById('lockscreen');if(ls)ls.style.display='none';
     document.body.classList.remove('locked');
@@ -3287,7 +3295,7 @@ function pResponderQuiz(qIdx,chosenIdx){
 })();
 
 </script>
-<div id="ver" style="position:fixed;bottom:8px;left:0;right:0;text-align:center;font-size:10px;color:var(--t3);opacity:.45;z-index:99999;pointer-events:none;font-family:monospace">v1.114.527</div>
+<div id="ver" style="position:fixed;bottom:8px;left:0;right:0;text-align:center;font-size:10px;color:var(--t3);opacity:.45;z-index:99999;pointer-events:none;font-family:monospace">v1.115.528</div>
 </body>
 </html>
  
