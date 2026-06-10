@@ -189,6 +189,7 @@ body.thays-mode .fhero{background:linear-gradient(135deg,#2a1530,#3a1f45)}
 /* ── PAULO GAME MODE ───────────────────────── */
 body.paulo-mode{--acc:#7c3aed;--accl:#a78bfa;--bg:#0f0f1a;--card:#161625;--s2:#1e1e35;--s3:#252540;--bdr:rgba(124,58,237,.2);--bdr2:rgba(124,58,237,.35);--grn:#34d399;--red:#f87171;--yel:#fbbf24;--t1:#f0f0ff;--t2:#b4b4d0;--t3:#6b6b9a}
 body.paulo-mode .topbar{background:linear-gradient(135deg,#161625,#1e1a35);border-bottom:1px solid rgba(124,58,237,.25)}
+body.paulo-mode #logBtn,body.thays-mode #logBtn{display:none!important}
 body.paulo-mode .nav{display:none!important}
 body.paulo-mode #fab{display:none!important}
 .pg-paulo{display:none}.pg-paulo.on{display:block}
@@ -311,6 +312,7 @@ inter-events:none}
   <header class="topbar">
     <div class="brand">PAX<em>.</em></div>
     <div class="topbar-right">
+      <button id="logBtn" onclick="openLog()" title="Log de atividades" style="background:var(--s2);border:1px solid var(--bdr);border-radius:12px;padding:8px 12px;font-size:16px;color:var(--t2);line-height:1;cursor:pointer">📊</button>
       <button class="eyebtn on" id="eyebtn" onclick="toggleValues()" title="Mostrar/ocultar valores"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/><line x1="1" y1="1" x2="23" y2="23" id="eyeSlash" style="display:none"/></svg></button>
       <button class="mbtn" onclick="openMP()"><span id="mlabel">--</span> &#9660;</button>
       <div id="userAvatar" onclick="openAvatarMenu()" style="display:none;width:34px;height:34px;border-radius:50%;background:var(--acc);color:#fff;font-size:14px;font-weight:800;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0" title="Trocar usuario"></div>
@@ -643,6 +645,21 @@ inter-events:none}
     <div class="shtitle"><span id="stitle">Nova Transacao</span><button class="shclose" onclick="closeSH()">&#10005;</button></div>
     <div id="sbody"></div>
   </div>
+</div>
+<!-- Log overlay — só Leandro -->
+<div id="log-overlay" style="display:none;position:fixed;inset:0;background:var(--bg);z-index:9999;overflow-y:auto;padding:0 0 40px">
+  <div style="position:sticky;top:0;background:var(--bg);padding:16px 20px 12px;border-bottom:1px solid var(--bdr);display:flex;justify-content:space-between;align-items:center">
+    <div style="font-size:17px;font-weight:900;color:var(--t1)">📊 Log de Atividades</div>
+    <div style="display:flex;gap:8px;align-items:center">
+      <select id="log-filter" onchange="renderLog()" style="background:var(--s2);color:var(--t1);border:1px solid var(--bdr);border-radius:8px;padding:6px 10px;font-size:13px">
+        <option value="all">Todos</option>
+        <option value="paulo">Paulo</option>
+        <option value="thays">Thays</option>
+      </select>
+      <button onclick="closeLog()" style="background:var(--s2);border:1px solid var(--bdr);border-radius:10px;padding:8px 14px;color:var(--t1);font-size:13px;font-weight:700;cursor:pointer">✕ Fechar</button>
+    </div>
+  </div>
+  <div id="log-list" style="padding:16px 20px"></div>
 </div>
 <div class="mpbg" id="mpbg" onclick="closeMPBG(event)">
   <div class="mp"><div class="mpt">Selecionar mes</div><div class="mgrid" id="mgrid"></div></div>
@@ -1360,6 +1377,7 @@ function delTx(id){
   var db=load(),t=db.fluxo.find(function(x){return x.id===id;});
   if(t&&isMesFechado(t.mes)){toast('Mes fechado - nao e possivel excluir');return;}
   if(!confirm('Excluir transacao?'))return;
+  if(t)_logActivity('del_tx','Removeu: '+t.descricao+' R$'+t.valor);
   db.fluxo=db.fluxo.filter(function(x){return x.id!==id;});
   save(db);toast('Removido');renderFluxo(db);
 }
@@ -1549,6 +1567,7 @@ function saveTx(){
     }
     toast(vezes===1?'Adicionado':vezes>100?'Recorrencia indeterminada criada':vezes+' repeticoes criadas');
   }
+  _logActivity('lancamento',(editId?'Editou':'Adicionou')+': '+base.descricao+' R$'+base.valor+' ('+base.operacao+')');
   save(db);closeSH();
   if(base.mes!==curMes){curMes=base.mes;updML();}
   renderFluxo(db);
@@ -1762,6 +1781,7 @@ function goP(id){
     var scr=document.getElementById('screen');if(scr)scr.scrollTop=0;
     // Render content
     var db=load();
+    if(id!=='home')_logActivity('nav','Abriu: '+id);
     if(id==='home')renderPauloHome(db);
     else if(id==='sonhos')renderPauloSonhos(db);
     else if(id==='missoes')renderPauloMissoes(db);
@@ -2103,6 +2123,8 @@ function pSelTipo(tipo){
 }
 function pDelLancamento(id){
   var db=load();
+  var tDel=(db.fluxo||[]).find(function(t){return t.id===id;});
+  if(tDel)_logActivity('del_lancamento','Removeu: '+tDel.descricao+' R$'+tDel.valor);
   db.fluxo=db.fluxo.filter(function(t){return t.id!==id;});
   save(db);renderPauloExtrato();
 }
@@ -2113,6 +2135,7 @@ function pConcluirMissao(id){
   if(!m||m.status!=='ativa')return;
   m.status='aguardando';
   m.completadoEm=new Date().toISOString().split('T')[0];
+  _logActivity('missao','Concluiu: '+m.titulo+' ('+m.pontos+' pts)');
   save(db);renderPauloMissoes(db);
   pToast('Missão enviada para aprovação dos pais!');
 }
@@ -2348,8 +2371,11 @@ function pGuardarNaSonho(id){
     var saidas=txsMes.filter(function(t){return t.operacao==='Saida';}).reduce(function(s,t){return s+t.valor;},0);
     var saldoDisp=entradas-saidas;
     if(v>saldoDisp){
-      toast('Saldo insuficiente! Disponível: R$ '+saldoDisp.toLocaleString('pt-BR',{minimumFractionDigits:2}));return;
+      toast('Saldo insuficiente! Disponível: R$ '+saldoDisp.toLocaleString('pt-BR',{minimumFractionDigits:2}));
+      _logActivity('sonho','Tentou guardar R$'+v+' em '+s.nome+' — saldo insuficiente');
+      return;
     }
+    _logActivity('sonho','Guardou R$'+v.toLocaleString('pt-BR',{minimumFractionDigits:2})+' em: '+s.nome);
     var idx=db2.paulo.sonhos.findIndex(function(x){return x.id===id;});if(idx<0)return;
     db2.paulo.sonhos[idx].guardado=Math.min(db2.paulo.sonhos[idx].meta,(db2.paulo.sonhos[idx].guardado||0)+v);
     var done=db2.paulo.sonhos[idx].guardado>=db2.paulo.sonhos[idx].meta;
@@ -3134,6 +3160,7 @@ function renderPauloQuiz(db){
       db.paulo.trofeus.push({id:uid(),emoji:'💰',titulo:'Bônus Quiz '+q.lastMonth,desc:'Completou '+earned+' dias → R$'+earned+',00 de bônus!',data:today});
       setTimeout(function(){pToast('🎉 R$'+earned+',00 de bônus na mesada!');},500);
     }
+    _logActivity('quiz_mes','Mês '+q.lastMonth+': '+earned+' dias → R$'+earned+',00 bônus na mesada');
     q.daysCompleted=0;q.monthCoins=0;q.lastMonth=curMonth;save(db);
   }
   if(!q.lastMonth)q.lastMonth=curMonth;
@@ -3225,6 +3252,7 @@ function pResponderQuiz(qIdx,chosenIdx){
   var pergunta=QUIZ_QUESTIONS[qIdx];
   if(!pergunta)return;
   var acertou=chosenIdx===pergunta.a;
+  _logActivity('quiz','P'+(q.dailyAnswers.length+1)+'/5 '+(acertou?'✅':'❌')+' '+pergunta.q.slice(0,30));
   // Record answer
   if(!q.dailyAnswers)q.dailyAnswers=[];
   q.dailyAnswers.push(acertou);
@@ -3310,6 +3338,67 @@ function pResetQuizHoje(){
 }
 // ===================== FIM QUIZ =====================
 
+// ===================== LOG DE ATIVIDADES =====================
+var _logRef=null;
+function _initLogRef(){
+  if(_logRef)return;
+  try{var fbApp=firebase.apps.length?firebase.apps[0]:null;if(fbApp)_logRef=firebase.database(fbApp).ref('pax/activity');}catch(e){}
+}
+function _logActivity(action,detail){
+  if(!curUser||curUser.id==='leandro')return; // só Paulo e Thays
+  _initLogRef();if(!_logRef)return;
+  var now=new Date();
+  var entry={u:curUser.id,a:action,d:detail||'',
+    dt:now.toISOString().split('T')[0],
+    t:('0'+now.getHours()).slice(-2)+':'+('0'+now.getMinutes()).slice(-2)+':'+('0'+now.getSeconds()).slice(-2),
+    ts:now.getTime()};
+  try{_logRef.push(entry).catch(function(){});}catch(e){}
+}
+var _logCache=[];
+function openLog(){
+  document.getElementById('log-overlay').style.display='block';
+  document.getElementById('log-list').innerHTML='<div style="text-align:center;color:var(--t3);padding:32px">Carregando...</div>';
+  _initLogRef();
+  if(!_logRef){document.getElementById('log-list').innerHTML='<div style="color:var(--t3);padding:20px">Firebase não conectado</div>';return;}
+  _logRef.orderByChild('ts').limitToLast(200).once('value').then(function(snap){
+    var raw=snap.val()||{};
+    _logCache=Object.values(raw).sort(function(a,b){return b.ts-a.ts;});
+    renderLog();
+  }).catch(function(){document.getElementById('log-list').innerHTML='<div style="color:var(--t3);padding:20px">Erro ao carregar log</div>';});
+}
+function closeLog(){document.getElementById('log-overlay').style.display='none';}
+function renderLog(){
+  var filter=document.getElementById('log-filter');
+  var sel=filter?filter.value:'all';
+  var entries=sel==='all'?_logCache:_logCache.filter(function(e){return e.u===sel;});
+  var actionLabels={login:'🔑 Login',nav:'📍 Navegou',quiz:'🧠 Quiz',quiz_mes:'📅 Fim do mês quiz',
+    missao:'🎯 Missão',lancamento:'💳 Lançamento',del_tx:'🗑 Removeu',sonho:'⭐ Sonho',
+    'del_lancamento':'🗑 Removeu lançamento'};
+  var userColors={paulo:'#7c3aed',thays:'#db2777'};
+  if(!entries.length){
+    document.getElementById('log-list').innerHTML='<div style="text-align:center;color:var(--t3);padding:48px">Nenhuma atividade registrada ainda</div>';return;
+  }
+  var lastDate='';
+  var html=entries.map(function(e){
+    var dateHeader='';
+    if(e.dt!==lastDate){lastDate=e.dt;var dp=e.dt.split('-');dateHeader='<div style="font-size:11px;font-weight:800;color:var(--t3);text-transform:uppercase;letter-spacing:.08em;padding:12px 0 6px">'+(dp[2]+'/'+dp[1]+'/'+dp[0])+'</div>';}
+    var uc=userColors[e.u]||'#888';
+    var alabel=actionLabels[e.a]||('📌 '+e.a);
+    return dateHeader+
+      '<div style="display:flex;gap:10px;align-items:flex-start;padding:8px 0;border-bottom:1px solid var(--bdr)">'+
+        '<div style="font-size:10px;color:var(--t3);min-width:44px;padding-top:2px">'+e.t.slice(0,5)+'</div>'+
+        '<div style="background:'+uc+'22;color:'+uc+';font-size:10px;font-weight:800;border-radius:20px;padding:2px 8px;min-width:44px;text-align:center;flex-shrink:0">'+e.u+'</div>'+
+        '<div style="flex:1">'+
+          '<div style="font-size:12px;font-weight:700;color:var(--t1)">'+alabel+'</div>'+
+          (e.d?'<div style="font-size:11px;color:var(--t3);margin-top:2px">'+e.d+'</div>':'')+
+        '</div>'+
+      '</div>';
+  }).join('');
+  document.getElementById('log-list').innerHTML=html;
+}
+window.openLog=openLog;window.closeLog=closeLog;window.renderLog=renderLog;
+// ===================== FIM LOG =====================
+
 
 (function(){
   var _umap={l:USERS['2505'],t:USERS['0609'],p:USERS['2014']};
@@ -3335,6 +3424,7 @@ function pResetQuizHoje(){
     updML();
     if(u.id==='paulo'){goP('home');}
     else{render('fluxo');renderLemb(load());}
+    setTimeout(function(){_logActivity('login','Entrou no app');},1200);
   }
 
 
@@ -3426,7 +3516,7 @@ function pResetQuizHoje(){
 })();
 
 </script>
-<div id="ver" style="position:fixed;bottom:8px;left:0;right:0;text-align:center;font-size:10px;color:var(--t3);opacity:.45;z-index:99999;pointer-events:none;font-family:monospace">v1.117.538</div>
+<div id="ver" style="position:fixed;bottom:8px;left:0;right:0;text-align:center;font-size:10px;color:var(--t3);opacity:.45;z-index:99999;pointer-events:none;font-family:monospace">v1.118.546</div>
 </body>
 </html>
  
