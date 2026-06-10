@@ -1827,28 +1827,40 @@ function renderPauloHome(db){
   var cf=document.getElementById('p-cofrinho');if(cf)cf.textContent=fmt2(p.cofrinho||0);
   var me=document.getElementById('p-mesada');if(me)me.textContent=fmt2(saldo);
   var gs=document.getElementById('p-gasto');if(gs)gs.textContent=fmt2(saidas);
-  // Troféus na home
+  // Troféus na home — mostra resumo de dinheiro conquistado
   var trofEl=document.getElementById('p-home-trofeus');
   if(trofEl){
     var trofeus=p.trofeus||[];
     var missOK=(p.missoes||[]).filter(function(m){return m.status==='aprovada';});
     var sonhosOK=(p.sonhos||[]).filter(function(s){return s.concluido||(s.guardado||0)>=s.meta;});
-    var q=p.quiz||{};
-    var html='<div style="font-size:13px;font-weight:800;color:var(--t2);margin-bottom:10px;text-transform:uppercase;letter-spacing:.05em">🏆 Troféus & Conquistas</div>';
-    // Stats rápidos
-    html+='<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px">';
-    html+='<div style="background:var(--s3);border-radius:12px;padding:10px 4px;text-align:center"><div style="font-size:20px">🎯</div><div style="font-size:16px;font-weight:900;color:#34d399">'+missOK.length+'</div><div style="font-size:10px;color:var(--t3)">Missões</div></div>';
-    html+='<div style="background:var(--s3);border-radius:12px;padding:10px 4px;text-align:center"><div style="font-size:20px">⭐</div><div style="font-size:16px;font-weight:900;color:#fbbf24">'+sonhosOK.length+'</div><div style="font-size:10px;color:var(--t3)">Sonhos</div></div>';
-    html+='<div style="background:var(--s3);border-radius:12px;padding:10px 4px;text-align:center"><div style="font-size:20px">🔥</div><div style="font-size:16px;font-weight:900;color:#f97316">'+(q.streak||0)+'</div><div style="font-size:10px;color:var(--t3)">Sequência</div></div>';
+    var q2=p.quiz||{};
+    var totalPtsMiss=missOK.reduce(function(s,m){return s+(m.pontos||0);},0);
+    var ganhouMiss=Math.floor((p.pontosJaPagos||0)/20)*5;
+    var ganhouQuiz2=q2.daysCompleted||0;
+    var bonusPend=p.mesadaBonus||0;
+    var totalG=ganhouMiss+ganhouQuiz2+bonusPend;
+    var ptsFalta2=20-(totalPtsMiss%20||20);if(ptsFalta2===20)ptsFalta2=0;
+    var html='';
+    // Card total
+    html+='<div style="background:linear-gradient(135deg,rgba(124,58,237,.18),rgba(52,211,153,.12));border:2px solid #34d39966;border-radius:16px;padding:14px;margin-bottom:12px;text-align:center">';
+    html+='<div style="font-size:11px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:.07em;margin-bottom:2px">💵 Total Conquistado</div>';
+    html+='<div style="font-size:30px;font-weight:900;color:#34d399">R$ '+totalG.toLocaleString('pt-BR',{minimumFractionDigits:2})+'</div>';
+    html+='<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-top:10px">';
+    html+='<div style="background:rgba(0,0,0,.15);border-radius:10px;padding:8px 4px"><div style="font-size:16px">🎯</div><div style="font-size:13px;font-weight:900;color:#fbbf24">R$'+ganhouMiss+',00</div><div style="font-size:10px;color:var(--t3)">Missões</div></div>';
+    html+='<div style="background:rgba(0,0,0,.15);border-radius:10px;padding:8px 4px"><div style="font-size:16px">🧠</div><div style="font-size:13px;font-weight:900;color:#60a5fa">R$'+ganhouQuiz2+',00</div><div style="font-size:10px;color:var(--t3)">Quiz/mês</div></div>';
+    html+='<div style="background:rgba(0,0,0,.15);border-radius:10px;padding:8px 4px"><div style="font-size:16px">🎁</div><div style="font-size:13px;font-weight:900;color:#f59e0b">R$'+bonusPend+',00</div><div style="font-size:10px;color:var(--t3)">Pendente</div></div>';
     html+='</div>';
+    if(ptsFalta2>0)html+='<div style="font-size:10px;color:var(--t3);margin-top:8px">Faltam '+ptsFalta2+' pts de missão para próximos R$5,00</div>';
+    html+='</div>';
+    // Troféus recentes
+    html+='<div style="font-size:12px;font-weight:800;color:var(--t2);margin-bottom:8px;text-transform:uppercase;letter-spacing:.05em">🏆 Troféus recentes</div>';
     if(!trofeus.length){
-      html+='<div style="text-align:center;color:var(--t3);font-size:12px;padding:8px 0">Complete missões e sonhos para ganhar troféus!</div>';
+      html+='<div style="text-align:center;color:var(--t3);font-size:12px;padding:6px 0">Complete missões e sonhos para ganhar troféus!</div>';
     } else {
-      var recentes=trofeus.slice(-4).reverse();
-      recentes.forEach(function(t){
-        html+='<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--bdr)"><span style="font-size:22px">'+t.emoji+'</span><div style="flex:1"><div style="font-size:12px;font-weight:700;color:var(--t1)">'+t.titulo+'</div><div style="font-size:11px;color:var(--t3)">'+t.desc+'</div></div></div>';
+      trofeus.slice(-4).reverse().forEach(function(t){
+        html+='<div style="display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid var(--bdr)"><span style="font-size:20px">'+t.emoji+'</span><div style="flex:1"><div style="font-size:12px;font-weight:700;color:var(--t1)">'+t.titulo+'</div><div style="font-size:11px;color:var(--t3)">'+t.desc+'</div></div></div>';
       });
-      if(trofeus.length>4)html+='<div style="text-align:center;font-size:11px;color:var(--t3);padding-top:6px">+' +(trofeus.length-4)+' troféus no histórico</div>';
+      if(trofeus.length>4)html+='<div style="text-align:center;font-size:11px;color:var(--t3);padding-top:5px">+' +(trofeus.length-4)+' troféus anteriores</div>';
     }
     trofEl.innerHTML=html;
   }
@@ -3414,7 +3426,7 @@ function pResetQuizHoje(){
 })();
 
 </script>
-<div id="ver" style="position:fixed;bottom:8px;left:0;right:0;text-align:center;font-size:10px;color:var(--t3);opacity:.45;z-index:99999;pointer-events:none;font-family:monospace">v1.117.537</div>
+<div id="ver" style="position:fixed;bottom:8px;left:0;right:0;text-align:center;font-size:10px;color:var(--t3);opacity:.45;z-index:99999;pointer-events:none;font-family:monospace">v1.117.538</div>
 </body>
 </html>
  
