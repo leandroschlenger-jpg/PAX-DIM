@@ -1938,19 +1938,37 @@ function renderPauloConquistas(db){
   var sonhosOK=(db.paulo.sonhos||[]).filter(function(s){return s.concluido||(s.guardado||0)>=s.meta;});
   var bonus=Math.floor((q.monthCoins||0)/5);
 
+  // Cálculo do total em dinheiro conquistado
+  var totalPtsMissoes=(db.paulo.missoes||[]).filter(function(m){return m.status==='aprovada';}).reduce(function(s,m){return s+(m.pontos||0);},0);
+  var ganhouMissoes=Math.floor((db.paulo.pontosJaPagos||0)/20)*5;
+  var ptsFaltaMissao=20-(totalPtsMissoes%20||20);if(ptsFaltaMissao===20)ptsFaltaMissao=0;
+  var ganhouQuizMes=q.daysCompleted||0;
+  var bonusPendente=db.paulo.mesadaBonus||0;
+  var totalGanho=ganhouMissoes+ganhouQuizMes+bonusPendente;
+
   var html2='';
+  // ── Card principal: total ganho ──────────────────────────────────────────
+  html2+='<div style="background:linear-gradient(135deg,rgba(124,58,237,.18),rgba(52,211,153,.12));border:2px solid #34d39966;border-radius:20px;padding:18px 16px;margin-bottom:16px;text-align:center">';
+  html2+='<div style="font-size:12px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:.07em;margin-bottom:4px">💵 Total Conquistado</div>';
+  html2+='<div style="font-size:36px;font-weight:900;color:#34d399;margin-bottom:2px">R$ '+totalGanho.toLocaleString('pt-BR',{minimumFractionDigits:2})+'</div>';
+  html2+='<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-top:14px">';
+  html2+='<div style="background:rgba(0,0,0,.15);border-radius:12px;padding:10px 6px"><div style="font-size:18px">🎯</div><div style="font-size:14px;font-weight:900;color:#fbbf24">R$'+ganhouMissoes+',00</div><div style="font-size:10px;color:var(--t3)">Missões</div></div>';
+  html2+='<div style="background:rgba(0,0,0,.15);border-radius:12px;padding:10px 6px"><div style="font-size:18px">🧠</div><div style="font-size:14px;font-weight:900;color:#60a5fa">R$'+ganhouQuizMes+',00</div><div style="font-size:10px;color:var(--t3)">Quiz/mês</div></div>';
+  html2+='<div style="background:rgba(0,0,0,.15);border-radius:12px;padding:10px 6px"><div style="font-size:18px">🎁</div><div style="font-size:14px;font-weight:900;color:#f59e0b">R$'+bonusPendente+',00</div><div style="font-size:10px;color:var(--t3)">Pendente</div></div>';
+  html2+='</div>';
+  if(ptsFaltaMissao>0){html2+='<div style="font-size:11px;color:var(--t3);margin-top:10px">Faltam '+ptsFaltaMissao+' pts de missão para próximos R$5,00</div>';}
+  html2+='</div>';
   // Quiz stats
   html2+='<div style="background:var(--s2);border-radius:18px;padding:16px;margin-bottom:16px;border:1px solid var(--bdr)">';
   html2+='<div style="font-size:13px;font-weight:800;color:var(--t2);margin-bottom:12px;text-transform:uppercase;letter-spacing:.05em">🧠 Quiz Financeiro</div>';
   html2+='<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:12px">';
   html2+='<div style="text-align:center"><div style="font-size:22px">🔥</div><div style="font-size:18px;font-weight:900;color:var(--acc)">'+(q.streak||0)+'</div><div style="font-size:10px;color:var(--t3)">Sequência</div></div>';
-  html2+='<div style="text-align:center"><div style="font-size:22px">🪙</div><div style="font-size:18px;font-weight:900;color:#f59e0b">'+(q.monthCoins||0)+'</div><div style="font-size:10px;color:var(--t3)">Moedas/mês</div></div>';
-  html2+='<div style="text-align:center"><div style="font-size:22px">💰</div><div style="font-size:18px;font-weight:900;color:#34d399">R$'+bonus+',00</div><div style="font-size:10px;color:var(--t3)">Bônus mesada</div></div>';
+  html2+='<div style="text-align:center"><div style="font-size:22px">📅</div><div style="font-size:18px;font-weight:900;color:#34d399">'+(q.daysCompleted||0)+'</div><div style="font-size:10px;color:var(--t3)">Dias completos</div></div>';
+  html2+='<div style="text-align:center"><div style="font-size:22px">💰</div><div style="font-size:18px;font-weight:900;color:#34d399">R$'+(q.daysCompleted||0)+',00</div><div style="font-size:10px;color:var(--t3)">Ganhou/mês</div></div>';
   html2+='</div>';
-  // monthly progress bar
-  var pctBonus=Math.min(100,Math.round((q.monthCoins||0)/50*100));
-  html2+='<div style="font-size:11px;color:var(--t3);margin-bottom:4px">Progresso para bônus de R$10: '+(q.monthCoins||0)+'/50 moedas</div>';
-  html2+='<div style="background:var(--s3);border-radius:99px;height:6px"><div style="background:#f59e0b;border-radius:99px;height:6px;width:'+pctBonus+'%"></div></div>';
+  var pctDias=Math.min(100,Math.round((q.daysCompleted||0)/31*100));
+  html2+='<div style="font-size:11px;color:var(--t3);margin-bottom:4px">'+(q.daysCompleted||0)+' dias completos este mês · R$1,00/dia</div>';
+  html2+='<div style="background:var(--s3);border-radius:99px;height:6px"><div style="background:#34d399;border-radius:99px;height:6px;width:'+pctDias+'%"></div></div>';
   html2+='</div>';
   // Missions completed
   html2+='<div style="background:var(--s2);border-radius:18px;padding:16px;margin-bottom:16px;border:1px solid var(--bdr)">';
@@ -3396,7 +3414,7 @@ function pResetQuizHoje(){
 })();
 
 </script>
-<div id="ver" style="position:fixed;bottom:8px;left:0;right:0;text-align:center;font-size:10px;color:var(--t3);opacity:.45;z-index:99999;pointer-events:none;font-family:monospace">v1.116.536</div>
+<div id="ver" style="position:fixed;bottom:8px;left:0;right:0;text-align:center;font-size:10px;color:var(--t3);opacity:.45;z-index:99999;pointer-events:none;font-family:monospace">v1.117.537</div>
 </body>
 </html>
  
