@@ -3190,10 +3190,7 @@ function renderPauloQuiz(db){
         '<div style="font-size:10px;color:var(--t3)">No mês</div>'+
       '</div>'+
     '</div>'+
-    '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">'+
-      '<div style="font-size:11px;color:var(--t3)">'+answered.length+'/5 hoje · '+(q.daysCompleted||0)+' dias (R$1/dia) · Nív. '+pNivel+'</div>'+
-      '<button onclick="pResetQuizHoje()" style="font-size:10px;color:var(--t3);background:none;border:none;cursor:pointer;padding:2px 6px">🔄 Reiniciar</button>'+
-    '</div>'+
+    '<div style="font-size:11px;color:var(--t3);margin-bottom:4px">'+answered.length+'/5 hoje · '+(q.daysCompleted||0)+' dias (R$1/dia) · Nív. '+pNivel+'</div>'+
     '<div style="display:flex;gap:4px;margin-bottom:14px">'+
       [0,1,2,3,4].map(function(i){
         var a=answered[i];
@@ -3378,21 +3375,28 @@ function renderLog(){
   if(!entries.length){
     document.getElementById('log-list').innerHTML='<div style="text-align:center;color:var(--t3);padding:48px">Nenhuma atividade registrada ainda</div>';return;
   }
-  var lastDate='';
+  var userNames={paulo:'Paulo',thays:'Thays'};
   var html=entries.map(function(e){
-    var dateHeader='';
-    if(e.dt!==lastDate){lastDate=e.dt;var dp=e.dt.split('-');dateHeader='<div style="font-size:11px;font-weight:800;color:var(--t3);text-transform:uppercase;letter-spacing:.08em;padding:12px 0 6px">'+(dp[2]+'/'+dp[1]+'/'+dp[0])+'</div>';}
     var uc=userColors[e.u]||'#888';
     var alabel=actionLabels[e.a]||('📌 '+e.a);
-    return dateHeader+
-      '<div style="display:flex;gap:10px;align-items:flex-start;padding:8px 0;border-bottom:1px solid var(--bdr)">'+
-        '<div style="font-size:10px;color:var(--t3);min-width:44px;padding-top:2px">'+e.t.slice(0,5)+'</div>'+
-        '<div style="background:'+uc+'22;color:'+uc+';font-size:10px;font-weight:800;border-radius:20px;padding:2px 8px;min-width:44px;text-align:center;flex-shrink:0">'+e.u+'</div>'+
-        '<div style="flex:1">'+
-          '<div style="font-size:12px;font-weight:700;color:var(--t1)">'+alabel+'</div>'+
-          (e.d?'<div style="font-size:11px;color:var(--t3);margin-top:2px">'+e.d+'</div>':'')+
+    var dp=e.dt?e.dt.split('-'):['','',''];
+    var dia=dp[2]+'/'+dp[1]+'/'+dp[0];
+    var hora=e.t?e.t.slice(0,5):'--:--';
+    return '<div style="background:var(--s2);border-radius:14px;padding:12px 14px;margin-bottom:8px;border:1px solid var(--bdr)">'+
+      '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">'+
+        '<div style="display:flex;align-items:center;gap:8px">'+
+          '<div style="background:'+uc+';color:#fff;font-size:11px;font-weight:800;border-radius:20px;padding:3px 10px">'+
+            (userNames[e.u]||e.u)+
+          '</div>'+
+          '<div style="font-size:13px;font-weight:700;color:var(--t1)">'+alabel+'</div>'+
         '</div>'+
-      '</div>';
+        '<div style="text-align:right">'+
+          '<div style="font-size:12px;font-weight:700;color:var(--acc)">'+hora+'</div>'+
+          '<div style="font-size:10px;color:var(--t3)">'+dia+'</div>'+
+        '</div>'+
+      '</div>'+
+      (e.d?'<div style="font-size:12px;color:var(--t3);padding-top:4px;border-top:1px solid var(--bdr)">'+e.d+'</div>':'')+
+    '</div>';
   }).join('');
   document.getElementById('log-list').innerHTML=html;
 }
@@ -3516,7 +3520,7 @@ window.openLog=openLog;window.closeLog=closeLog;window.renderLog=renderLog;
 })();
 
 </script>
-<div id="ver" style="position:fixed;bottom:8px;left:0;right:0;text-align:center;font-size:10px;color:var(--t3);opacity:.45;z-index:99999;pointer-events:none;font-family:monospace">v1.118.546</div>
+<div id="ver" style="position:fixed;bottom:8px;left:0;right:0;text-align:center;font-size:10px;color:var(--t3);opacity:.45;z-index:99999;pointer-events:none;font-family:monospace">v1.118.548</div>
 </body>
 </html>
  
