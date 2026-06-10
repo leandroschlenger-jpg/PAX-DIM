@@ -1807,9 +1807,9 @@ function _ensureMesadaPaulo(db){
   return false;
 }
 function renderPauloHome(db){
-  if(!db.paulo){db.paulo=seedPaulo().paulo;save(db);}
-  // Garante lançamento da mesada no mês corrente
-  if(_ensureMesadaPaulo(db))save(db);
+  if(!db.paulo){db.paulo=seedPaulo().paulo;} // sem save() — Firebase sync repopula os dados reais
+  // Garante lançamento da mesada só após Firebase ter sincronizado
+  if(_fbSynced&&_ensureMesadaPaulo(db))save(db);
   var p=db.paulo;
   var xp=p.xp||0,nivel=pGetNivel(xp),nome=NIVEL_NOMES[nivel];
   var xpBase=NIVEL_XP[nivel],xpProx=pXpNext(nivel),xpRange=xpProx-xpBase,xpCur=xp-xpBase;
@@ -1854,7 +1854,7 @@ function renderPauloHome(db){
   }
 }
 function renderPauloSonhos(db){
-  if(!db.paulo){db.paulo=seedPaulo().paulo;save(db);}
+  if(!db.paulo){db.paulo=seedPaulo().paulo;} // sem save() — Firebase sync repopula os dados reais
   var el=document.getElementById('p-sonhos-list');if(!el)return;
   var sonhos=(db.paulo.sonhos||[]);
   var hoje=new Date();
@@ -1897,7 +1897,7 @@ function renderPauloSonhos(db){
 }
 
 function renderPauloMissoes(db){
-  if(!db.paulo){db.paulo=seedPaulo().paulo;save(db);}
+  if(!db.paulo){db.paulo=seedPaulo().paulo;} // sem save() — Firebase sync repopula os dados reais
   var el=document.getElementById('p-missoes-list');if(!el)return;
   var missoes=(db.paulo.missoes||[]);
   var statusLabels={ativa:'Ativa',aguardando:'Aguardando aprovação',aprovada:'Aprovada',expirada:'Expirada'};
@@ -1930,7 +1930,7 @@ function renderPauloMissoes(db){
 }
 
 function renderPauloConquistas(db){
-  if(!db.paulo){db.paulo=seedPaulo().paulo;save(db);}
+  if(!db.paulo){db.paulo=seedPaulo().paulo;} // sem save() — Firebase sync repopula os dados reais
   var el=document.getElementById('p-conquistas-list');if(!el)return;
   var trofeus=(db.paulo.trofeus||[]);
   var q=db.paulo.quiz||{coins:0,monthCoins:0,streak:0};
@@ -3396,7 +3396,7 @@ function pResetQuizHoje(){
 })();
 
 </script>
-<div id="ver" style="position:fixed;bottom:8px;left:0;right:0;text-align:center;font-size:10px;color:var(--t3);opacity:.45;z-index:99999;pointer-events:none;font-family:monospace">v1.116.534</div>
+<div id="ver" style="position:fixed;bottom:8px;left:0;right:0;text-align:center;font-size:10px;color:var(--t3);opacity:.45;z-index:99999;pointer-events:none;font-family:monospace">v1.116.535</div>
 </body>
 </html>
  
