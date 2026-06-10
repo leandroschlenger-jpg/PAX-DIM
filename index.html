@@ -320,7 +320,6 @@ inter-events:none}
   <button class="p-tab on" id="p-ni-home" onclick="goP('home')"><span class="ic">🏠</span>Início</button>
   <button class="p-tab" id="p-ni-sonhos" onclick="goP('sonhos')"><span class="ic">⭐</span>Sonhos</button>
   <button class="p-tab" id="p-ni-missoes" onclick="goP('missoes')"><span class="ic">🎯</span>Missões</button>
-  <button class="p-tab" id="p-ni-conquistas" onclick="goP('conquistas')"><span class="ic">🏆</span>Troféus</button>
   <button class="p-tab" id="p-ni-quiz" onclick="goP('quiz')"><span class="ic">🧠</span>Quiz</button>
   <button class="p-tab" id="p-ni-extrato" onclick="goP('extrato')"><span class="ic">📋</span>Extrato</button>
 </nav>
@@ -589,6 +588,7 @@ inter-events:none}
       <button class="p-btn purple" onclick="pGuardar()">💰 Guardar dinheiro</button>
       <button class="p-btn gold" onclick="pRegistrarCompra()">🛒 Registrar compra</button>
       <button class="p-btn" style="background:var(--s2);color:var(--t1);border:1px solid var(--bdr)" onclick="goP('extrato')">📋 Lançamentos</button>
+      <div id="p-home-trofeus" style="background:var(--s2);border-radius:18px;padding:16px;margin-top:4px;border:1px solid var(--bdr)"></div>
     </div>
   </div>
   <div class="pg-paulo" id="pg-paulo-sonhos">
@@ -1827,6 +1827,31 @@ function renderPauloHome(db){
   var cf=document.getElementById('p-cofrinho');if(cf)cf.textContent=fmt2(p.cofrinho||0);
   var me=document.getElementById('p-mesada');if(me)me.textContent=fmt2(saldo);
   var gs=document.getElementById('p-gasto');if(gs)gs.textContent=fmt2(saidas);
+  // Troféus na home
+  var trofEl=document.getElementById('p-home-trofeus');
+  if(trofEl){
+    var trofeus=p.trofeus||[];
+    var missOK=(p.missoes||[]).filter(function(m){return m.status==='aprovada';});
+    var sonhosOK=(p.sonhos||[]).filter(function(s){return s.concluido||(s.guardado||0)>=s.meta;});
+    var q=p.quiz||{};
+    var html='<div style="font-size:13px;font-weight:800;color:var(--t2);margin-bottom:10px;text-transform:uppercase;letter-spacing:.05em">🏆 Troféus & Conquistas</div>';
+    // Stats rápidos
+    html+='<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px">';
+    html+='<div style="background:var(--s3);border-radius:12px;padding:10px 4px;text-align:center"><div style="font-size:20px">🎯</div><div style="font-size:16px;font-weight:900;color:#34d399">'+missOK.length+'</div><div style="font-size:10px;color:var(--t3)">Missões</div></div>';
+    html+='<div style="background:var(--s3);border-radius:12px;padding:10px 4px;text-align:center"><div style="font-size:20px">⭐</div><div style="font-size:16px;font-weight:900;color:#fbbf24">'+sonhosOK.length+'</div><div style="font-size:10px;color:var(--t3)">Sonhos</div></div>';
+    html+='<div style="background:var(--s3);border-radius:12px;padding:10px 4px;text-align:center"><div style="font-size:20px">🔥</div><div style="font-size:16px;font-weight:900;color:#f97316">'+(q.streak||0)+'</div><div style="font-size:10px;color:var(--t3)">Sequência</div></div>';
+    html+='</div>';
+    if(!trofeus.length){
+      html+='<div style="text-align:center;color:var(--t3);font-size:12px;padding:8px 0">Complete missões e sonhos para ganhar troféus!</div>';
+    } else {
+      var recentes=trofeus.slice(-4).reverse();
+      recentes.forEach(function(t){
+        html+='<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--bdr)"><span style="font-size:22px">'+t.emoji+'</span><div style="flex:1"><div style="font-size:12px;font-weight:700;color:var(--t1)">'+t.titulo+'</div><div style="font-size:11px;color:var(--t3)">'+t.desc+'</div></div></div>';
+      });
+      if(trofeus.length>4)html+='<div style="text-align:center;font-size:11px;color:var(--t3);padding-top:6px">+' +(trofeus.length-4)+' troféus no histórico</div>';
+    }
+    trofEl.innerHTML=html;
+  }
 }
 function renderPauloSonhos(db){
   if(!db.paulo){db.paulo=seedPaulo().paulo;save(db);}
@@ -2215,9 +2240,21 @@ function pAprovarMissao(id){
   db.paulo.coins=(db.paulo.coins||0)+m.pontos;
   if(!db.paulo.trofeus)db.paulo.trofeus=[];
   db.paulo.trofeus.push({id:uid(),emoji:'🎯',titulo:'Missão concluída',desc:m.titulo+' (+'+m.pontos+' pts)',data:new Date().toISOString().split('T')[0]});
+  // Bônus: a cada 20 pts aprovados = R$5
+  var totalPtsAprovados=(db.paulo.missoes||[]).filter(function(x){return x.status==='aprovada';}).reduce(function(s,x){return s+(x.pontos||0);},0);
+  var milestonesPagos=db.paulo.pontosJaPagos||0;
+  var novosMilestones=Math.floor(totalPtsAprovados/20)-Math.floor(milestonesPagos/20);
+  if(novosMilestones>0){
+    var bonus=novosMilestones*5;
+    db.paulo.mesadaBonus=(db.paulo.mesadaBonus||0)+bonus;
+    db.paulo.pontosJaPagos=(db.paulo.pontosJaPagos||0)+(novosMilestones*20);
+    db.paulo.trofeus.push({id:uid(),emoji:'💵',titulo:'Bônus de Missão',desc:'+R$'+bonus+',00 por '+totalPtsAprovados+' pts aprovados!',data:new Date().toISOString().split('T')[0]});
+    pToast('Missão aprovada! +'+m.pontos+' pts · +R$'+bonus+',00 bônus!');
+  } else {
+    pToast('Missão aprovada! +'+m.pontos+' pts');
+  }
   save(db);closeSH();
   setTimeout(function(){pPaisMissoes();},100);
-  pToast('Missão aprovada! +'+m.pontos+' pts');
 }
 function pRejeitarMissao(id){
   var db=load();if(!db.paulo)return;
@@ -2274,6 +2311,15 @@ function pGuardarNaSonho(id){
     var v=parseMoney(document.getElementById('p-sonho-val').value);
     if(!v||v<=0){toast('Digite um valor');return;}
     var db2=load();
+    // Verificar saldo disponível
+    var hm=_hoje.getFullYear()+'-'+('0'+(_hoje.getMonth()+1)).slice(-2);
+    var txsMes=(db2.fluxo||[]).filter(function(t){return t.mes===hm;});
+    var entradas=txsMes.filter(function(t){return t.operacao==='Entrada';}).reduce(function(s,t){return s+t.valor;},0);
+    var saidas=txsMes.filter(function(t){return t.operacao==='Saida';}).reduce(function(s,t){return s+t.valor;},0);
+    var saldoDisp=entradas-saidas;
+    if(v>saldoDisp){
+      toast('Saldo insuficiente! Disponível: R$ '+saldoDisp.toLocaleString('pt-BR',{minimumFractionDigits:2}));return;
+    }
     var idx=db2.paulo.sonhos.findIndex(function(x){return x.id===id;});if(idx<0)return;
     db2.paulo.sonhos[idx].guardado=Math.min(db2.paulo.sonhos[idx].meta,(db2.paulo.sonhos[idx].guardado||0)+v);
     var done=db2.paulo.sonhos[idx].guardado>=db2.paulo.sonhos[idx].meta;
@@ -2282,6 +2328,11 @@ function pGuardarNaSonho(id){
       if(!db2.paulo.trofeus)db2.paulo.trofeus=[];
       db2.paulo.trofeus.push({id:uid(),emoji:'⭐',titulo:'Sonho realizado!',desc:s.nome+' concluído!',data:new Date().toISOString().split('T')[0]});
     }
+    // Lançar saída no fluxo
+    var dia=('0'+_hoje.getDate()).slice(-2);
+    if(!db2.fluxo)db2.fluxo=[];
+    db2.fluxo.push({id:uid(),mes:hm,data:hm+'-'+dia,operacao:'Saida',valor:v,conta:'Mesada',
+      descricao:'Guardar: '+s.nome,categoria:'Sonho',status:'OK',forma:''});
     save(db2);closeSH();renderPauloSonhos(db2);
     pToast(done?'Sonho realizado! ⭐':'+R$ '+v.toLocaleString('pt-BR',{minimumFractionDigits:2})+' guardado!');
   };
@@ -2966,46 +3017,73 @@ function importData(e){
 }
 function resetData(){localStorage.removeItem(KEY);_db=null;load();render('fluxo');renderLemb(load());toast('Dados de exemplo carregados');}
 // ===================== PAULO QUIZ =====================
+// nivel: 1=fácil, 2=médio, 3=difícil
 var QUIZ_QUESTIONS = [
-  {q:'O que é uma poupança?',opts:['Dinheiro guardado para o futuro','Dinheiro para gastar hoje','Um tipo de jogo','Uma dívida'],a:0},
-  {q:'O que acontece quando você gasta mais do que ganha?',opts:['Fica com dinheiro sobrando','Entra em dívida','Ganha mais dinheiro','Nada muda'],a:1},
-  {q:'O que é uma despesa fixa?',opts:['Algo que compra por impulso','Gasto que se repete todo mês','Dinheiro ganho no trabalho','Uma promoção'],a:1},
-  {q:'Qual o melhor hábito financeiro?',opts:['Gastar tudo que ganha','Comprar sempre parcelado','Guardar parte todo mês','Pedir empréstimo'],a:2},
-  {q:'O que é um orçamento?',opts:['Uma lista de desejos','Planejamento de quanto entra e sai','Um banco','Um investimento'],a:1},
-  {q:'Para que serve uma reserva de emergência?',opts:['Pagar festa','Cobrir gastos inesperados','Comprar presentes','Viajar'],a:1},
-  {q:'O que são juros compostos?',opts:['Juros que crescem só uma vez','Juros que crescem sobre juros','Um tipo de desconto','Uma taxa do governo'],a:1},
-  {q:'O que é inflação?',opts:['Aumento geral dos preços','Queda dos preços','Um investimento','Uma moeda'],a:0},
-  {q:'Quanto deve durar uma reserva de emergência?',opts:['1 semana','1 mês','3 a 6 meses','10 anos'],a:2},
-  {q:'O que são ações?',opts:['Promoções em lojas','Pedaços de uma empresa','Tipo de empréstimo','Notas de dinheiro'],a:1},
-  {q:'O que é o Tesouro Direto?',opts:['Banco privado','Investimento em títulos do governo','App de compras','Tipo de cartão'],a:1},
-  {q:'O que é IPCA?',opts:['Índice de preços ao consumidor','Taxa de juros bancária','Tipo de investimento','Uma moeda'],a:0},
-  {q:'Guardar dinheiro todo mês é...',opts:['Chato e desnecessário','Um hábito essencial para o futuro','Coisa de adulto rico','Impossível para quem tem mesada'],a:1},
-  {q:'Quando é melhor comprar algo parcelado?',opts:['Sempre, parcelas são mais fáceis','Nunca, é sempre prejuízo','Só se não tiver juros e caber no orçamento','Quando está com vontade'],a:2},
-  {q:'O que é uma meta financeira?',opts:['Um sonho sem prazo','Um objetivo com valor e prazo definidos','Uma dívida futura','Um tipo de conta'],a:1},
-  {q:'Qual a diferença entre querer e precisar?',opts:['São a mesma coisa','Precisar é necessidade, querer é desejo','Querer é mais importante','Precisar é mais caro'],a:1},
-  {q:'Se sua mesada é R$150, quanto guardar?',opts:['Nada, é pouco','Tudo é muito','Pelo menos R$15 a R$30 (10-20%)','Só guardar se sobrar'],a:2},
-  {q:'O que é um cartão de crédito?',opts:['Dinheiro grátis','Um empréstimo que pode ter juros altos','Substituto da poupança','Presente do banco'],a:1},
-  {q:'Por que comparar preços antes de comprar?',opts:['É desnecessário','Para economizar dinheiro','Para gastar mais tempo','Os preços são iguais em todo lugar'],a:1},
-  {q:'O que é custo de oportunidade?',opts:['O preço de uma oportunidade','O que você deixa de ganhar ao fazer uma escolha','Um desconto especial','Taxa cobrada pelo banco'],a:1},
-  {q:'Como funciona o rendimento da poupança?',opts:['Não rende nada','O banco paga juros sobre o valor guardado','O banco cobra por guardar','O dinheiro dobra todo mês'],a:1},
-  {q:'O que é diversificação?',opts:['Gastar em lugares diferentes','Não colocar tudo numa única opção','Ter muitas contas bancárias','Comprar marcas diferentes'],a:1},
-  {q:'Por que fazer um planejamento financeiro?',opts:['Só adultos precisam','Para saber para onde vai o dinheiro e alcançar metas','É complicado demais','Só serve para quem tem muito dinheiro'],a:1},
-  {q:'O que são investimentos?',opts:['Gastos desnecessários','Formas de fazer o dinheiro trabalhar por você','Dívidas do futuro','Tipo de poupança negativa'],a:1},
-  {q:'O que acontece se você não pagar uma dívida?',opts:['Nada muda','Os juros crescem e fica cada vez mais difícil pagar','O banco esquece','A dívida desaparece'],a:1},
-  {q:'Qual é a regra 50-30-20?',opts:['50% gastar, 30% dívidas, 20% descansar','50% necessidades, 30% desejos, 20% guardar','50% guardar, 30% gastar, 20% emprestar','50% mesada, 30% presente, 20% jogo'],a:1},
-  {q:'Sonho de consumo grande exige...',opts:['Pedir dinheiro emprestado','Poupar por bastante tempo com meta e prazo','Comprar parcelado sem pensar','Esperar aparecer um milagre'],a:1},
-  {q:'O que é taxa de juros?',opts:['Desconto dado pelo vendedor','Percentual cobrado (ou pago) sobre dinheiro','Taxa para abrir uma conta','Imposto do governo'],a:1},
-  {q:'Quando você acerta no quiz diário, você está...',opts:['Perdendo tempo','Aprendendo sobre dinheiro e ganhando recompensas','Fazendo algo sem utilidade','Apenas brincando'],a:1},
-  {q:'Qual a melhor hora para começar a poupar?',opts:['Só quando for adulto','Agora, o quanto antes!','Quando tiver muito dinheiro','Depois de comprar tudo que quer'],a:1}
+  {q:'O que é uma poupança?',opts:['Dinheiro guardado para o futuro','Dinheiro para gastar hoje','Um tipo de jogo','Uma dívida'],a:0,nivel:1},
+  {q:'O que acontece quando você gasta mais do que ganha?',opts:['Fica com dinheiro sobrando','Entra em dívida','Ganha mais dinheiro','Nada muda'],a:1,nivel:1},
+  {q:'Qual o melhor hábito financeiro?',opts:['Gastar tudo que ganha','Comprar sempre parcelado','Guardar parte todo mês','Pedir empréstimo'],a:2,nivel:1},
+  {q:'Para que serve uma reserva de emergência?',opts:['Pagar festa','Cobrir gastos inesperados','Comprar presentes','Viajar'],a:1,nivel:1},
+  {q:'Guardar dinheiro todo mês é...',opts:['Chato e desnecessário','Um hábito essencial para o futuro','Coisa de adulto rico','Impossível para quem tem mesada'],a:1,nivel:1},
+  {q:'Qual a diferença entre querer e precisar?',opts:['São a mesma coisa','Precisar é necessidade, querer é desejo','Querer é mais importante','Precisar é mais caro'],a:1,nivel:1},
+  {q:'Se sua mesada é R$150, quanto guardar?',opts:['Nada, é pouco','Tudo é muito','Pelo menos R$15 a R$30 (10-20%)','Só guardar se sobrar'],a:2,nivel:1},
+  {q:'Por que comparar preços antes de comprar?',opts:['É desnecessário','Para economizar dinheiro','Para gastar mais tempo','Os preços são iguais em todo lugar'],a:1,nivel:1},
+  {q:'Quando você acerta no quiz diário, você está...',opts:['Perdendo tempo','Aprendendo sobre dinheiro e ganhando recompensas','Fazendo algo sem utilidade','Apenas brincando'],a:1,nivel:1},
+  {q:'Qual a melhor hora para começar a poupar?',opts:['Só quando for adulto','Agora, o quanto antes!','Quando tiver muito dinheiro','Depois de comprar tudo que quer'],a:1,nivel:1},
+  {q:'O que é uma despesa fixa?',opts:['Algo que compra por impulso','Gasto que se repete todo mês','Dinheiro ganho no trabalho','Uma promoção'],a:1,nivel:2},
+  {q:'O que é um orçamento?',opts:['Uma lista de desejos','Planejamento de quanto entra e sai','Um banco','Um investimento'],a:1,nivel:2},
+  {q:'O que é inflação?',opts:['Aumento geral dos preços','Queda dos preços','Um investimento','Uma moeda'],a:0,nivel:2},
+  {q:'Quanto deve durar uma reserva de emergência?',opts:['1 semana','1 mês','3 a 6 meses','10 anos'],a:2,nivel:2},
+  {q:'O que é uma meta financeira?',opts:['Um sonho sem prazo','Um objetivo com valor e prazo definidos','Uma dívida futura','Um tipo de conta'],a:1,nivel:2},
+  {q:'Quando é melhor comprar algo parcelado?',opts:['Sempre, parcelas são mais fáceis','Nunca, é sempre prejuízo','Só se não tiver juros e caber no orçamento','Quando está com vontade'],a:2,nivel:2},
+  {q:'O que é um cartão de crédito?',opts:['Dinheiro grátis','Um empréstimo que pode ter juros altos','Substituto da poupança','Presente do banco'],a:1,nivel:2},
+  {q:'Por que fazer um planejamento financeiro?',opts:['Só adultos precisam','Para saber para onde vai o dinheiro e alcançar metas','É complicado demais','Só serve para quem tem muito dinheiro'],a:1,nivel:2},
+  {q:'O que são investimentos?',opts:['Gastos desnecessários','Formas de fazer o dinheiro trabalhar por você','Dívidas do futuro','Tipo de poupança negativa'],a:1,nivel:2},
+  {q:'Sonho de consumo grande exige...',opts:['Pedir dinheiro emprestado','Poupar por bastante tempo com meta e prazo','Comprar parcelado sem pensar','Esperar aparecer um milagre'],a:1,nivel:2},
+  {q:'O que é taxa de juros?',opts:['Desconto dado pelo vendedor','Percentual cobrado (ou pago) sobre dinheiro','Taxa para abrir uma conta','Imposto do governo'],a:1,nivel:2},
+  {q:'O que são juros compostos?',opts:['Juros que crescem só uma vez','Juros que crescem sobre juros','Um tipo de desconto','Uma taxa do governo'],a:1,nivel:3},
+  {q:'O que são ações?',opts:['Promoções em lojas','Pedaços de uma empresa','Tipo de empréstimo','Notas de dinheiro'],a:1,nivel:3},
+  {q:'O que é o Tesouro Direto?',opts:['Banco privado','Investimento em títulos do governo','App de compras','Tipo de cartão'],a:1,nivel:3},
+  {q:'O que é IPCA?',opts:['Índice de preços ao consumidor','Taxa de juros bancária','Tipo de investimento','Uma moeda'],a:0,nivel:3},
+  {q:'Como funciona o rendimento da poupança?',opts:['Não rende nada','O banco paga juros sobre o valor guardado','O banco cobra por guardar','O dinheiro dobra todo mês'],a:1,nivel:3},
+  {q:'O que é diversificação?',opts:['Gastar em lugares diferentes','Não colocar tudo numa única opção','Ter muitas contas bancárias','Comprar marcas diferentes'],a:1,nivel:3},
+  {q:'O que acontece se você não pagar uma dívida?',opts:['Nada muda','Os juros crescem e fica cada vez mais difícil pagar','O banco esquece','A dívida desaparece'],a:1,nivel:3},
+  {q:'Qual é a regra 50-30-20?',opts:['50% gastar, 30% dívidas, 20% descansar','50% necessidades, 30% desejos, 20% guardar','50% guardar, 30% gastar, 20% emprestar','50% mesada, 30% presente, 20% jogo'],a:1,nivel:3},
+  {q:'O que é custo de oportunidade?',opts:['O preço de uma oportunidade','O que você deixa de ganhar ao fazer uma escolha','Um desconto especial','Taxa cobrada pelo banco'],a:1,nivel:3}
 ];
 
-function _quizDailyIndices(today, n){
+function _quizDailyIndices(today, n, pauloNivel){
   // Deterministic shuffle by date — same questions on same day across devices
   var seed=parseInt(today.replace(/-/g,''));
-  var idxs=[];for(var i=0;i<QUIZ_QUESTIONS.length;i++)idxs.push(i);
+  // Mix by Paulo's game level: [easy, medium, hard]
+  var nv=pauloNivel||1;
+  var mix;
+  if(nv<=2)      mix=[5,0,0];
+  else if(nv<=4) mix=[4,1,0];
+  else if(nv<=6) mix=[3,2,0];
+  else if(nv<=8) mix=[2,2,1];
+  else           mix=[1,2,2];
+  // Separate indices by difficulty
+  var byNivel=[[],[],[]];
+  for(var i=0;i<QUIZ_QUESTIONS.length;i++) byNivel[(QUIZ_QUESTIONS[i].nivel||1)-1].push(i);
+  // Shuffle each group deterministically
   var s=seed;
-  for(var i=idxs.length-1;i>0;i--){s=(s*1664525+1013904223)&0x7fffffff;var j=s%(i+1);var tmp=idxs[i];idxs[i]=idxs[j];idxs[j]=tmp;}
-  return idxs.slice(0,n);
+  function shuffled(arr){
+    var a=arr.slice();
+    for(var k=a.length-1;k>0;k--){s=(s*1664525+1013904223)&0x7fffffff;var j2=s%(k+1);var tmp=a[k];a[k]=a[j2];a[j2]=tmp;}
+    return a;
+  }
+  var s1=shuffled(byNivel[0]),s2=shuffled(byNivel[1]),s3=shuffled(byNivel[2]);
+  var result=[];
+  for(var i=0;i<mix[0]&&i<s1.length;i++) result.push(s1[i]);
+  for(var i=0;i<mix[1]&&i<s2.length;i++) result.push(s2[i]);
+  for(var i=0;i<mix[2]&&i<s3.length;i++) result.push(s3[i]);
+  // Fallback if not enough questions of a level
+  while(result.length<n){
+    var all=shuffled(s1.concat(s2).concat(s3));
+    for(var i=0;i<all.length&&result.length<n;i++){if(result.indexOf(all[i])<0)result.push(all[i]);}
+    break;
+  }
+  return result.slice(0,n);
 }
 
 function renderPauloQuiz(db){
@@ -3030,7 +3108,8 @@ function renderPauloQuiz(db){
   }
   if(!q.lastMonth)q.lastMonth=curMonth;
   // Reset daily state for new day
-  if(q.dailyDate!==today){q.dailyDate=today;q.dailyQs=_quizDailyIndices(today,5);q.dailyAnswers=[];}
+  var pNivel=pGetNivel(db.paulo.xp||0);
+  if(q.dailyDate!==today){q.dailyDate=today;q.dailyQs=_quizDailyIndices(today,5,pNivel);q.dailyAnswers=[];}
   var el=document.getElementById('p-quiz-daily');if(!el)return;
   var answered=q.dailyAnswers||[];
   var done=answered.length>=5;
@@ -3054,7 +3133,10 @@ function renderPauloQuiz(db){
         '<div style="font-size:10px;color:var(--t3)">No mês</div>'+
       '</div>'+
     '</div>'+
-    '<div style="font-size:11px;color:var(--t3);margin-bottom:4px">'+answered.length+'/5 perguntas hoje · '+(q.daysCompleted||0)+' dias completos (R$1/dia)</div>'+
+    '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">'+
+      '<div style="font-size:11px;color:var(--t3)">'+answered.length+'/5 hoje · '+(q.daysCompleted||0)+' dias (R$1/dia) · Nív. '+pNivel+'</div>'+
+      '<button onclick="pResetQuizHoje()" style="font-size:10px;color:var(--t3);background:none;border:none;cursor:pointer;padding:2px 6px">🔄 Reiniciar</button>'+
+    '</div>'+
     '<div style="display:flex;gap:4px;margin-bottom:14px">'+
       [0,1,2,3,4].map(function(i){
         var a=answered[i];
@@ -3178,6 +3260,24 @@ function pResponderQuiz(qIdx,chosenIdx){
   if(acertou)pToast('✅ Correto! '+(acertou?'+XP':''));
   else pToast('❌ Errou! A resposta era: '+pergunta.opts[pergunta.a]);
 }
+function pResetQuizHoje(){
+  document.getElementById('stitle').textContent='🔑 Acesso dos Pais';
+  document.getElementById('sbody').innerHTML=
+    '<div style="text-align:center;font-size:13px;color:var(--t3);margin-bottom:16px">Digite seu PIN para reiniciar o quiz de hoje</div>'+
+    '<input id="p-rq-pin" type="tel" inputmode="numeric" maxlength="4" class="ainp" placeholder="PIN" style="font-size:28px;letter-spacing:10px;text-align:center" autocomplete="off">'+
+    '<div id="p-rq-err" style="min-height:16px;font-size:12px;color:var(--red);text-align:center;margin-top:8px"></div>';
+  var btn=document.createElement('button');btn.className='savebtn';btn.textContent='Reiniciar quiz';
+  btn.onclick=function(){
+    var pin=document.getElementById('p-rq-pin').value;
+    if(pin!=='2505'&&pin!=='0609'){document.getElementById('p-rq-err').textContent='PIN inválido';return;}
+    var db=load();
+    if(db.paulo&&db.paulo.quiz){db.paulo.quiz.dailyDate='';db.paulo.quiz.dailyAnswers=[];save(db);}
+    closeSH();renderPauloQuiz(load());pToast('Quiz do dia reiniciado!');
+  };
+  document.getElementById('sbody').appendChild(btn);
+  document.getElementById('sbg').classList.add('on');
+  setTimeout(function(){var i=document.getElementById('p-rq-pin');if(i)i.focus();},300);
+}
 // ===================== FIM QUIZ =====================
 
 
@@ -3292,10 +3392,11 @@ function pResponderQuiz(qIdx,chosenIdx){
   window.pExcluirMissao=pExcluirMissao;
   window._ensureMesadaPaulo=_ensureMesadaPaulo;
   window.pEditLancamento=pEditLancamento;
+  window.pResetQuizHoje=pResetQuizHoje;
 })();
 
 </script>
-<div id="ver" style="position:fixed;bottom:8px;left:0;right:0;text-align:center;font-size:10px;color:var(--t3);opacity:.45;z-index:99999;pointer-events:none;font-family:monospace">v1.115.528</div>
+<div id="ver" style="position:fixed;bottom:8px;left:0;right:0;text-align:center;font-size:10px;color:var(--t3);opacity:.45;z-index:99999;pointer-events:none;font-family:monospace">v1.116.534</div>
 </body>
 </html>
  
