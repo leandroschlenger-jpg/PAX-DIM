@@ -365,7 +365,7 @@ inter-events:none}
         <div class="hlbl">Saldo Patrimonial</div><div class="hval" id="rSaldo">--</div><div class="hsub" id="rSub">--</div>
       </div>
       <div class="r2">
-        <div class="mc"><div class="mclbl">Bens</div><div class="mcval green" id="rBens">--</div></div>
+        <div class="mc" onclick="go('bens')" style="cursor:pointer"><div class="mclbl">Bens &#8250;</div><div class="mcval green" id="rBens">--</div></div>
         <div class="mc"><div class="mclbl">Dividas</div><div class="mcval red" id="rDiv">--</div></div>
       </div>
       <div class="dc"><div class="dct">Fluxo por mes</div><div class="cwrap" style="height:220px"><canvas id="cR"></canvas></div></div>
@@ -374,8 +374,8 @@ inter-events:none}
   </div>
 
   <div id="pg-bens" class="page">
-    <div class="pp">
-      <div class="ph1">Patrimonio</div><div class="psub">Bens e ativos</div>
+    <div class="bh"><button class="bbtn" onclick="go('resumo')">&#8249;</button><div class="ph1" style="font-size:20px">Patrim\xf4nio</div></div>
+    <div class="pp" style="padding-top:0">
       <div class="hcard" style="background:linear-gradient(145deg,#0d2040,#0f1120);border:1px solid rgba(77,166,255,.2)">
         <div class="hlbl">Total</div><div class="hval" id="bTotal">--</div><div class="hsub" id="bSub">--</div>
       </div>
@@ -1189,6 +1189,7 @@ function go(id){
   document.getElementById('screen').scrollTop=0;
   curPage=id;
   document.getElementById('fab').style.display=['resumo','mais'].includes(id)?'none':'flex';
+  if(id==='bens'){document.getElementById('fab').style.display='flex';}
   render(id);
 }
 function sub(id){
@@ -1242,7 +1243,7 @@ function renderFluxo(db){
   var banner=document.getElementById('fechadoBanner');
   var btnF=document.getElementById('btnFecharMes');
   if(banner)banner.style.display=fechado?'block':'none';
-  if(btnF){btnF.style.display=fechado?'none':'block';btnF.style.color=fechado?'var(--blu)':'var(--t3)';}
+  if(btnF){btnF.style.display='block';btnF.textContent=fechado?'🔓 Reabrir m\xeas':'🔒 Fechar m\xeas';btnF.style.color=fechado?'var(--blu)':'var(--t3)';}
   document.getElementById('fhero').innerHTML=
     '<div class="fhl">Saldo do mes</div>'+
     '<div class="fhv '+(saldo>=0?'pos':'neg')+'">'+fmt(saldo)+'</div>'+
@@ -1356,7 +1357,16 @@ function bindSwipe(txs){
 function isMesFechado(mes){var db=load();return(db.mesesFechados||[]).indexOf(mes)>=0;}
 function fecharMes(){
   var db=load();
-  if((db.mesesFechados||[]).indexOf(curMes)>=0){toast('Mes ja fechado');return;}
+  var jeFechado=(db.mesesFechados||[]).indexOf(curMes)>=0;
+  if(jeFechado){
+    var pin=prompt('Digite sua senha (PIN) para reabrir '+mNome(curMes)+':');
+    if(!pin)return;
+    var pinValido=Object.keys(USERS).some(function(k){return USERS[k].id===curUser.id&&k===pin;});
+    if(!pinValido){toast('Senha incorreta');return;}
+    db.mesesFechados=db.mesesFechados.filter(function(m){return m!==curMes;});
+    save(db);renderFluxo(db);toast(mNome(curMes)+' reaberto!');
+    return;
+  }
   var all=db.fluxo.filter(function(t){return t.mes===curMes;});
   if(all.length===0){toast('Nenhum lancamento neste mes');return;}
   var pend=all.filter(function(t){return t.status!=='OK';}).length;
@@ -2085,7 +2095,18 @@ function pAddLancamento(editId){
     '<input id="pl-desc" type="text" class="ainp" placeholder="Descrição (ex: Mesada, Lanche...)" style="margin-bottom:8px" value="'+(ex?ex.descricao:'')+'">'+
     '<input id="pl-val" type="text" inputmode="decimal" class="ainp" placeholder="Valor (0,00)" oninput="moneyMask(this)" style="font-size:20px;margin-bottom:8px" value="'+(ex?ex.valor.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2}):'')+'">'+
     '<input id="pl-data" type="date" class="ainp" style="margin-bottom:8px" value="'+(ex?ex.data:new Date().toISOString().split('T')[0])+'">'+
-    '<input id="pl-cat" type="text" class="ainp" placeholder="Categoria (opcional)" value="'+(ex&&ex.categoria&&ex.categoria!=='Outros'?ex.categoria:'')+'">';
+    '<input id="pl-cat" type="text" class="ainp" placeholder="Categoria (opcional)" value="'+(ex&&ex.categoria&&ex.categoria!=='Outros'?ex.categoria:'')+'">'+(ex?'':
+    '<div style="border-top:1px solid var(--bdr);margin:12px 0 8px;padding-top:12px">'+
+    '<div style="font-size:12px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px">Parcelamento</div>'+
+    '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">'+
+      '<button type="button" id="pl-parc-no" onclick="pSelParc(false)" style="padding:10px;border-radius:12px;background:rgba(123,110,246,.25);border:2px solid var(--acc);color:var(--accl);font-size:13px;font-weight:800;cursor:pointer">Sem parcelas</button>'+
+      '<button type="button" id="pl-parc-yes" onclick="pSelParc(true)" style="padding:10px;border-radius:12px;background:var(--s2);border:2px solid var(--bdr);color:var(--t3);font-size:13px;font-weight:800;cursor:pointer">Parcelar</button>'+
+    '</div>'+
+    '<div id="pl-parc-wrap" style="display:none;margin-top:10px">'+
+      '<input id="pl-parc-qtd" type="number" class="ainp" placeholder="N\xba de parcelas (ex: 3)" min="2" max="24" value="2" style="font-size:18px">'+
+      '<div style="font-size:11px;color:var(--t3);margin-top:4px">Ser\xe3o criadas N entradas mensais com o mesmo valor</div>'+
+    '</div>'+
+    '</div>');
   var btn=document.createElement('button');btn.className='savebtn';btn.textContent=ex?'Salvar alterações':'Salvar';
   btn.onclick=function(){
     var tipo2=document.getElementById('pl-tipo').value;
@@ -2099,16 +2120,44 @@ function pAddLancamento(editId){
       var idx=db2.fluxo.findIndex(function(t){return t.id===editId;});
       if(idx>=0){db2.fluxo[idx].operacao=tipo2;db2.fluxo[idx].descricao=desc;db2.fluxo[idx].valor=val;db2.fluxo[idx].data=data;db2.fluxo[idx].mes=data.slice(0,7);db2.fluxo[idx].categoria=cat;}
     } else {
-      db2.fluxo.push({id:uid(),mes:data.slice(0,7),data:data,operacao:tipo2,valor:val,conta:'Paulo',status:'OK',descricao:desc,categoria:cat,forma:''});
+      var parcWrap=document.getElementById('pl-parc-wrap');
+      var usarParc=parcWrap&&parcWrap.style.display!=='none';
+      var qtdParc=usarParc?Math.max(2,Math.min(24,parseInt(document.getElementById('pl-parc-qtd').value)||2)):1;
+      var recIdParc=usarParc?uid():null;
+      for(var pi=0;pi<qtdParc;pi++){
+        var dParts=data.split('-');
+        var ano=parseInt(dParts[0]);var mes2=parseInt(dParts[1])-1+pi;
+        ano+=Math.floor(mes2/12);mes2=mes2%12;
+        var mesFmt=ano+'-'+('0'+(mes2+1)).slice(-2);
+        var diaStr=dParts[2];
+        var entry={id:uid(),mes:mesFmt,data:mesFmt+'-'+diaStr,operacao:tipo2,valor:val,conta:'Paulo',status:'OK',descricao:desc+(usarParc?' ('+( pi+1)+'/'+qtdParc+')':''),categoria:cat,forma:''};
+        if(usarParc){entry.recId=recIdParc;entry.recIdx=pi+1;entry.recTotal=qtdParc;}
+        db2.fluxo.push(entry);
+      }
     }
     save(db2);closeSH();renderPauloExtrato();
-    pToast(ex?'Lançamento atualizado!':(tipo2==='Entrada'?'+R$'+val.toLocaleString('pt-BR',{minimumFractionDigits:2})+' registrado!':'−R$'+val.toLocaleString('pt-BR',{minimumFractionDigits:2})+' registrado!'));
+    var msg=ex?'Lançamento atualizado!':(usarParc?qtdParc+'x de R$'+val.toLocaleString('pt-BR',{minimumFractionDigits:2})+' criadas!':(tipo2==='Entrada'?'+R$'+val.toLocaleString('pt-BR',{minimumFractionDigits:2})+' registrado!':'−R$'+val.toLocaleString('pt-BR',{minimumFractionDigits:2})+' registrado!'));
+    pToast(msg);
   };
   document.getElementById('sbody').appendChild(btn);
   document.getElementById('sbg').classList.add('on');
   setTimeout(function(){document.getElementById('pl-desc').focus();},300);
 }
 function pEditLancamento(id){pAddLancamento(id);}
+function pSelParc(ativo){
+  var no=document.getElementById('pl-parc-no');
+  var yes=document.getElementById('pl-parc-yes');
+  var wrap=document.getElementById('pl-parc-wrap');
+  if(ativo){
+    if(yes){yes.style.background='rgba(123,110,246,.25)';yes.style.borderColor='var(--acc)';yes.style.color='var(--accl)';}
+    if(no){no.style.background='var(--s2)';no.style.borderColor='var(--bdr)';no.style.color='var(--t3)';}
+    if(wrap)wrap.style.display='block';
+  } else {
+    if(no){no.style.background='rgba(123,110,246,.25)';no.style.borderColor='var(--acc)';no.style.color='var(--accl)';}
+    if(yes){yes.style.background='var(--s2)';yes.style.borderColor='var(--bdr)';yes.style.color='var(--t3)';}
+    if(wrap)wrap.style.display='none';
+  }
+}
 function pSelTipo(tipo){
   document.getElementById('pl-tipo').value=tipo;
   var eBtn=document.getElementById('pl-ent');
@@ -2408,9 +2457,19 @@ function pGuardar(){
     var v=parseMoney(document.getElementById('p-val-guardar').value);
     if(!v||v<=0){toast('Digite um valor');return;}
     var db=load();if(!db.paulo)db.paulo=seedPaulo().paulo;
+    var _hj=new Date();
+    var hm=_hj.getFullYear()+'-'+('0'+(_hj.getMonth()+1)).slice(-2);
+    var txsMes=(db.fluxo||[]).filter(function(t){return t.mes===hm;});
+    var entradas=txsMes.filter(function(t){return t.operacao==='Entrada';}).reduce(function(s,t){return s+t.valor;},0);
+    var saidas=txsMes.filter(function(t){return t.operacao==='Saida';}).reduce(function(s,t){return s+t.valor;},0);
+    var saldoDisp=entradas-saidas;
+    if(v>saldoDisp){pToast('Saldo insuficiente! Dispon\xedvel: R$ '+saldoDisp.toLocaleString('pt-BR',{minimumFractionDigits:2}));return;}
+    var dia=('0'+_hj.getDate()).slice(-2);
+    db.fluxo.push({id:uid(),mes:hm,data:hm+'-'+dia,operacao:'Saida',valor:v,conta:'Paulo',descricao:'Guardar no cofrinho',categoria:'Guardar',status:'OK',forma:''});
     db.paulo.cofrinho=(db.paulo.cofrinho||0)+v;
     var xpGanho=Math.max(1,Math.round(v*2));
     addXP(xpGanho,db);checkMissoes(db);checkConquistas(db);
+    _logActivity('guardar','Guardou R$ '+v.toLocaleString('pt-BR',{minimumFractionDigits:2})+' no cofrinho');
     save(db);closeSH();goP('home');
     pToast('+'+xpGanho+' XP guardados! \u{1F4B0}');
   };
@@ -3520,7 +3579,7 @@ window.openLog=openLog;window.closeLog=closeLog;window.renderLog=renderLog;
 })();
 
 </script>
-<div id="ver" style="position:fixed;bottom:8px;left:0;right:0;text-align:center;font-size:10px;color:var(--t3);opacity:.45;z-index:99999;pointer-events:none;font-family:monospace">v1.118.548</div>
+<div id="ver" style="position:fixed;bottom:8px;left:0;right:0;text-align:center;font-size:10px;color:var(--t3);opacity:.45;z-index:99999;pointer-events:none;font-family:monospace">v1.119.552</div>
 </body>
 </html>
  
