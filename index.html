@@ -49,13 +49,8 @@ body.locked .nav,body.locked #fab,body.locked .topbar,body.locked .p-tabs,body.l
 .ls-pcards{display:flex;gap:12px;justify-content:center;width:100%;max-width:340px}
 .ls-pcard{flex:1;background:var(--s1);border:1.5px solid var(--bdr);border-radius:22px;padding:14px 8px 12px;display:flex;flex-direction:column;align-items:center;gap:10px;cursor:pointer;transition:transform .18s,border-color .18s;-webkit-tap-highlight-color:rgba(0,0,0,0);touch-action:manipulation}
 .ls-pcard:active{transform:scale(.93);background:var(--s2)}
-.ls-gifbox{width:80px;height:80px;border-radius:16px;overflow:hidden;background:var(--s2);display:flex;align-items:center;justify-content:center;font-size:38px;position:relative}
-.ls-gifbox img{width:100%;height:100%;object-fit:cover;display:block;position:absolute;inset:0}
+.ls-gifbox{width:80px;height:80px;border-radius:50%;overflow:hidden;background:var(--s2);display:flex;align-items:center;justify-content:center;font-size:28px;font-weight:900;color:#fff}
 .ls-tag{font-size:16px;font-weight:900;color:var(--t1);letter-spacing:.05em}
-/* GIF PICKER */
-.gif-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:8px}
-.gif-opt{width:100%;aspect-ratio:1;border-radius:12px;overflow:hidden;cursor:pointer;background:var(--s2);border:2.5px solid transparent;transition:border-color .15s;display:flex;align-items:center;justify-content:center;font-size:22px}
-.gif-opt.gif-sel{border-color:var(--acc);box-shadow:0 0 0 1px var(--acc)}
 /* FLUXO */
 .fhero{margin:8px 16px 0;background:linear-gradient(145deg,#1a1060,#0f1120);border:1px solid rgba(123,110,246,.25);border-radius:24px;padding:22px 20px 18px;position:relative;overflow:hidden}
 .fhero::before{content:'';position:absolute;right:-40px;top:-40px;width:200px;height:200px;border-radius:50%;background:radial-gradient(circle,rgba(123,110,246,.2),transparent 70%)}
@@ -273,24 +268,15 @@ inter-events:none}
     <!-- 3 cards de perfil -->
     <div id="ls-cards-area" class="ls-pcards">
       <div class="ls-pcard" onclick="lsSelectUser('paulo')">
-        <div class="ls-gifbox">
-          <span id="lsgif-paulo-fb">👦</span>
-          <img id="lsgif-paulo" src="" alt="" onerror="this.style.display='none';document.getElementById('lsgif-paulo-fb').style.display='flex'" onload="document.getElementById('lsgif-paulo-fb').style.display='none'">
-        </div>
+        <div class="ls-gifbox" id="lsav-paulo"></div>
         <div class="ls-tag">PH</div>
       </div>
       <div class="ls-pcard" onclick="lsSelectUser('thays')">
-        <div class="ls-gifbox">
-          <span id="lsgif-thays-fb">👩</span>
-          <img id="lsgif-thays" src="" alt="" onerror="this.style.display='none';document.getElementById('lsgif-thays-fb').style.display='flex'" onload="document.getElementById('lsgif-thays-fb').style.display='none'">
-        </div>
+        <div class="ls-gifbox" id="lsav-thays"></div>
         <div class="ls-tag">TP</div>
       </div>
       <div class="ls-pcard" onclick="lsSelectUser('leandro')">
-        <div class="ls-gifbox">
-          <span id="lsgif-leandro-fb">🛹</span>
-          <img id="lsgif-leandro" src="" alt="" onerror="this.style.display='none';document.getElementById('lsgif-leandro-fb').style.display='flex'" onload="document.getElementById('lsgif-leandro-fb').style.display='none'">
-        </div>
+        <div class="ls-gifbox" id="lsav-leandro"></div>
         <div class="ls-tag">LF</div>
       </div>
     </div>
@@ -450,16 +436,13 @@ inter-events:none}
         <div id="menuApto" class="ai" onclick="sub('apto')"><div class="aico" style="background:rgba(45,212,170,.12)">&#127968;</div><div class="abody"><div class="atitle">Apto Cajamar</div><div class="asub">Venda + saldos</div></div><div class="aarr">&#8250;</div></div>
         <div id="menuProc" class="ai" onclick="sub('proc')"><div class="aico" style="background:rgba(251,191,36,.12)">&#9878;</div><div class="abody"><div class="atitle">Processos Judiciais</div><div class="asub">6 processos</div></div><div class="aarr">&#8250;</div></div>
       </div>
-      <div class="ar" style="margin-top:16px;margin-bottom:8px">
-        <div class="ai" onclick="openGifPicker()"><div class="aico" style="background:rgba(251,191,36,.1)">&#127917;</div><div class="abody"><div class="atitle">Trocar meu GIF</div><div class="asub">Personalize sua tela de entrada</div></div><div class="aarr">&#8250;</div></div>
-      </div>
-      <div class="ar" style="margin-top:8px">
+      <div class="ar" style="margin-top:16px">
         <div class="ai" onclick="limparDuplicatas()"><div class="aico" style="background:rgba(255,204,0,.1)">&#129529;</div><div class="abody"><div class="atitle">Limpar duplicatas</div><div class="asub">Remove lancamentos duplicados</div></div><div class="aarr">&#8250;</div></div>
         <div class="ai" onclick="exportData()"><div class="aico" style="background:rgba(77,166,255,.1)">&#128190;</div><div class="abody"><div class="atitle">Exportar backup</div><div class="asub">Salvar JSON</div></div><div class="aarr">&#8250;</div></div>
         <div class="ai" onclick="document.getElementById('ifile').click()"><div class="aico" style="background:rgba(77,166,255,.1)">&#128193;</div><div class="abody"><div class="atitle">Importar backup</div><div class="asub">Restaurar dados</div></div><div class="aarr">&#8250;</div></div>
       </div>
       <input id="ifile" type="file" accept=".json" style="display:none" onchange="importData(event)">
-      <div style="text-align:center;padding:24px 0 8px;font-size:11px;color:var(--t3);font-family:monospace;opacity:.5">v1.122.562</div>
+      <div style="text-align:center;padding:24px 0 8px;font-size:11px;color:var(--t3);font-family:monospace;opacity:.5">v1.123.563</div>
     </div>
   </div>
 
@@ -731,26 +714,23 @@ var curUser=null,pinEntered='';
 
 /* ─── NOVA TELA DE SELEÇÃO DE PERFIL ─── */
 var lsSelectedUserId=null,lsPinEntered='';
-var GIF_OPTIONS=[
-  {url:'https://media.giphy.com/media/26BRuo6sLetdllPAQ/giphy.gif',label:'🎉 Animado'},
-  {url:'https://media.giphy.com/media/xUA7aLpVxPVEoEPXji/giphy.gif',label:'🛹 Skate'},
-  {url:'https://media.giphy.com/media/3ohzdIuqJoo8QdKlnW/giphy.gif',label:'😎 Cool'},
-  {url:'https://media.giphy.com/media/l0HlBO7eyXzSZkJri/giphy.gif',label:'👋 Oi!'},
-  {url:'https://media.giphy.com/media/3o7TKSjRrfIPjeiVyM/giphy.gif',label:'👏 Palmas'},
-  {url:'https://media.giphy.com/media/26uf9QPzzpKcAdoxO/giphy.gif',label:'🎵 Dança'},
-  {url:'https://media.giphy.com/media/JIX9t2j0ZTN9S/giphy.gif',label:'🐱 Gato'},
-  {url:'https://media.giphy.com/media/l46Cy1rHbQ92uuLXa/giphy.gif',label:'🕺 Move'},
-  {url:'https://media.giphy.com/media/xT9IgG50Lg7ezTyrlu/giphy.gif',label:'🌟 Estrela'},
-  {url:'https://media.giphy.com/media/QYkX9IMHthiF0kByMl/giphy.gif',label:'💪 Força'}
+var LS_AV_CFG=[
+  {id:'paulo', el:'lsav-paulo', ini:'P', bg:'#7c3aed'},
+  {id:'thays', el:'lsav-thays', ini:'T', bg:'#c084a8'},
+  {id:'leandro',el:'lsav-leandro',ini:'L', bg:'#7b6ef6'}
 ];
-var GIF_DEFAULTS={paulo:'https://media.giphy.com/media/26BRuo6sLetdllPAQ/giphy.gif',thays:'https://media.giphy.com/media/3ohzdIuqJoo8QdKlnW/giphy.gif',leandro:'https://media.giphy.com/media/xUA7aLpVxPVEoEPXji/giphy.gif'};
-function getGifUrl(userId){
-  return localStorage.getItem('pax_gif_'+userId)||GIF_DEFAULTS[userId]||'';
-}
-function lsInitGifs(){
-  ['paulo','thays','leandro'].forEach(function(uid){
-    var img=document.getElementById('lsgif-'+uid);
-    if(img){img.src=getGifUrl(uid);}
+function lsInitAvatars(){
+  LS_AV_CFG.forEach(function(u){
+    var el=document.getElementById(u.el);
+    if(!el)return;
+    var stored=localStorage.getItem('pax_av_'+u.id);
+    if(stored){
+      el.innerHTML='<img src="'+stored+'" style="width:100%;height:100%;object-fit:cover;display:block;border-radius:50%">';
+      el.style.background='transparent';
+    } else {
+      el.innerHTML='<span style="font-size:28px;font-weight:900;color:#fff">'+u.ini+'</span>';
+      el.style.background=u.bg;
+    }
   });
 }
 function lsSelectUser(userId){
@@ -771,6 +751,7 @@ function lsCancelPin(){
   var pinArea=document.getElementById('ls-pin-area');
   if(cards)cards.style.display='flex';
   if(pinArea)pinArea.style.display='none';
+  lsInitAvatars();
 }
 function lsNumpad(n){
   if(n===-1){lsPinEntered='';lsUpdateDots();return;}
@@ -804,47 +785,6 @@ function lsUpdateDots(){
   }
 }
 
-/* ─── GIF PICKER ─── */
-var selectedGifUrl=null;
-function openGifPicker(){
-  if(!curUser)return;
-  selectedGifUrl=getGifUrl(curUser.id);
-  var grid=GIF_OPTIONS.map(function(g){
-    var sel=g.url===selectedGifUrl;
-    return '<div class="gif-opt'+(sel?' gif-sel':'')+'" onclick="selectGifOpt(this,\''+g.url+'\')" title="'+g.label+'">'+
-      '<img src="'+g.url+'" style="width:100%;height:100%;object-fit:cover;display:block" onerror="this.outerHTML=\'<span style=&quot;font-size:22px&quot;>'+g.label.split(' ')[0]+'</span>\'">'+
-      '</div>';
-  }).join('');
-  document.getElementById('stitle').textContent='Trocar meu GIF';
-  document.getElementById('sbody').innerHTML=
-    '<div style="font-size:13px;color:var(--t3);margin-bottom:14px">Escolha o GIF para sua tela de entrada</div>'+
-    '<div class="gif-grid">'+grid+'</div>'+
-    '<div style="margin-top:18px">'+
-    '<div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--t3);margin-bottom:8px">Confirme com seu PIN</div>'+
-    '<input type="password" id="gifConfirmPin" inputmode="numeric" maxlength="4" placeholder="••••" style="width:100%;background:var(--s2);border:1.5px solid var(--bdr);border-radius:12px;padding:13px;font-size:24px;letter-spacing:8px;text-align:center;font-family:inherit;color:var(--t1);outline:none;box-sizing:border-box">'+
-    '</div>'+
-    '<button onclick="confirmGifChange()" class="savebtn" style="margin-top:14px">Salvar GIF</button>';
-  document.getElementById('sbg').classList.add('on');
-}
-function selectGifOpt(el,url){
-  selectedGifUrl=url;
-  document.querySelectorAll('.gif-opt').forEach(function(e){e.classList.remove('gif-sel');});
-  el.classList.add('gif-sel');
-}
-function confirmGifChange(){
-  var pinEl=document.getElementById('gifConfirmPin');
-  if(!pinEl||!curUser)return;
-  var pinVal=pinEl.value.replace(/\D/g,'');
-  var valid=Object.keys(USERS).some(function(k){return USERS[k].id===curUser.id&&k===pinVal;});
-  if(!valid){toast('PIN incorreto');return;}
-  if(!selectedGifUrl){toast('Selecione um GIF');return;}
-  localStorage.setItem('pax_gif_'+curUser.id,selectedGifUrl);
-  var img=document.getElementById('lsgif-'+curUser.id);
-  if(img){img.src=selectedGifUrl;img.style.display='block';}
-  var fb=document.getElementById('lsgif-'+curUser.id+'-fb');
-  if(fb)fb.style.display='none';
-  closeSH();toast('GIF atualizado! ✨');
-}
 
 function numpad(n){
   if(n===-1){pinEntered='';updateDots();}
@@ -957,7 +897,7 @@ function confirmCrop(){
     var b64=canvas.toDataURL('image/jpeg',0.85);
     localStorage.setItem('pax_av_'+curUser.id,b64);
     var cm=document.getElementById('cropModal');if(cm)cm.style.display='none';
-    displayAvatar();closeSH();toast('Foto atualizada!');
+    displayAvatar();lsInitAvatars();closeSH();toast('Foto atualizada!');
   };
   img.src=_cropSrc;
 }
@@ -967,7 +907,7 @@ function cancelCrop(){
 function removeAvatar(){
   if(!curUser)return;
   localStorage.removeItem('pax_av_'+curUser.id);
-  displayAvatar();closeSH();toast('Foto removida');
+  displayAvatar();lsInitAvatars();closeSH();toast('Foto removida');
 }
 function trocarUsuario(){
   if(!confirm('Trocar de usuario?'))return;
@@ -3734,8 +3674,8 @@ window.openLog=openLog;window.closeLog=closeLog;window.renderLog=renderLog;
     curMes=_m.getFullYear()+'-'+('0'+(_m.getMonth()+1)).slice(-2);
     updML();
   }catch(e){}
-  // Carrega GIFs na tela de seleção de perfil
-  try{if(typeof lsInitGifs==='function')lsInitGifs();}catch(e){}
+  // Carrega avatares na tela de seleção de perfil
+  try{if(typeof lsInitAvatars==='function')lsInitAvatars();}catch(e){}
 
   // Expose Paulo functions globally
   window.goP=goP;
@@ -3770,7 +3710,8 @@ window.openLog=openLog;window.closeLog=closeLog;window.renderLog=renderLog;
 })();
 
 </script>
-<div id="ver" style="position:fixed;bottom:8px;left:0;right:0;text-align:center;font-size:10px;color:var(--t3);opacity:.45;z-index:99999;pointer-events:none;font-family:monospace">v1.122.562</div>
+<div id="ver" style="position:fixed;bottom:8px;left:0;right:0;text-align:center;font-size:10px;color:var(--t3);opacity:.45;z-index:99999;pointer-events:none;font-family:monospace">v1.123.563</div>
 </body>
 </html>
  
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              
