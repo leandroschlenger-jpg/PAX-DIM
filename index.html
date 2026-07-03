@@ -45,6 +45,17 @@ body.locked .nav,body.locked #fab,body.locked .topbar,body.locked .p-tabs,body.l
 .npbtn{padding:18px;border-radius:16px;background:var(--s1);border:1px solid var(--bdr);font-size:22px;font-weight:700;color:var(--t1);text-align:center;transition:all .15s;touch-action:manipulation;-webkit-tap-highlight-color:rgba(0,0,0,0);user-select:none;cursor:pointer}
 .npbtn:active{background:var(--s2);transform:scale(.94)}
 .lock-err{font-size:14px;color:var(--red);margin-top:16px;min-height:20px;text-align:center}
+/* PROFILE SELECT LOCKSCREEN */
+.ls-pcards{display:flex;gap:12px;justify-content:center;width:100%;max-width:340px}
+.ls-pcard{flex:1;background:var(--s1);border:1.5px solid var(--bdr);border-radius:22px;padding:14px 8px 12px;display:flex;flex-direction:column;align-items:center;gap:10px;cursor:pointer;transition:transform .18s,border-color .18s;-webkit-tap-highlight-color:rgba(0,0,0,0);touch-action:manipulation}
+.ls-pcard:active{transform:scale(.93);background:var(--s2)}
+.ls-gifbox{width:80px;height:80px;border-radius:16px;overflow:hidden;background:var(--s2);display:flex;align-items:center;justify-content:center;font-size:38px;position:relative}
+.ls-gifbox img{width:100%;height:100%;object-fit:cover;display:block;position:absolute;inset:0}
+.ls-tag{font-size:16px;font-weight:900;color:var(--t1);letter-spacing:.05em}
+/* GIF PICKER */
+.gif-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:8px}
+.gif-opt{width:100%;aspect-ratio:1;border-radius:12px;overflow:hidden;cursor:pointer;background:var(--s2);border:2.5px solid transparent;transition:border-color .15s;display:flex;align-items:center;justify-content:center;font-size:22px}
+.gif-opt.gif-sel{border-color:var(--acc);box-shadow:0 0 0 1px var(--acc)}
 /* FLUXO */
 .fhero{margin:8px 16px 0;background:linear-gradient(145deg,#1a1060,#0f1120);border:1px solid rgba(123,110,246,.25);border-radius:24px;padding:22px 20px 18px;position:relative;overflow:hidden}
 .fhero::before{content:'';position:absolute;right:-40px;top:-40px;width:200px;height:200px;border-radius:50%;background:radial-gradient(circle,rgba(123,110,246,.2),transparent 70%)}
@@ -257,28 +268,59 @@ inter-events:none}
 <!-- LOCK -->
   <div class="lockscreen" id="lockscreen">
     <div style="font-size:30px;font-weight:900;letter-spacing:-.5px;margin-bottom:4px">PAX<span style="color:var(--acc)">.</span></div>
-    <div style="font-size:13px;color:var(--t3);margin-bottom:32px">Financeiro pessoal</div>
-    <div class="lock-dots" id="lockdots">
-      <div class="lock-dot" id="d0"></div>
-      <div class="lock-dot" id="d1"></div>
-      <div class="lock-dot" id="d2"></div>
-      <div class="lock-dot" id="d3"></div>
+    <div style="font-size:13px;color:var(--t3);margin-bottom:28px">Quem vai entrar?</div>
+
+    <!-- 3 cards de perfil -->
+    <div id="ls-cards-area" class="ls-pcards">
+      <div class="ls-pcard" onclick="lsSelectUser('paulo')">
+        <div class="ls-gifbox">
+          <span id="lsgif-paulo-fb">👦</span>
+          <img id="lsgif-paulo" src="" alt="" onerror="this.style.display='none';document.getElementById('lsgif-paulo-fb').style.display='flex'" onload="document.getElementById('lsgif-paulo-fb').style.display='none'">
+        </div>
+        <div class="ls-tag">PH</div>
+      </div>
+      <div class="ls-pcard" onclick="lsSelectUser('thays')">
+        <div class="ls-gifbox">
+          <span id="lsgif-thays-fb">👩</span>
+          <img id="lsgif-thays" src="" alt="" onerror="this.style.display='none';document.getElementById('lsgif-thays-fb').style.display='flex'" onload="document.getElementById('lsgif-thays-fb').style.display='none'">
+        </div>
+        <div class="ls-tag">TP</div>
+      </div>
+      <div class="ls-pcard" onclick="lsSelectUser('leandro')">
+        <div class="ls-gifbox">
+          <span id="lsgif-leandro-fb">🛹</span>
+          <img id="lsgif-leandro" src="" alt="" onerror="this.style.display='none';document.getElementById('lsgif-leandro-fb').style.display='flex'" onload="document.getElementById('lsgif-leandro-fb').style.display='none'">
+        </div>
+        <div class="ls-tag">LF</div>
+      </div>
     </div>
-    <div class="numpad" style="margin-top:24px">
-      <button class="npbtn" onclick="numpad(1)">1</button>
-      <button class="npbtn" onclick="numpad(2)">2</button>
-      <button class="npbtn" onclick="numpad(3)">3</button>
-      <button class="npbtn" onclick="numpad(4)">4</button>
-      <button class="npbtn" onclick="numpad(5)">5</button>
-      <button class="npbtn" onclick="numpad(6)">6</button>
-      <button class="npbtn" onclick="numpad(7)">7</button>
-      <button class="npbtn" onclick="numpad(8)">8</button>
-      <button class="npbtn" onclick="numpad(9)">9</button>
-      <button class="npbtn" onclick="numpad(-1)" style="font-size:13px;color:var(--t3)">limpar</button>
-      <button class="npbtn" onclick="numpad(0)">0</button>
-      <button class="npbtn" onclick="numpad(-2)" style="font-size:18px">&#9003;</button>
+
+    <!-- Área de entrada de PIN (oculta inicialmente) -->
+    <div id="ls-pin-area" style="display:none;flex-direction:column;align-items:center">
+      <div style="font-size:16px;font-weight:700;color:var(--t2);margin-bottom:20px" id="ls-pin-username"></div>
+      <div class="lock-dots" id="ls-pin-dots">
+        <div class="lock-dot" id="lsd0"></div>
+        <div class="lock-dot" id="lsd1"></div>
+        <div class="lock-dot" id="lsd2"></div>
+        <div class="lock-dot" id="lsd3"></div>
+      </div>
+      <div class="numpad" style="margin-top:20px">
+        <button class="npbtn" onclick="lsNumpad(1)">1</button>
+        <button class="npbtn" onclick="lsNumpad(2)">2</button>
+        <button class="npbtn" onclick="lsNumpad(3)">3</button>
+        <button class="npbtn" onclick="lsNumpad(4)">4</button>
+        <button class="npbtn" onclick="lsNumpad(5)">5</button>
+        <button class="npbtn" onclick="lsNumpad(6)">6</button>
+        <button class="npbtn" onclick="lsNumpad(7)">7</button>
+        <button class="npbtn" onclick="lsNumpad(8)">8</button>
+        <button class="npbtn" onclick="lsNumpad(9)">9</button>
+        <button class="npbtn" onclick="lsNumpad(-1)" style="font-size:13px;color:var(--t3)">limpar</button>
+        <button class="npbtn" onclick="lsNumpad(0)">0</button>
+        <button class="npbtn" onclick="lsNumpad(-2)" style="font-size:18px">&#9003;</button>
+      </div>
+      <button onclick="lsCancelPin()" style="margin-top:14px;font-size:14px;color:var(--t3);background:none;border:none;cursor:pointer;padding:10px 20px">&#8249; Voltar</button>
+      <div class="lock-err" id="ls-err"></div>
     </div>
-    <div class="lock-err" id="lockerr" style="margin-top:16px;min-height:18px;font-size:13px;color:var(--red);text-align:center"></div>
   </div>
 <input type="file" id="avatarInput" accept="image/*" style="display:none" onchange="handleAvatarUpload(event)">
 <div id="app">
@@ -408,13 +450,16 @@ inter-events:none}
         <div id="menuApto" class="ai" onclick="sub('apto')"><div class="aico" style="background:rgba(45,212,170,.12)">&#127968;</div><div class="abody"><div class="atitle">Apto Cajamar</div><div class="asub">Venda + saldos</div></div><div class="aarr">&#8250;</div></div>
         <div id="menuProc" class="ai" onclick="sub('proc')"><div class="aico" style="background:rgba(251,191,36,.12)">&#9878;</div><div class="abody"><div class="atitle">Processos Judiciais</div><div class="asub">6 processos</div></div><div class="aarr">&#8250;</div></div>
       </div>
-      <div class="ar" style="margin-top:16px">
+      <div class="ar" style="margin-top:16px;margin-bottom:8px">
+        <div class="ai" onclick="openGifPicker()"><div class="aico" style="background:rgba(251,191,36,.1)">&#127917;</div><div class="abody"><div class="atitle">Trocar meu GIF</div><div class="asub">Personalize sua tela de entrada</div></div><div class="aarr">&#8250;</div></div>
+      </div>
+      <div class="ar" style="margin-top:8px">
         <div class="ai" onclick="limparDuplicatas()"><div class="aico" style="background:rgba(255,204,0,.1)">&#129529;</div><div class="abody"><div class="atitle">Limpar duplicatas</div><div class="asub">Remove lancamentos duplicados</div></div><div class="aarr">&#8250;</div></div>
         <div class="ai" onclick="exportData()"><div class="aico" style="background:rgba(77,166,255,.1)">&#128190;</div><div class="abody"><div class="atitle">Exportar backup</div><div class="asub">Salvar JSON</div></div><div class="aarr">&#8250;</div></div>
         <div class="ai" onclick="document.getElementById('ifile').click()"><div class="aico" style="background:rgba(77,166,255,.1)">&#128193;</div><div class="abody"><div class="atitle">Importar backup</div><div class="asub">Restaurar dados</div></div><div class="aarr">&#8250;</div></div>
       </div>
       <input id="ifile" type="file" accept=".json" style="display:none" onchange="importData(event)">
-      <div style="text-align:center;padding:24px 0 8px;font-size:11px;color:var(--t3);font-family:monospace;opacity:.5">v1.121.561</div>
+      <div style="text-align:center;padding:24px 0 8px;font-size:11px;color:var(--t3);font-family:monospace;opacity:.5">v1.122.562</div>
     </div>
   </div>
 
@@ -683,6 +728,124 @@ function loginAs(key){
   }
 }
 var curUser=null,pinEntered='';
+
+/* ─── NOVA TELA DE SELEÇÃO DE PERFIL ─── */
+var lsSelectedUserId=null,lsPinEntered='';
+var GIF_OPTIONS=[
+  {url:'https://media.giphy.com/media/26BRuo6sLetdllPAQ/giphy.gif',label:'🎉 Animado'},
+  {url:'https://media.giphy.com/media/xUA7aLpVxPVEoEPXji/giphy.gif',label:'🛹 Skate'},
+  {url:'https://media.giphy.com/media/3ohzdIuqJoo8QdKlnW/giphy.gif',label:'😎 Cool'},
+  {url:'https://media.giphy.com/media/l0HlBO7eyXzSZkJri/giphy.gif',label:'👋 Oi!'},
+  {url:'https://media.giphy.com/media/3o7TKSjRrfIPjeiVyM/giphy.gif',label:'👏 Palmas'},
+  {url:'https://media.giphy.com/media/26uf9QPzzpKcAdoxO/giphy.gif',label:'🎵 Dança'},
+  {url:'https://media.giphy.com/media/JIX9t2j0ZTN9S/giphy.gif',label:'🐱 Gato'},
+  {url:'https://media.giphy.com/media/l46Cy1rHbQ92uuLXa/giphy.gif',label:'🕺 Move'},
+  {url:'https://media.giphy.com/media/xT9IgG50Lg7ezTyrlu/giphy.gif',label:'🌟 Estrela'},
+  {url:'https://media.giphy.com/media/QYkX9IMHthiF0kByMl/giphy.gif',label:'💪 Força'}
+];
+var GIF_DEFAULTS={paulo:'https://media.giphy.com/media/26BRuo6sLetdllPAQ/giphy.gif',thays:'https://media.giphy.com/media/3ohzdIuqJoo8QdKlnW/giphy.gif',leandro:'https://media.giphy.com/media/xUA7aLpVxPVEoEPXji/giphy.gif'};
+function getGifUrl(userId){
+  return localStorage.getItem('pax_gif_'+userId)||GIF_DEFAULTS[userId]||'';
+}
+function lsInitGifs(){
+  ['paulo','thays','leandro'].forEach(function(uid){
+    var img=document.getElementById('lsgif-'+uid);
+    if(img){img.src=getGifUrl(uid);}
+  });
+}
+function lsSelectUser(userId){
+  lsSelectedUserId=userId;lsPinEntered='';
+  var cards=document.getElementById('ls-cards-area');
+  var pinArea=document.getElementById('ls-pin-area');
+  if(cards)cards.style.display='none';
+  if(pinArea)pinArea.style.display='flex';
+  var names={leandro:'Leandro',thays:'Thays',paulo:'Paulo'};
+  var el=document.getElementById('ls-pin-username');
+  if(el)el.textContent=names[userId]||userId;
+  lsUpdateDots();
+  var err=document.getElementById('ls-err');if(err)err.textContent='';
+}
+function lsCancelPin(){
+  lsSelectedUserId=null;lsPinEntered='';
+  var cards=document.getElementById('ls-cards-area');
+  var pinArea=document.getElementById('ls-pin-area');
+  if(cards)cards.style.display='flex';
+  if(pinArea)pinArea.style.display='none';
+}
+function lsNumpad(n){
+  if(n===-1){lsPinEntered='';lsUpdateDots();return;}
+  if(n===-2){lsPinEntered=lsPinEntered.slice(0,-1);lsUpdateDots();return;}
+  if(lsPinEntered.length>=4)return;
+  lsPinEntered+=n;lsUpdateDots();
+  if(lsPinEntered.length===4){
+    setTimeout(function(){
+      var u=USERS[lsPinEntered];
+      var err=document.getElementById('ls-err');
+      if(u&&u.id===lsSelectedUserId){
+        loginAs(u.id==='leandro'?'l':u.id==='thays'?'t':'p');
+        lsPinEntered='';lsSelectedUserId=null;
+      } else {
+        var dots=document.querySelectorAll('#ls-pin-dots .lock-dot');
+        dots.forEach(function(d){d.classList.add('error');});
+        if(err)err.textContent='PIN incorreto';
+        setTimeout(function(){
+          lsPinEntered='';lsUpdateDots();
+          dots.forEach(function(d){d.classList.remove('error');});
+          if(err)err.textContent='';
+        },800);
+      }
+    },150);
+  }
+}
+function lsUpdateDots(){
+  for(var i=0;i<4;i++){
+    var d=document.getElementById('lsd'+i);
+    if(d){d.classList.toggle('filled',i<lsPinEntered.length);d.classList.remove('error');}
+  }
+}
+
+/* ─── GIF PICKER ─── */
+var selectedGifUrl=null;
+function openGifPicker(){
+  if(!curUser)return;
+  selectedGifUrl=getGifUrl(curUser.id);
+  var grid=GIF_OPTIONS.map(function(g){
+    var sel=g.url===selectedGifUrl;
+    return '<div class="gif-opt'+(sel?' gif-sel':'')+'" onclick="selectGifOpt(this,\''+g.url+'\')" title="'+g.label+'">'+
+      '<img src="'+g.url+'" style="width:100%;height:100%;object-fit:cover;display:block" onerror="this.outerHTML=\'<span style=&quot;font-size:22px&quot;>'+g.label.split(' ')[0]+'</span>\'">'+
+      '</div>';
+  }).join('');
+  document.getElementById('stitle').textContent='Trocar meu GIF';
+  document.getElementById('sbody').innerHTML=
+    '<div style="font-size:13px;color:var(--t3);margin-bottom:14px">Escolha o GIF para sua tela de entrada</div>'+
+    '<div class="gif-grid">'+grid+'</div>'+
+    '<div style="margin-top:18px">'+
+    '<div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--t3);margin-bottom:8px">Confirme com seu PIN</div>'+
+    '<input type="password" id="gifConfirmPin" inputmode="numeric" maxlength="4" placeholder="••••" style="width:100%;background:var(--s2);border:1.5px solid var(--bdr);border-radius:12px;padding:13px;font-size:24px;letter-spacing:8px;text-align:center;font-family:inherit;color:var(--t1);outline:none;box-sizing:border-box">'+
+    '</div>'+
+    '<button onclick="confirmGifChange()" class="savebtn" style="margin-top:14px">Salvar GIF</button>';
+  document.getElementById('sbg').classList.add('on');
+}
+function selectGifOpt(el,url){
+  selectedGifUrl=url;
+  document.querySelectorAll('.gif-opt').forEach(function(e){e.classList.remove('gif-sel');});
+  el.classList.add('gif-sel');
+}
+function confirmGifChange(){
+  var pinEl=document.getElementById('gifConfirmPin');
+  if(!pinEl||!curUser)return;
+  var pinVal=pinEl.value.replace(/\D/g,'');
+  var valid=Object.keys(USERS).some(function(k){return USERS[k].id===curUser.id&&k===pinVal;});
+  if(!valid){toast('PIN incorreto');return;}
+  if(!selectedGifUrl){toast('Selecione um GIF');return;}
+  localStorage.setItem('pax_gif_'+curUser.id,selectedGifUrl);
+  var img=document.getElementById('lsgif-'+curUser.id);
+  if(img){img.src=selectedGifUrl;img.style.display='block';}
+  var fb=document.getElementById('lsgif-'+curUser.id+'-fb');
+  if(fb)fb.style.display='none';
+  closeSH();toast('GIF atualizado! ✨');
+}
+
 function numpad(n){
   if(n===-1){pinEntered='';updateDots();}
   else if(n===-2){pinEntered=pinEntered.slice(0,-1);updateDots();}
@@ -811,7 +974,7 @@ function trocarUsuario(){
   curUser=null;KEY='pax_fin_guest';_db=null;_fbRef=null;_fbReady=false;_fbSynced=false;
   document.body.classList.remove('paulo-mode','thays-mode');
   document.body.classList.add('locked');
-  pinEntered='';updateDots();
+  lsCancelPin();
   document.getElementById('userAvatar').style.display='none';displayAvatar();
   document.getElementById('lockscreen').style.display='flex';
 }
@@ -3571,6 +3734,8 @@ window.openLog=openLog;window.closeLog=closeLog;window.renderLog=renderLog;
     curMes=_m.getFullYear()+'-'+('0'+(_m.getMonth()+1)).slice(-2);
     updML();
   }catch(e){}
+  // Carrega GIFs na tela de seleção de perfil
+  try{if(typeof lsInitGifs==='function')lsInitGifs();}catch(e){}
 
   // Expose Paulo functions globally
   window.goP=goP;
@@ -3605,7 +3770,7 @@ window.openLog=openLog;window.closeLog=closeLog;window.renderLog=renderLog;
 })();
 
 </script>
-<div id="ver" style="position:fixed;bottom:8px;left:0;right:0;text-align:center;font-size:10px;color:var(--t3);opacity:.45;z-index:99999;pointer-events:none;font-family:monospace">v1.121.561</div>
+<div id="ver" style="position:fixed;bottom:8px;left:0;right:0;text-align:center;font-size:10px;color:var(--t3);opacity:.45;z-index:99999;pointer-events:none;font-family:monospace">v1.122.562</div>
 </body>
 </html>
  
