@@ -445,7 +445,7 @@ inter-events:none}
         <div class="ai" onclick="document.getElementById('ifile').click()"><div class="aico" style="background:rgba(77,166,255,.1)">&#128193;</div><div class="abody"><div class="atitle">Importar backup</div><div class="asub">Restaurar dados</div></div><div class="aarr">&#8250;</div></div>
       </div>
       <input id="ifile" type="file" accept=".json" style="display:none" onchange="importData(event)">
-      <div style="text-align:center;padding:24px 0 8px;font-size:11px;color:var(--t3);font-family:monospace;opacity:.5">v1.128.568</div>
+      <div style="text-align:center;padding:24px 0 8px;font-size:11px;color:var(--t3);font-family:monospace;opacity:.5">v1.129.569</div>
     </div>
   </div>
 
@@ -1388,6 +1388,13 @@ function _syncPai(db,parentId){
 /* ═══════ INTEGRAÇÃO OPEN FINANCE (Pluggy via Netlify Function) ═══════ */
 var PLUGGY_FN='/.netlify/functions/pluggy';
 function _ofToken(){return String(localStorage.getItem('pax_of_token')||'').trim();}
+function _ofItemIds(){return String(localStorage.getItem('pax_of_items')||'').trim();}
+function salvarOFItem(){
+  var v=String(document.getElementById('ofItem').value||'').trim();
+  if(!v){toast('Informe o Item ID');return;}
+  localStorage.setItem('pax_of_items',v);
+  toast('Item ID salvo');
+}
 function _ofCard(){try{return JSON.parse(localStorage.getItem('pax_of_card')||'null');}catch(e){return null;}}
 function _ofConfigurado(){return !!_ofToken()&&!!_ofCard();}
 function _ofCall(payload){
@@ -1422,6 +1429,11 @@ function openOFConfig(){
     '</div>'+
     '<button onclick="salvarOFToken()" class="savebtn">Salvar token</button>'+
     '<div class="sep"></div>'+
+    '<div class="field"><label>Item ID (Dashboard Pluggy)</label>'+
+    '<input id="ofItem" type="text" autocapitalize="off" autocorrect="off" spellcheck="false" placeholder="ex: 8ec91739-82ac-4c83-..." value="'+String(_ofItemIds()).replace(/"/g,'&quot;')+'"></div>'+
+    '<div style="font-size:11px;color:var(--t3);margin:-8px 0 12px">Se tiver mais de um, separe por virgula.</div>'+
+    '<button onclick="salvarOFItem()" class="savebtn" style="background:var(--s3);color:var(--t2);border:1.5px solid var(--bdr);box-shadow:none">Salvar Item ID</button>'+
+    '<div class="sep"></div>'+
     '<div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--t3);margin-bottom:8px">Cartao vinculado</div>'+
     (card
       ? '<div style="background:var(--s2);border:1px solid var(--bdr2);border-radius:14px;padding:13px 15px;margin-bottom:10px">'+
@@ -1443,12 +1455,17 @@ function salvarOFToken(){
 }
 function buscarCartoesOF(){
   if(!_ofToken()){toast('Salve o token primeiro');return;}
+  // pega o que estiver digitado, mesmo sem ter clicado em Salvar
+  var digitado=(document.getElementById('ofItem')||{}).value;
+  var ids=String(digitado||_ofItemIds()||'').trim();
+  if(!ids){toast('Informe o Item ID do Dashboard Pluggy');return;}
+  localStorage.setItem('pax_of_items',ids);
   var box=document.getElementById('ofCards');
   box.innerHTML='<div style="text-align:center;padding:18px;color:var(--t3);font-size:13px">Consultando Open Finance...</div>';
-  _ofCall({action:'cartoes'}).then(function(j){
+  _ofCall({action:'cartoes',itemIds:ids}).then(function(j){
     var cs=j.cartoes||[];
     if(cs.length===0){
-      box.innerHTML='<div style="background:rgba(255,204,0,.08);border:1px solid rgba(255,204,0,.25);border-radius:12px;padding:12px;font-size:12px;color:var(--yel);line-height:1.5">Nenhum cartao de credito encontrado. Conecte o Itau no Meu Pluggy e repita o Passo 6 do tutorial (vincular a conta a aplicacao no Dashboard).</div>';
+      box.innerHTML='<div style="background:rgba(255,204,0,.08);border:1px solid rgba(255,204,0,.25);border-radius:12px;padding:12px;font-size:12px;color:var(--yel);line-height:1.5">Item conectado, mas sem conta de cartao de credito. Confirme no Meu Pluggy que o cartao (nao so a conta corrente) foi autorizado.</div>';
       return;
     }
     box.innerHTML=cs.map(function(c,i){
@@ -4072,7 +4089,7 @@ window.openLog=openLog;window.closeLog=closeLog;window.renderLog=renderLog;
 })();
 
 </script>
-<div id="ver" style="position:fixed;bottom:8px;left:0;right:0;text-align:center;font-size:10px;color:var(--t3);opacity:.45;z-index:99999;pointer-events:none;font-family:monospace">v1.128.568</div>
+<div id="ver" style="position:fixed;bottom:8px;left:0;right:0;text-align:center;font-size:10px;color:var(--t3);opacity:.45;z-index:99999;pointer-events:none;font-family:monospace">v1.129.569</div>
 </body>
 </html>
  

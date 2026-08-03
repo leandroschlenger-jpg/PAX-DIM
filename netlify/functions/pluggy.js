@@ -112,32 +112,58 @@ async function pget(path, apiKey) {
   return r.json();
 }
 
-/* ── Lista todas as contas de cartão de crédito conectadas ── */
-async function listarCartoes(apiKey) {
-  const items = await pget('/items', apiKey);
-  const lista = items.results || items.items || [];
-  const out = [];
-  for (const it of lista) {
+/* ── Lista as contas de cartão de crédito de um ou mais Items ──
+   A API da Pluggy NAO tem endpoint para listar todos os items:
+   existe apenas GET /items/:id. Por isso o Item ID e informado
+   pelo app (o usuario copia do Dashboard Pluggy).              */
+async function listarCartoes(apiKey, itemIds) {
+  if (!itemIds || itemIds.length === 0) {
+    throw new Error('Informe o Item ID (copie no Dashboard Pluggy > sua aplicacao > Items/Connections)');
+  }
+  const out = [], erros = [];
+  for (const rawId of itemIds) {
+    const itemId = String(rawId).trim();
+    if (!itemId) continue;
+
+    let item = null;
+    try {
+      item = await pget('/items/' + encodeURIComponent(itemId), apiKey);
+    } catch (e) {
+      erros.push(itemId.slice(0, 8) + '…: ' + String(e.message).slice(0, 90));
+      continue;
+    }
+
     let accs;
     try {
-      accs = await pget('/accounts?itemId=' + encodeURIComponent(it.id), apiKey);
-    } catch (e) { continue; }
+      accs = await pget('/accounts?itemId=' + encodeURIComponent(itemId), apiKey);
+    } catch (e) {
+      erros.push(itemId.slice(0, 8) + '… (contas): ' + String(e.message).slice(0, 90));
+      continue;
+    }
+
+    const banco = (item.connector && item.connector.name) || 'Banco';
     for (const a of (accs.results || [])) {
       if (a.type === 'CREDIT' || a.subtype === 'CREDIT_CARD') {
         out.push({
           accountId:  a.id,
-          itemId:     it.id,
-          banco:      (it.connector && it.connector.name) || 'Banco',
+          itemId:     itemId,
+          banco:      banco,
           nome:       a.name || a.marketingName || 'Cartao',
           numero:     a.number || '',
           bandeira:   (a.creditData && a.creditData.brand) || '',
           limite:     (a.creditData && a.creditData.creditLimit) || null,
           vencimento: (a.creditData && a.creditData.balanceDueDate) || null,
-          status:     it.status || ''
+          status:     item.status || ''
         });
       }
     }
+    // Se o item conectou mas nao tem cartao, avisa quais contas veio
+    if ((accs.results || []).length && !out.length) {
+      const tipos = (accs.results || []).map(a => (a.type || '?') + '/' + (a.subtype || '?')).join(', ');
+      erros.push(banco + ': nenhuma conta de cartao (encontrado: ' + tipos + ')');
+    }
   }
+  if (out.length === 0 && erros.length) throw new Error(erros.join(' | '));
   return out;
 }
 
@@ -231,7 +257,12 @@ exports.handler = async (event) => {
     const apiKey = await getApiKey();
 
     if (body.action === 'cartoes') {
-      const cartoes = await listarCartoes(apiKey);
+      // aceita string ("id" ou "id1,id2") ou array
+      let ids = body.itemIds || body.itemId || [];
+      if (typeof ids === 'string') ids = ids.split(/[,;\s]+/);
+      if (!Array.isArray(ids)) ids = [ids];
+      ids = ids.map(s => String(s).trim()).filter(Boolean);
+      const cartoes = await listarCartoes(apiKey, ids);
       return { statusCode: 200, headers: CORS, body: JSON.stringify({ cartoes }) };
     }
 
