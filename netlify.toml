@@ -4,3 +4,12 @@
 
 [functions]
   node_bundler = "esbuild"
+
+[build.environment]
+  # A chave da API do Firebase é PÚBLICA por design em apps client-side:
+  # ela identifica o projeto, não autentica ninguém. A proteção real vem
+  # das regras do Realtime Database. O scanner do Netlify a trata como
+  # segredo por causa do formato (AIza...), gerando falso positivo.
+  # Referência: https://firebase.google.com/docs/projects/api-keys
+  SECRETS_SCAN_OMIT_KEYS = "FIREBASE_API_KEY"
+  SECRETS_SCAN_OMIT_PATHS = "app.html,index.html"
