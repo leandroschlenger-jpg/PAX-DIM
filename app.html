@@ -445,7 +445,7 @@ inter-events:none}
         <div class="ai" onclick="document.getElementById('ifile').click()"><div class="aico" style="background:rgba(77,166,255,.1)">&#128193;</div><div class="abody"><div class="atitle">Importar backup</div><div class="asub">Restaurar dados</div></div><div class="aarr">&#8250;</div></div>
       </div>
       <input id="ifile" type="file" accept=".json" style="display:none" onchange="importData(event)">
-      <div style="text-align:center;padding:24px 0 8px;font-size:11px;color:var(--t3);font-family:monospace;opacity:.5">v1.127.567</div>
+      <div style="text-align:center;padding:24px 0 8px;font-size:11px;color:var(--t3);font-family:monospace;opacity:.5">v1.128.568</div>
     </div>
   </div>
 
@@ -1387,7 +1387,7 @@ function _syncPai(db,parentId){
 }
 /* ═══════ INTEGRAÇÃO OPEN FINANCE (Pluggy via Netlify Function) ═══════ */
 var PLUGGY_FN='/.netlify/functions/pluggy';
-function _ofToken(){return localStorage.getItem('pax_of_token')||'';}
+function _ofToken(){return String(localStorage.getItem('pax_of_token')||'').trim();}
 function _ofCard(){try{return JSON.parse(localStorage.getItem('pax_of_card')||'null');}catch(e){return null;}}
 function _ofConfigurado(){return !!_ofToken()&&!!_ofCard();}
 function _ofCall(payload){
@@ -1416,7 +1416,10 @@ function openOFConfig(){
       '4. Informe o token de acesso abaixo</div>'+
     '</div>'+
     '<div class="field"><label>Token de acesso (PAX_ACCESS_TOKEN)</label>'+
-    '<input id="ofTok" type="password" placeholder="cole o token aqui" value="'+String(_ofToken()).replace(/"/g,'&quot;')+'"></div>'+
+    '<input id="ofTok" type="text" autocapitalize="off" autocorrect="off" spellcheck="false" placeholder="cole o token aqui" value="'+String(_ofToken()).replace(/"/g,'&quot;')+'"></div>'+
+    '<div id="ofTokInfo" style="font-size:11px;color:var(--t3);margin:-8px 0 12px">'+
+      (_ofToken()?'Salvo: '+_ofToken().length+' caracteres':'Nenhum token salvo')+
+    '</div>'+
     '<button onclick="salvarOFToken()" class="savebtn">Salvar token</button>'+
     '<div class="sep"></div>'+
     '<div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--t3);margin-bottom:8px">Cartao vinculado</div>'+
@@ -1431,10 +1434,12 @@ function openOFConfig(){
   document.getElementById('sbg').classList.add('on');
 }
 function salvarOFToken(){
-  var v=document.getElementById('ofTok').value.trim();
+  var v=String(document.getElementById('ofTok').value||'').trim();
   if(!v){toast('Informe o token');return;}
   localStorage.setItem('pax_of_token',v);
-  toast('Token salvo');
+  var inf=document.getElementById('ofTokInfo');
+  if(inf)inf.textContent='Salvo: '+v.length+' caracteres';
+  toast('Token salvo ('+v.length+' caracteres)');
 }
 function buscarCartoesOF(){
   if(!_ofToken()){toast('Salve o token primeiro');return;}
@@ -4067,7 +4072,7 @@ window.openLog=openLog;window.closeLog=closeLog;window.renderLog=renderLog;
 })();
 
 </script>
-<div id="ver" style="position:fixed;bottom:8px;left:0;right:0;text-align:center;font-size:10px;color:var(--t3);opacity:.45;z-index:99999;pointer-events:none;font-family:monospace">v1.127.567</div>
+<div id="ver" style="position:fixed;bottom:8px;left:0;right:0;text-align:center;font-size:10px;color:var(--t3);opacity:.45;z-index:99999;pointer-events:none;font-family:monospace">v1.128.568</div>
 </body>
 </html>
  

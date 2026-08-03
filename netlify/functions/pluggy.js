@@ -214,8 +214,17 @@ exports.handler = async (event) => {
     return { statusCode: 500, headers: CORS,
       body: JSON.stringify({ erro: 'PAX_ACCESS_TOKEN nao configurado no Netlify' }) };
   }
-  if (body.token !== esperado) {
-    return { statusCode: 401, headers: CORS, body: JSON.stringify({ erro: 'Token invalido' }) };
+  // trim nos dois lados: colar valor com espaco/newline invisivel e comum
+  const recebido = String(body.token == null ? '' : body.token).trim();
+  const alvo     = String(esperado).trim();
+  if (recebido !== alvo) {
+    // Diagnostico sem vazar o segredo: tamanhos + primeiro/ultimo caractere
+    const dica = 'app enviou ' + recebido.length + ' caractere(s)' +
+      (recebido.length ? ' ("' + recebido.slice(0, 3) + '…' + recebido.slice(-2) + '")' : '') +
+      ' / Netlify espera ' + alvo.length + ' caractere(s)' +
+      ' ("' + alvo.slice(0, 3) + '…' + alvo.slice(-2) + '")';
+    return { statusCode: 401, headers: CORS,
+      body: JSON.stringify({ erro: 'Token invalido — ' + dica }) };
   }
 
   try {
