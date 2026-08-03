@@ -445,7 +445,7 @@ inter-events:none}
         <div class="ai" onclick="document.getElementById('ifile').click()"><div class="aico" style="background:rgba(77,166,255,.1)">&#128193;</div><div class="abody"><div class="atitle">Importar backup</div><div class="asub">Restaurar dados</div></div><div class="aarr">&#8250;</div></div>
       </div>
       <input id="ifile" type="file" accept=".json" style="display:none" onchange="importData(event)">
-      <div style="text-align:center;padding:24px 0 8px;font-size:11px;color:var(--t3);font-family:monospace;opacity:.5">v1.126.566</div>
+      <div style="text-align:center;padding:24px 0 8px;font-size:11px;color:var(--t3);font-family:monospace;opacity:.5">v1.127.567</div>
     </div>
   </div>
 
@@ -517,18 +517,6 @@ inter-events:none}
             <div style="font-size:11px;color:var(--t3)">Jeep Compass 2025 Blackwalk - veiculos.fipe.org.br</div>
           </div>
         </a>
-      </div>
-      <div class="dc" id="dc-carbank">
-        <div class="dct">Acesso CarBank</div>
-        <a href="https://cliente.carbankbrasil.com.br/login" target="_blank" style="display:flex;align-items:center;gap:10px;padding:12px;background:rgba(96,165,250,.08);border:1px solid rgba(96,165,250,.2);border-radius:12px;text-decoration:none;margin-bottom:12px">
-          <span style="font-size:22px">&#128279;</span>
-          <div>
-            <div style="font-size:14px;font-weight:800;color:var(--blu)">Abrir CarBank</div>
-            <div style="font-size:11px;color:var(--t3)">cliente.carbankbrasil.com.br</div>
-          </div>
-          <span style="margin-left:auto;color:var(--t3);font-size:16px">&#8250;</span>
-        </a>
-        <div style="font-size:13px;color:var(--t2);line-height:2">CPF: 323.025.288-83<br>Senha: 9297</div>
       </div>
     </div>  </div>
 
@@ -1193,7 +1181,7 @@ function seed(){
     lembretes:[
       {id:uid(),titulo:'Deposito judicial - Processo Felix cobranca titulo',data:'2026-06-10',processo:'Proc 4 - Felix (requerido)',prioridade:'Alta',status:'Pendente',obs:'Verificar se deposito de 18/02 foi aceito nos embargos de execucao'},
       {id:uid(),titulo:'Acompanhar Processo Latam SP',data:'2026-06-15',processo:'Proc 6 - Latam',prioridade:'Media',status:'Pendente',obs:'Dr. Luiz Fernando - checar andamento da indenizacao'},
-      {id:uid(),titulo:'Parcela carro 4/48',data:'2026-07-01',processo:'',prioridade:'Alta',status:'Pendente',obs:'Acessar carbankbrasil.com.br - CPF 323.025.288-83 senha 9297'},
+      {id:uid(),titulo:'Parcela carro 4/48',data:'2026-07-01',processo:'',prioridade:'Alta',status:'Pendente',obs:''},
       {id:uid(),titulo:'A receber Inter - Apto Cajamar',data:'2026-06-30',processo:'',prioridade:'Alta',status:'Pendente',obs:'R$ 165.000 pendente de recebimento pelo Inter'}
     ]
   };
@@ -3334,7 +3322,6 @@ function showObs(id){
 function renderCarroThays(){
   var db=load();
   var _f=document.getElementById('dc-fipe');if(_f)_f.style.display='none';
-  var _c=document.getElementById('dc-carbank');if(_c)_c.style.display='none';
   var c=db.carro||{};
   var manut=c.manutencoes||[];
   var docs=c.documentos||[];
@@ -3464,11 +3451,11 @@ function editarSaldoCarro(){
   var db=load(),c=db.carro||{};
   document.getElementById('stitle').textContent='Saldo Devedor';
   document.getElementById('sbody').innerHTML=
-    '<div style="font-size:13px;color:var(--t2);margin-bottom:16px">Informe o saldo atual conforme o banco (CarBank).</div>'+
+    '<div style="font-size:13px;color:var(--t2);margin-bottom:16px">Informe o saldo atual conforme o banco.</div>'+
     '<div class="field"><label>Saldo devedor atual (R$)</label>'+
     '<input id="csaldo" type="text" inputmode="numeric" placeholder="Ex: 152.122,98" value="'+(c.saldoDevedor?Number(c.saldoDevedor).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2}):'')+'" style="font-size:20px;font-weight:800"></div>'+
     '<div class="field"><label>Data de referencia</label><input id="csdata" type="date" value="'+new Date().toISOString().split('T')[0]+'"></div>'+
-    '<div class="field"><label>Obs.</label><input id="csobs" type="text" placeholder="Ex: Consultado no site CarBank" value=""></div>';
+    '<div class="field"><label>Obs.</label><input id="csobs" type="text" placeholder="Ex: Consultado no site do banco" value=""></div>';
   var sav=document.createElement('button');sav.className='savebtn';sav.textContent='Salvar saldo';
   sav.onclick=function(){
     var db=load();if(!db.carro)db.carro={};
@@ -4080,7 +4067,7 @@ window.openLog=openLog;window.closeLog=closeLog;window.renderLog=renderLog;
 })();
 
 </script>
-<div id="ver" style="position:fixed;bottom:8px;left:0;right:0;text-align:center;font-size:10px;color:var(--t3);opacity:.45;z-index:99999;pointer-events:none;font-family:monospace">v1.126.566</div>
+<div id="ver" style="position:fixed;bottom:8px;left:0;right:0;text-align:center;font-size:10px;color:var(--t3);opacity:.45;z-index:99999;pointer-events:none;font-family:monospace">v1.127.567</div>
 </body>
 </html>
  
