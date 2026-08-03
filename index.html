@@ -442,7 +442,7 @@ inter-events:none}
         <div class="ai" onclick="document.getElementById('ifile').click()"><div class="aico" style="background:rgba(77,166,255,.1)">&#128193;</div><div class="abody"><div class="atitle">Importar backup</div><div class="asub">Restaurar dados</div></div><div class="aarr">&#8250;</div></div>
       </div>
       <input id="ifile" type="file" accept=".json" style="display:none" onchange="importData(event)">
-      <div style="text-align:center;padding:24px 0 8px;font-size:11px;color:var(--t3);font-family:monospace;opacity:.5">v1.124.564</div>
+      <div style="text-align:center;padding:24px 0 8px;font-size:11px;color:var(--t3);font-family:monospace;opacity:.5">v1.125.565</div>
     </div>
   </div>
 
@@ -954,7 +954,7 @@ var OLD_KEYS=['pax_v7','pax_v6','pax_v5','pax_v4','pax_v3','pax_db_v2'];
 function uid(){return Date.now().toString(36)+Math.random().toString(36).slice(2,5);}
 function mkT(m,d,op,v,c,s,desc,cat,forma){return{id:uid(),mes:m,data:d,operacao:op,valor:v,conta:c,status:s,descricao:desc,categoria:cat||'Outros',forma:forma||''};}
 function seedVazio(){
-  return {fluxo:[],patrimonio:[],dividas:[],investimentos:[],emergencia:[],casamento:[],processos:[],mesesFechados:[],saldoMes:{},carro:{codigoFipe:'',valorFinanciado:0,totalParcelas:48,parcelas:[]},lembretes:[],distrib:[]};
+  return {fluxo:[],patrimonio:[],dividas:[],investimentos:[],emergencia:[],casamento:[],processos:[],mesesFechados:[],saldoMes:{},carro:{codigoFipe:'',valorFinanciado:0,totalParcelas:48,parcelas:[]},lembretes:[],distrib:[],filhos:{}};
 }
 function seedThays(){
   var T=[
@@ -1217,6 +1217,10 @@ function _normalizeFuturo(db){
   var hm=_hoje.getFullYear()+'-'+('0'+(_hoje.getMonth()+1)).slice(-2);
   var changed=false;
   (db.fluxo||[]).forEach(function(t){if(t.mes>hm&&t.status==='OK'){t.status='Pendente';changed=true;}});
+  // Garante que db.filhos existe e limpa filhos orfaos (pai excluido)
+  if(!db.filhos||typeof db.filhos!=='object'||Array.isArray(db.filhos))db.filhos={};
+  var ids={};(db.fluxo||[]).forEach(function(t){ids[t.id]=1;});
+  Object.keys(db.filhos).forEach(function(pid){if(!ids[pid]){delete db.filhos[pid];changed=true;}});
   return changed;
 }
 function save(db){
@@ -1362,6 +1366,162 @@ function setF(f,el){
   document.querySelectorAll('.chip').forEach(function(c){c.classList.remove('on');});
   el.classList.add('on');renderFluxo(load());
 }
+/* ══════════ LANÇAMENTOS FILHO (categoria Cartão) ══════════
+   Filhos ficam em db.filhos[parentId] — FORA de db.fluxo.
+   Nenhum totalizador enxerga os filhos, então não há duplicação.
+   O valor do Pai é sempre recalculado como a soma dos filhos.        */
+function _filhosDe(db,parentId){
+  if(!db.filhos||typeof db.filhos!=='object')db.filhos={};
+  var arr=db.filhos[parentId];
+  if(!Array.isArray(arr)){
+    // Firebase pode devolver objeto esparso em vez de array
+    arr=(arr&&typeof arr==='object')?Object.keys(arr).map(function(k){return arr[k];}):[];
+    db.filhos[parentId]=arr;
+  }
+  return arr;
+}
+function _somaFilhos(db,parentId){
+  return _filhosDe(db,parentId).reduce(function(s,f){return s+(Number(f.valor)||0);},0);
+}
+function isCartao(t){return t&&(t.categoria||'')==='Cartao';}
+/* Recalcula o valor do Pai = soma dos filhos. Retorna o novo valor. */
+function _syncPai(db,parentId){
+  var pai=db.fluxo.find(function(x){return x.id===parentId;});
+  if(!pai)return 0;
+  var filhos=_filhosDe(db,parentId);
+  if(filhos.length===0)return pai.valor; // sem filhos: Pai mantém valor manual
+  var soma=_somaFilhos(db,parentId);
+  pai.valor=Math.round(soma*100)/100;
+  return pai.valor;
+}
+var _fpId=null,_fpEdit=null;
+function openFilhos(parentId){
+  var db=load();
+  var pai=db.fluxo.find(function(x){return x.id===parentId;});
+  if(!pai){toast('Lancamento nao encontrado');return;}
+  if(isMesFechado(pai.mes)){toast('Mes fechado - nao e possivel alterar');return;}
+  _fpId=parentId;_fpEdit=null;
+  _renderFilhosSheet();
+  document.getElementById('sbg').classList.add('on');
+}
+function _renderFilhosSheet(){
+  var db=load();
+  var pai=db.fluxo.find(function(x){return x.id===_fpId;});
+  if(!pai){closeSH();return;}
+  var filhos=_filhosDe(db,_fpId);
+  var soma=_somaFilhos(db,_fpId);
+  document.getElementById('stitle').textContent='Itens da fatura';
+  var lista=filhos.length===0
+    ? '<div style="text-align:center;padding:26px 12px;color:var(--t3);font-size:13px">Nenhum item lancado ainda.<br>Adicione os itens que compoem esta fatura.</div>'
+    : filhos.map(function(f){
+        var ok=f.status==='OK';
+        return '<div style="display:flex;align-items:center;gap:10px;padding:11px 12px;background:var(--s2);border:1px solid var(--bdr);border-radius:12px;margin-bottom:7px">'+
+          '<div style="flex:1;min-width:0">'+
+            '<div style="font-size:14px;font-weight:700;color:var(--t1);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+(f.descricao||'(sem descricao)')+'</div>'+
+            '<div style="font-size:11px;color:var(--t3);margin-top:2px">'+
+              (f.categoria||'Outros')+' &middot; '+fmtD(f.data)+
+              ' &middot; <span style="color:'+(ok?'var(--grn)':'var(--yel)')+';font-weight:700">'+(ok?'OK':'Pend.')+'</span>'+
+            '</div>'+
+          '</div>'+
+          '<div style="font-size:14px;font-weight:800;color:var(--t1);white-space:nowrap">'+fmt(f.valor)+'</div>'+
+          '<button onclick="editFilho(\''+f.id+'\')" style="background:none;border:none;font-size:17px;color:var(--t2);padding:5px 4px;cursor:pointer;min-width:30px">&#9998;</button>'+
+          '<button onclick="delFilho(\''+f.id+'\')" style="background:none;border:none;font-size:16px;color:var(--red);padding:5px 4px;cursor:pointer;min-width:30px">&#10005;</button>'+
+        '</div>';
+      }).join('');
+  var temFilhos=filhos.length>0;
+  document.getElementById('sbody').innerHTML=
+    '<div style="background:linear-gradient(145deg,#1a1060,#0f1120);border:1px solid rgba(123,110,246,.25);border-radius:16px;padding:14px 16px;margin-bottom:14px">'+
+      '<div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--accl);opacity:.85;margin-bottom:3px">Lancamento pai</div>'+
+      '<div style="font-size:14px;font-weight:700;color:var(--t1);margin-bottom:8px">'+pai.descricao+'</div>'+
+      '<div style="display:flex;gap:16px;align-items:flex-end">'+
+        '<div><div style="font-size:10px;color:var(--t3);text-transform:uppercase;letter-spacing:.06em">Total da fatura</div>'+
+        '<div style="font-size:22px;font-weight:800;color:var(--t1);letter-spacing:-.5px">'+fmt(pai.valor)+'</div></div>'+
+        '<div><div style="font-size:10px;color:var(--t3);text-transform:uppercase;letter-spacing:.06em">'+filhos.length+' '+(filhos.length===1?'item':'itens')+'</div>'+
+        '<div style="font-size:15px;font-weight:800;color:var(--accl)">'+fmt(soma)+'</div></div>'+
+      '</div>'+
+      (temFilhos
+        ? '<div style="font-size:11px;color:var(--grn);margin-top:9px;font-weight:700">&#10003; Total do pai calculado pela soma dos itens</div>'
+        : '<div style="font-size:11px;color:var(--t3);margin-top:9px">Ao adicionar o 1&#186; item, o total do pai passa a ser a soma dos itens.</div>')+
+    '</div>'+
+    '<div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--t3);margin-bottom:8px">Itens</div>'+
+    lista+
+    '<button onclick="novoFilho()" class="p-addream" style="margin-top:10px;color:var(--accl);border-color:var(--bdr2);background:rgba(123,110,246,.07)">+ Adicionar item</button>'+
+    '<button onclick="closeSH();renderFluxo(load())" class="savebtn" style="margin-top:12px">Concluir</button>';
+}
+function novoFilho(){_fpEdit=null;_openFilhoForm(null);}
+function editFilho(fid){
+  var db=load(),f=_filhosDe(db,_fpId).find(function(x){return x.id===fid;});
+  if(!f)return;
+  _fpEdit=fid;_openFilhoForm(f);
+}
+function _openFilhoForm(f){
+  var db=load();
+  var pai=db.fluxo.find(function(x){return x.id===_fpId;});
+  if(!pai)return;
+  var cats=['Alimentacao','Compras','Tecnologia','Saude','Educacao','Veiculo','Lazer','Viagem','Moradia','Servicos','Assinaturas','Familia','Pessoal','Outros'];
+  document.getElementById('stitle').textContent=f?'Editar item':'Novo item da fatura';
+  document.getElementById('sbody').innerHTML=
+    '<div class="awrap"><span class="apfx">R$</span>'+
+    '<input class="ainp" id="ffval" type="text" inputmode="decimal" placeholder="0,00" value="'+(f?Number(f.valor).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2}):'')+'" oninput="moneyMask(this)">'+
+    '</div>'+
+    '<div class="field" style="margin-top:12px"><label>Descricao</label>'+
+    '<input id="ffdesc" type="text" placeholder="Ex: Mercado, Netflix, Uber..." value="'+(f?String(f.descricao||'').replace(/"/g,'&quot;'):'')+'"></div>'+
+    '<div class="field"><label>Categoria</label><select id="ffcat">'+
+      cats.map(function(c){return'<option'+(f&&f.categoria===c?' selected':'')+'>'+c+'</option>';}).join('')+
+    '</select></div>'+
+    '<div class="field"><label>Data</label><input id="ffdata" type="date" value="'+(f&&f.data?f.data:pai.data)+'"></div>'+
+    '<div class="field"><label>Status</label><select id="ffstatus">'+
+      '<option value="OK"'+(f&&f.status==='OK'?' selected':'')+'>OK - Confirmado</option>'+
+      '<option value=""'+(!f||f.status!=='OK'?' selected':'')+'>Pendente</option>'+
+    '</select></div>'+
+    '<button onclick="saveFilho()" class="savebtn">Salvar item</button>'+
+    '<button onclick="_renderFilhosSheet()" class="delbtn" style="background:var(--s2);color:var(--t2);border-color:var(--bdr)">Cancelar</button>';
+  setTimeout(function(){var v=document.getElementById('ffval');if(v)v.focus();},250);
+}
+function saveFilho(){
+  var db=load();
+  var pai=db.fluxo.find(function(x){return x.id===_fpId;});
+  if(!pai){toast('Pai nao encontrado');return;}
+  if(isMesFechado(pai.mes)){toast('Mes fechado');return;}
+  var val=parseMoney(document.getElementById('ffval').value);
+  var desc=document.getElementById('ffdesc').value.trim();
+  if(!val||val<=0){toast('Informe um valor valido');return;}
+  if(!desc){toast('Informe a descricao');return;}
+  var item={
+    id:_fpEdit||uid(),
+    descricao:desc,
+    valor:Math.round(val*100)/100,
+    categoria:document.getElementById('ffcat').value,
+    data:document.getElementById('ffdata').value||pai.data,
+    status:document.getElementById('ffstatus').value
+  };
+  var arr=_filhosDe(db,_fpId);
+  if(_fpEdit){
+    var i=arr.findIndex(function(x){return x.id===_fpEdit;});
+    if(i>=0)arr[i]=item;else arr.push(item);
+  } else arr.push(item);
+  var novoTotal=_syncPai(db,_fpId);
+  save(db);
+  _fpEdit=null;
+  _renderFilhosSheet();
+  toast('Item salvo — pai: '+fmt(novoTotal));
+  _logActivity('filho','Item cartao: '+desc+' R$'+item.valor);
+}
+function delFilho(fid){
+  var db=load();
+  var pai=db.fluxo.find(function(x){return x.id===_fpId;});
+  if(!pai)return;
+  if(isMesFechado(pai.mes)){toast('Mes fechado');return;}
+  var arr=_filhosDe(db,_fpId);
+  var f=arr.find(function(x){return x.id===fid;});
+  if(!confirm('Excluir "'+(f?f.descricao:'item')+'"?'))return;
+  db.filhos[_fpId]=arr.filter(function(x){return x.id!==fid;});
+  var novoTotal=_syncPai(db,_fpId);
+  save(db);
+  _renderFilhosSheet();
+  toast('Item removido — pai: '+fmt(novoTotal));
+}
+
 function renderFluxo(db){
   if(!db||!Array.isArray(db.fluxo))db=load();
   if(curUser&&curUser.id==='paulo'){goP('extrato');return;}
@@ -1441,6 +1601,8 @@ function renderFluxo(db){
     items.forEach(function(t){
       var isE=t.operacao==='Entrada',isPJ=t.conta==='PJ Itau Nu';
       var rec=t.recId?(' <span style="font-size:10px;color:var(--t3)">&#8635;'+t.recIdx+'/'+t.recTotal+'</span>'):'';
+      var nFilhos=isCartao(t)?_filhosDe(db,t.id).length:0;
+      var filhoTag=nFilhos>0?(' <span style="font-size:10px;color:var(--accl);font-weight:700">&#9783;'+nFilhos+'</span>'):'';
       var wrap=document.createElement('div');wrap.className='txwrap';wrap.id='w-'+t.id;
       wrap.innerHTML=
         '<div class="txbg-ok"><span style="font-size:20px">&#10003;</span></div>'+
@@ -1452,7 +1614,7 @@ function renderFluxo(db){
             '<div class="txm" style="margin-top:3px">'+
               '<span class="ctag '+(isPJ?'pj':'vl')+'">'+(isPJ?'PJ':'VL')+'</span>'+
               '<span style="font-size:12px;color:var(--t2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:140px">'+t.descricao+'</span>'+
-              rec+
+              rec+filhoTag+
             '</div>'+
           '</div>'+
           '<div class="txr">'+
@@ -1461,6 +1623,7 @@ function renderFluxo(db){
               (t.status==='OK'?'&#10003; OK':'&#8987; Pend.')+
             '</button>'+
           '</div>'+
+          (isCartao(t)?'<button class="filho-btn" data-tid="'+t.id+'" style="font-size:18px;padding:6px 7px;min-width:34px;min-height:36px;color:var(--accl);opacity:.9;background:none;border:none;cursor:pointer" title="Itens da fatura">&#9783;</button>':'')+
           '<button class="ebtn" data-tid="'+t.id+'" style="font-size:20px;opacity:.7;padding:6px 8px;min-width:36px;min-height:36px">&#9998;</button>'+
           (t.obs?'<button class="obs-btn" data-tid="'+t.id+'" style="font-size:20px;padding:6px 8px;min-width:36px;min-height:36px;color:var(--yel);opacity:.8">&#128203;</button>':'')+
         '</div>';
@@ -1470,6 +1633,7 @@ function renderFluxo(db){
   list.querySelectorAll('.sbtn').forEach(function(b){b.onclick=function(){togOK(this.dataset.tid);};});
   list.querySelectorAll('.ebtn').forEach(function(b){b.onclick=function(){editTx(this.dataset.tid);};});
   list.querySelectorAll('.obs-btn').forEach(function(b){b.onclick=function(){showObs(this.dataset.tid);};});
+  list.querySelectorAll('.filho-btn').forEach(function(b){b.onclick=function(e){e.stopPropagation();openFilhos(this.dataset.tid);};});
   setTimeout(function(){bindSwipe(fil);},0);
 }
 function bindSwipe(txs){
@@ -1526,6 +1690,7 @@ function delTx(id){
   if(!confirm('Excluir transacao?'))return;
   if(t)_logActivity('del_tx','Removeu: '+t.descricao+' R$'+t.valor);
   db.fluxo=db.fluxo.filter(function(x){return x.id!==id;});
+  if(db.filhos)delete db.filhos[id];
   save(db);toast('Removido');renderFluxo(db);
 }
 function editTx(id){
@@ -1590,9 +1755,19 @@ function openTxSheet(ex){
     recHtml+
     '<button class="savebtn" onclick="saveTx()">Salvar</button>';
   if(editId){
+    // Botão de itens da fatura — só para categoria Cartão
+    if(isCartao(ex)){
+      var dbF=load(),nF=_filhosDe(dbF,editId).length;
+      var fB=document.createElement('button');
+      fB.className='savebtn';
+      fB.style.cssText='margin-top:8px;background:rgba(123,110,246,.14);color:var(--accl);border:1.5px solid var(--bdr2);box-shadow:none';
+      fB.innerHTML='&#9783; Itens da fatura'+(nF>0?' ('+nF+')':'');
+      fB.onclick=function(){var id=editId;closeSH();setTimeout(function(){openFilhos(id);},180);};
+      document.getElementById('sbody').appendChild(fB);
+    }
     var delB=document.createElement('button');
     delB.className='delbtn';delB.textContent='Excluir';
-    delB.onclick=function(){var id=editId;if(confirm('Excluir?')){var db=load();db.fluxo=db.fluxo.filter(function(x){return x.id!==id;});save(db);closeSH();renderFluxo(db);toast('Removido');}};
+    delB.onclick=function(){var id=editId;if(confirm('Excluir?')){var db=load();db.fluxo=db.fluxo.filter(function(x){return x.id!==id;});if(db.filhos)delete db.filhos[id];save(db);closeSH();renderFluxo(db);toast('Removido');}};
     document.getElementById('sbody').appendChild(delB);
     // If part of a recurrence group, offer to delete entire group
     var orig2=_db&&_db.fluxo.find(function(x){return x.id===editId;});
@@ -1608,6 +1783,7 @@ function openTxSheet(ex){
         var db=load();
         var n=db.fluxo.filter(function(x){return x.recId===rid;}).length;
         if(!confirm('Excluir todos os '+n+' lancamentos deste grupo recorrente?'))return;
+        db.fluxo.filter(function(x){return x.recId===rid;}).forEach(function(x){if(db.filhos)delete db.filhos[x.id];});
         db.fluxo=db.fluxo.filter(function(x){return x.recId!==rid;});
         save(db);closeSH();renderFluxo(db);toast(n+' lancamentos removidos');
       };
@@ -1682,6 +1858,10 @@ function saveTx(){
     // Atualiza lancamento atual
     var i=db.fluxo.findIndex(function(x){return x.id===editId;});
     if(i>=0)db.fluxo[i]=Object.assign({},base,{id:editId},recFields);
+    // Se e Cartao com filhos, o valor do pai e sempre a soma dos filhos
+    if(i>=0&&isCartao(db.fluxo[i])&&_filhosDe(db,editId).length>0)_syncPai(db,editId);
+    // Se deixou de ser Cartao, descarta os filhos orfaos
+    if(i>=0&&!isCartao(db.fluxo[i])&&db.filhos&&db.filhos[editId])delete db.filhos[editId];
     // Cria proximos se aumentou recorrencia
     var origTotal=orig.recId?(orig.recTotal==='?'?9999:Number(orig.recTotal)||1):1;
     var novos=vezes-origTotal;
@@ -3725,7 +3905,7 @@ window.openLog=openLog;window.closeLog=closeLog;window.renderLog=renderLog;
 })();
 
 </script>
-<div id="ver" style="position:fixed;bottom:8px;left:0;right:0;text-align:center;font-size:10px;color:var(--t3);opacity:.45;z-index:99999;pointer-events:none;font-family:monospace">v1.124.564</div>
+<div id="ver" style="position:fixed;bottom:8px;left:0;right:0;text-align:center;font-size:10px;color:var(--t3);opacity:.45;z-index:99999;pointer-events:none;font-family:monospace">v1.125.565</div>
 </body>
 </html>
  
