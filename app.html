@@ -445,7 +445,7 @@ inter-events:none}
         <div class="ai" onclick="document.getElementById('ifile').click()"><div class="aico" style="background:rgba(77,166,255,.1)">&#128193;</div><div class="abody"><div class="atitle">Importar backup</div><div class="asub">Restaurar dados</div></div><div class="aarr">&#8250;</div></div>
       </div>
       <input id="ifile" type="file" accept=".json" style="display:none" onchange="importData(event)">
-      <div style="text-align:center;padding:24px 0 8px;font-size:11px;color:var(--t3);font-family:monospace;opacity:.5">v1.129.569</div>
+      <div style="text-align:center;padding:24px 0 8px;font-size:11px;color:var(--t3);font-family:monospace;opacity:.5">v1.130.570</div>
     </div>
   </div>
 
@@ -1517,36 +1517,11 @@ function importarFaturaOF(){
         '<button onclick="_renderFilhosSheet()" class="savebtn" style="margin-top:14px">Voltar</button>';
       return;
     }
-    window._ofItens=itens;
-    var existentes=_filhosDe(load(),_fpId);
-    var jaImportados={};
-    existentes.forEach(function(f){if(f.extId)jaImportados[f.extId]=1;});
-    var novos=itens.filter(function(i){return !jaImportados[i.extId];});
-    var dupes=itens.length-novos.length;
-    document.getElementById('stitle').textContent='Fatura encontrada';
-    document.getElementById('sbody').innerHTML=
-      '<div style="background:linear-gradient(145deg,#1a1060,#0f1120);border:1px solid rgba(123,110,246,.25);border-radius:16px;padding:14px 16px;margin-bottom:14px">'+
-        '<div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--accl);opacity:.85">'+card.banco+' &middot; '+mNome(pai.mes)+'</div>'+
-        '<div style="font-size:24px;font-weight:800;color:var(--t1);letter-spacing:-.5px;margin-top:4px">'+fmt(j.total)+'</div>'+
-        '<div style="font-size:12px;color:var(--t2);margin-top:3px">'+itens.length+' compras'+(dupes>0?' &middot; '+dupes+' ja importada(s)':'')+'</div>'+
-      '</div>'+
-      (novos.length===0
-        ? '<div style="background:rgba(0,212,170,.08);border:1px solid rgba(0,212,170,.25);border-radius:12px;padding:12px;font-size:12px;color:var(--grn)">Todas as compras desta fatura ja estao importadas.</div>'
-        : '<div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--t3);margin-bottom:8px">'+novos.length+' item(ns) a importar</div>'+
-          '<div style="max-height:38vh;overflow-y:auto;margin-bottom:12px">'+
-          novos.map(function(it){
-            return '<div style="display:flex;align-items:center;gap:10px;padding:9px 11px;background:var(--s2);border:1px solid var(--bdr);border-radius:11px;margin-bottom:6px">'+
-              '<div style="flex:1;min-width:0">'+
-                '<div style="font-size:13px;font-weight:700;color:var(--t1);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+it.descricao+'</div>'+
-                '<div style="font-size:10px;color:var(--t3);margin-top:2px">'+it.categoria+' &middot; '+fmtD(it.data)+'</div>'+
-              '</div>'+
-              '<div style="font-size:13px;font-weight:800;color:var(--t1);white-space:nowrap">'+fmt(it.valor)+'</div>'+
-            '</div>';
-          }).join('')+
-          '</div>'+
-          '<button onclick="confirmarImportOF()" class="savebtn">Importar '+novos.length+' item(ns)</button>')+
-      '<button onclick="_renderFilhosSheet()" class="delbtn" style="background:var(--s2);color:var(--t2);border-color:var(--bdr)">Cancelar</button>';
-    window._ofNovos=novos;
+    window._ofResp=j;
+    // Se a fatura ainda esta aberta, comeca oferecendo so as compras confirmadas
+    var faturaAberta=(j.fatura&&j.fatura.fechada===false)||(j.qtdPendente>0);
+    _ofSoConfirmadas=faturaAberta&&j.qtdConfirmada>0;
+    _renderImportOF();
   }).catch(function(e){
     document.getElementById('sbody').innerHTML=
       '<div style="background:rgba(255,95,87,.08);border:1px solid rgba(255,95,87,.25);border-radius:12px;padding:14px;font-size:12px;color:var(--red);line-height:1.55">'+
@@ -1554,6 +1529,75 @@ function importarFaturaOF(){
       '</div>'+
       '<button onclick="_renderFilhosSheet()" class="savebtn" style="margin-top:14px">Voltar</button>';
   });
+}
+var _ofSoConfirmadas=true;
+function _ofToggleConf(){_ofSoConfirmadas=!_ofSoConfirmadas;_renderImportOF();}
+function _renderImportOF(){
+  var j=window._ofResp;if(!j)return;
+  var db=load();
+  var pai=db.fluxo.find(function(x){return x.id===_fpId;});
+  if(!pai){closeSH();return;}
+  var card=_ofCard();
+  var jaImp={};
+  _filhosDe(db,_fpId).forEach(function(f){if(f.extId)jaImp[f.extId]=1;});
+
+  var base=(j.itens||[]).filter(function(i){return !jaImp[i.extId];});
+  var novos=_ofSoConfirmadas?base.filter(function(i){return i.confirmada;}):base;
+  var dupes=(j.itens||[]).length-base.length;
+  var somaNovos=novos.reduce(function(s,i){return s+i.valor;},0);
+  var ocultos=base.length-novos.length;
+  var f=j.fatura||{};
+
+  var aviso='';
+  if(f.fechada===false){
+    aviso='<div style="background:rgba(255,204,0,.08);border:1px solid rgba(255,204,0,.28);border-radius:12px;padding:11px 13px;margin-bottom:12px;font-size:12px;color:var(--yel);line-height:1.5">'+
+      '<b>Fatura ainda aberta</b>'+(f.fechamento?' — fecha em '+fmtD(f.fechamento):'')+(f.vencimento?', vence '+fmtD(f.vencimento):'')+'.'+
+      '<div style="color:var(--t3);margin-top:4px">Novas compras ainda vao entrar. Voce pode importar so as confirmadas agora e rodar de novo depois do fechamento.</div>'+
+    '</div>';
+  } else if(f.fechada===true){
+    aviso='<div style="background:rgba(0,212,170,.07);border:1px solid rgba(0,212,170,.22);border-radius:12px;padding:10px 13px;margin-bottom:12px;font-size:12px;color:var(--grn)">'+
+      '&#10003; Fatura fechada'+(f.fechamento?' em '+fmtD(f.fechamento):'')+(f.totalBanco!=null?' &middot; total do banco: '+fmt(f.totalBanco):'')+
+    '</div>';
+  }
+
+  document.getElementById('stitle').textContent='Fatura encontrada';
+  document.getElementById('sbody').innerHTML=
+    '<div style="background:linear-gradient(145deg,#1a1060,#0f1120);border:1px solid rgba(123,110,246,.25);border-radius:16px;padding:14px 16px;margin-bottom:12px">'+
+      '<div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--accl);opacity:.85">'+card.banco+' &middot; '+mNome(pai.mes)+'</div>'+
+      '<div style="font-size:24px;font-weight:800;color:var(--t1);letter-spacing:-.5px;margin-top:4px">'+fmt(somaNovos)+'</div>'+
+      '<div style="font-size:12px;color:var(--t2);margin-top:3px">'+novos.length+' a importar'+
+        (ocultos>0?' &middot; '+ocultos+' pendente(s) oculta(s)':'')+
+        (dupes>0?' &middot; '+dupes+' ja importada(s)':'')+'</div>'+
+    '</div>'+
+    aviso+
+    (j.qtdPendente>0
+      ? '<div onclick="_ofToggleConf()" style="display:flex;align-items:center;gap:10px;padding:11px 13px;background:var(--s2);border:1.5px solid '+(_ofSoConfirmadas?'var(--bdr2)':'var(--bdr)')+';border-radius:12px;margin-bottom:12px;cursor:pointer">'+
+          '<div style="width:20px;height:20px;border-radius:6px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:900;'+
+            (_ofSoConfirmadas?'background:var(--acc);color:#fff':'background:transparent;border:1.5px solid var(--bdr2);color:transparent')+'">&#10003;</div>'+
+          '<div style="flex:1"><div style="font-size:13px;font-weight:700;color:var(--t1)">Somente compras confirmadas</div>'+
+          '<div style="font-size:11px;color:var(--t3);margin-top:1px">Ignora as '+j.qtdPendente+' ainda nao consolidadas pelo banco</div></div>'+
+        '</div>'
+      : '')+
+    (novos.length===0
+      ? '<div style="background:rgba(0,212,170,.08);border:1px solid rgba(0,212,170,.25);border-radius:12px;padding:12px;font-size:12px;color:var(--grn);line-height:1.5">'+
+          (base.length===0?'Todas as compras desta fatura ja estao importadas.':'Nenhuma compra confirmada disponivel. Desmarque a opcao acima para ver as pendentes.')+
+        '</div>'
+      : '<div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--t3);margin-bottom:8px">Itens</div>'+
+        '<div style="max-height:34vh;overflow-y:auto;margin-bottom:12px">'+
+        novos.map(function(it){
+          return '<div style="display:flex;align-items:center;gap:10px;padding:9px 11px;background:var(--s2);border:1px solid '+(it.confirmada?'var(--bdr)':'rgba(255,204,0,.3)')+';border-radius:11px;margin-bottom:6px">'+
+            '<div style="flex:1;min-width:0">'+
+              '<div style="font-size:13px;font-weight:700;color:var(--t1);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+it.descricao+'</div>'+
+              '<div style="font-size:10px;color:var(--t3);margin-top:2px">'+it.categoria+' &middot; '+fmtD(it.data)+
+                (it.confirmada?'':' &middot; <span style="color:var(--yel);font-weight:700">pendente</span>')+'</div>'+
+            '</div>'+
+            '<div style="font-size:13px;font-weight:800;color:var(--t1);white-space:nowrap">'+fmt(it.valor)+'</div>'+
+          '</div>';
+        }).join('')+
+        '</div>'+
+        '<button onclick="confirmarImportOF()" class="savebtn">Importar '+novos.length+' item(ns)</button>')+
+    '<button onclick="_renderFilhosSheet()" class="delbtn" style="background:var(--s2);color:var(--t2);border-color:var(--bdr)">Cancelar</button>';
+  window._ofNovos=novos;
 }
 function confirmarImportOF(){
   var novos=window._ofNovos||[];
@@ -1572,10 +1616,11 @@ function confirmarImportOF(){
   });
   var total=_syncPai(db,_fpId);
   save(db);
-  _renderFilhosSheet();
-  toast(novos.length+' itens importados — pai: '+fmt(total));
-  _logActivity('import_of','Importou '+novos.length+' itens da fatura '+pai.mes);
+  var n=novos.length;
   window._ofNovos=[];
+  _renderFilhosSheet();
+  toast(n+' itens importados — pai: '+fmt(total));
+  _logActivity('import_of','Importou '+n+' itens da fatura '+pai.mes);
 }
 
 var _fpId=null,_fpEdit=null;
@@ -4089,7 +4134,7 @@ window.openLog=openLog;window.closeLog=closeLog;window.renderLog=renderLog;
 })();
 
 </script>
-<div id="ver" style="position:fixed;bottom:8px;left:0;right:0;text-align:center;font-size:10px;color:var(--t3);opacity:.45;z-index:99999;pointer-events:none;font-family:monospace">v1.129.569</div>
+<div id="ver" style="position:fixed;bottom:8px;left:0;right:0;text-align:center;font-size:10px;color:var(--t3);opacity:.45;z-index:99999;pointer-events:none;font-family:monospace">v1.130.570</div>
 </body>
 </html>
  

@@ -211,10 +211,32 @@ async function buscarFatura(apiKey, accountId, mes) {
       data:      String(cc.purchaseDate || t.date).slice(0, 10),
       categoria: mapCat(t.category),
       status:    t.status === 'POSTED' ? 'OK' : '',
+      confirmada: t.status === 'POSTED',
       parcela:   parc.trim() || null,
       catOrig:   t.category || null
     };
   }).sort((a, b) => a.data.localeCompare(b.data));
+}
+
+/* ── Descobre se a fatura daquele mes ja fechou ── */
+async function statusFatura(apiKey, accountId, mes) {
+  try {
+    const bills = await pget('/bills?accountId=' + encodeURIComponent(accountId), apiKey);
+    const hoje = new Date().toISOString().slice(0, 10);
+    for (const b of (bills.results || [])) {
+      const venc = String(b.dueDate || '').slice(0, 10);
+      if (venc.slice(0, 7) !== mes) continue;
+      const fecha = b.billClosingDate ? String(b.billClosingDate).slice(0, 10) : null;
+      return {
+        temBill:   true,
+        fechada:   fecha ? (fecha <= hoje) : (venc < hoje),
+        fechamento: fecha,
+        vencimento: venc,
+        totalBanco: b.totalAmount == null ? null : Math.round(b.totalAmount * 100) / 100
+      };
+    }
+  } catch (e) { /* alguns conectores nao expoem bills — segue sem */ }
+  return { temBill: false, fechada: null, fechamento: null, vencimento: null, totalBanco: null };
 }
 
 /* ═══════════════ handler ═══════════════ */
@@ -274,8 +296,18 @@ exports.handler = async (event) => {
         return { statusCode: 400, headers: CORS, body: JSON.stringify({ erro: 'mes deve ser YYYY-MM' }) };
       }
       const itens = await buscarFatura(apiKey, body.accountId, body.mes);
-      const total = Math.round(itens.reduce((s, i) => s + i.valor, 0) * 100) / 100;
-      return { statusCode: 200, headers: CORS, body: JSON.stringify({ itens, total, mes: body.mes }) };
+      const fat   = await statusFatura(apiKey, body.accountId, body.mes);
+      const soma  = arr => Math.round(arr.reduce((s, i) => s + i.valor, 0) * 100) / 100;
+      const conf  = itens.filter(i => i.confirmada);
+      return { statusCode: 200, headers: CORS, body: JSON.stringify({
+        itens,
+        total:          soma(itens),
+        totalConfirmado: soma(conf),
+        qtdConfirmada:  conf.length,
+        qtdPendente:    itens.length - conf.length,
+        fatura:         fat,
+        mes:            body.mes
+      }) };
     }
 
     return { statusCode: 400, headers: CORS, body: JSON.stringify({ erro: 'action desconhecida' }) };
