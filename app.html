@@ -445,7 +445,7 @@ inter-events:none}
         <div class="ai" onclick="document.getElementById('ifile').click()"><div class="aico" style="background:rgba(77,166,255,.1)">&#128193;</div><div class="abody"><div class="atitle">Importar backup</div><div class="asub">Restaurar dados</div></div><div class="aarr">&#8250;</div></div>
       </div>
       <input id="ifile" type="file" accept=".json" style="display:none" onchange="importData(event)">
-      <div style="text-align:center;padding:24px 0 8px;font-size:11px;color:var(--t3);font-family:monospace;opacity:.5">v1.131.571</div>
+      <div style="text-align:center;padding:24px 0 8px;font-size:11px;color:var(--t3);font-family:monospace;opacity:.5">v1.132.572</div>
     </div>
   </div>
 
@@ -1487,7 +1487,7 @@ function vincularCartaoOF(i){
   toast('Cartao vinculado: '+c.banco);
   openOFConfig();
 }
-/* Importa os itens da fatura para dentro dos lançamentos filho */
+/* Passo 1: lista as faturas reais do banco para o usuário escolher */
 function importarFaturaOF(){
   if(!_ofConfigurado()){
     toast('Configure o cartao em Mais > Open Finance');
@@ -1498,36 +1498,100 @@ function importarFaturaOF(){
   var pai=db.fluxo.find(function(x){return x.id===_fpId;});
   if(!pai){toast('Pai nao encontrado');return;}
   var card=_ofCard();
+  document.getElementById('stitle').textContent='Faturas do cartao';
   document.getElementById('sbody').innerHTML=
     '<div style="text-align:center;padding:40px 16px">'+
       '<div style="font-size:34px;margin-bottom:12px">&#128179;</div>'+
-      '<div style="font-size:15px;font-weight:800;color:var(--t1)">Buscando fatura de '+mNome(pai.mes)+'</div>'+
+      '<div style="font-size:15px;font-weight:800;color:var(--t1)">Consultando faturas</div>'+
       '<div style="font-size:12px;color:var(--t3);margin-top:6px">'+card.banco+' &middot; Open Finance</div>'+
       '<div style="font-size:11px;color:var(--t3);margin-top:14px">Isso pode levar alguns segundos...</div>'+
     '</div>';
-  _ofCall({action:'fatura',accountId:card.accountId,mes:pai.mes}).then(function(j){
+  _ofCall({action:'faturas',accountId:card.accountId}).then(function(j){
+    window._ofFaturas=(j.faturas||[]).concat(j.emFormacao||[]);
+    _renderSelFatura();
+  }).catch(function(e){
+    document.getElementById('sbody').innerHTML=
+      '<div style="background:rgba(255,95,87,.08);border:1px solid rgba(255,95,87,.25);border-radius:12px;padding:14px;font-size:12px;color:var(--red);line-height:1.55">'+
+        '<b>Nao foi possivel listar as faturas</b><br>'+String(e.message||e)+'</div>'+
+      '<button onclick="_renderFilhosSheet()" class="savebtn" style="margin-top:14px">Voltar</button>';
+  });
+}
+function _renderSelFatura(){
+  var fs=window._ofFaturas||[];
+  var db=load();
+  var pai=db.fluxo.find(function(x){return x.id===_fpId;});
+  if(!pai){closeSH();return;}
+  document.getElementById('stitle').textContent='Escolha a fatura';
+  if(fs.length===0){
+    document.getElementById('sbody').innerHTML=
+      '<div style="background:rgba(255,204,0,.08);border:1px solid rgba(255,204,0,.28);border-radius:12px;padding:13px;font-size:12px;color:var(--yel);line-height:1.5">O banco nao devolveu nenhuma fatura para este cartao.</div>'+
+      '<button onclick="_renderFilhosSheet()" class="savebtn" style="margin-top:14px">Voltar</button>';
+    return;
+  }
+  document.getElementById('sbody').innerHTML=
+    '<div style="font-size:12px;color:var(--t2);margin-bottom:4px">Lancamento: <b>'+pai.descricao+'</b> ('+mNome(pai.mes)+')</div>'+
+    '<div style="font-size:11px;color:var(--t3);margin-bottom:14px;line-height:1.5">Escolha qual fatura do banco compoe este lancamento. A fatura que vence em um mes contem as compras do ciclo anterior.</div>'+
+    fs.map(function(f,i){
+      var badge=f.emFormacao
+        ? '<span style="font-size:9px;font-weight:800;padding:2px 7px;border-radius:99px;background:rgba(255,204,0,.15);color:var(--yel)">EM FORMACAO</span>'
+        : (f.fechada
+            ? '<span style="font-size:9px;font-weight:800;padding:2px 7px;border-radius:99px;background:rgba(0,212,170,.15);color:var(--grn)">FECHADA</span>'
+            : '<span style="font-size:9px;font-weight:800;padding:2px 7px;border-radius:99px;background:rgba(255,204,0,.15);color:var(--yel)">ABERTA</span>');
+      return '<div onclick="_ofEscolherFatura('+i+')" style="background:var(--s2);border:1.5px solid var(--bdr);border-radius:14px;padding:13px 15px;margin-bottom:9px;cursor:pointer">'+
+        '<div style="display:flex;align-items:center;gap:8px;margin-bottom:5px">'+
+          '<div style="font-size:15px;font-weight:800;color:var(--t1)">'+(f.mes?mNome(f.mes):'?')+'</div>'+badge+
+        '</div>'+
+        '<div style="font-size:11px;color:var(--t3);line-height:1.6">'+
+          (f.fechamento?'Fecha '+fmtD(f.fechamento):'')+
+          (f.vencimento?(f.fechamento?' &middot; ':'')+'Vence '+fmtD(f.vencimento):'')+
+          '<br>'+f.qtdItens+' compra(s) &middot; soma '+fmt(f.somaItens)+
+          (f.totalBanco!=null?' &middot; total do banco '+fmt(f.totalBanco):'')+
+          (f.encargos?'<br><span style="color:var(--yel)">Encargos/IOF: '+fmt(f.encargos)+'</span>':'')+
+        '</div>'+
+        '<div style="font-size:11px;color:var(--accl);margin-top:7px;font-weight:700">Ver o que compoe &#8250;</div>'+
+      '</div>';
+    }).join('')+
+    '<button onclick="_renderFilhosSheet()" class="delbtn" style="background:var(--s2);color:var(--t2);border-color:var(--bdr);margin-top:6px">Cancelar</button>';
+}
+function _ofEscolherFatura(i){
+  var f=(window._ofFaturas||[])[i];
+  if(!f)return;
+  var db=load();
+  var pai=db.fluxo.find(function(x){return x.id===_fpId;});
+  if(!pai){closeSH();return;}
+  var card=_ofCard();
+  document.getElementById('sbody').innerHTML=
+    '<div style="text-align:center;padding:40px 16px">'+
+      '<div style="font-size:34px;margin-bottom:12px">&#128179;</div>'+
+      '<div style="font-size:15px;font-weight:800;color:var(--t1)">Abrindo fatura '+(f.mes?mNome(f.mes):'')+'</div>'+
+      '<div style="font-size:11px;color:var(--t3);margin-top:14px">Buscando as compras...</div>'+
+    '</div>';
+  var payload={action:'fatura',accountId:card.accountId,mes:f.mes||pai.mes};
+  if(f.billId)payload.billId=f.billId;
+  _ofCall(payload).then(function(j){
     var itens=j.itens||[];
     if(itens.length===0){
       document.getElementById('sbody').innerHTML=
         '<div style="text-align:center;padding:30px 16px">'+
           '<div style="font-size:32px;margin-bottom:10px">&#128533;</div>'+
-          '<div style="font-size:14px;font-weight:700;color:var(--t2)">Nenhuma compra encontrada em '+mNome(pai.mes)+'</div>'+
-          '<div style="font-size:12px;color:var(--t3);margin-top:8px;line-height:1.5">A fatura pode ainda nao ter fechado, ou o banco nao devolveu dados desse periodo.</div>'+
+          '<div style="font-size:14px;font-weight:700;color:var(--t2)">Nenhuma compra nesta fatura</div>'+
+          '<div style="font-size:12px;color:var(--t3);margin-top:8px;line-height:1.5">O banco nao devolveu as compras desta fatura.</div>'+
         '</div>'+
-        '<button onclick="_renderFilhosSheet()" class="savebtn" style="margin-top:14px">Voltar</button>';
+        '<button onclick="_renderSelFatura()" class="savebtn" style="margin-top:14px">Escolher outra fatura</button>';
       return;
     }
     window._ofResp=j;
+    window._ofFatEscolhida=f;
     // Se a fatura ainda esta aberta, comeca oferecendo so as compras confirmadas
-    var faturaAberta=(j.fatura&&j.fatura.fechada===false)||(j.qtdPendente>0);
-    _ofSoConfirmadas=faturaAberta&&j.qtdConfirmada>0;
+    var faturaAberta=(j.fatura&&j.fatura.fechada===false)||f.emFormacao;
+    _ofSoConfirmadas=!!(faturaAberta&&j.qtdConfirmada>0);
     _renderImportOF();
   }).catch(function(e){
     document.getElementById('sbody').innerHTML=
       '<div style="background:rgba(255,95,87,.08);border:1px solid rgba(255,95,87,.25);border-radius:12px;padding:14px;font-size:12px;color:var(--red);line-height:1.55">'+
         '<b>Nao foi possivel buscar a fatura</b><br>'+String(e.message||e)+
       '</div>'+
-      '<button onclick="_renderFilhosSheet()" class="savebtn" style="margin-top:14px">Voltar</button>';
+      '<button onclick="_renderSelFatura()" class="savebtn" style="margin-top:14px">Escolher outra fatura</button>';
   });
 }
 var _ofSoConfirmadas=true;
@@ -1571,10 +1635,11 @@ function _renderImportOF(){
   var critAviso='<div style="font-size:10px;color:var(--t3);margin-bottom:12px;line-height:1.45">Criterio: '+critTxt+
     (j.mesesDisponiveis&&j.mesesDisponiveis.length?'<br>Faturas disponiveis no banco: '+j.mesesDisponiveis.map(mNome).join(', '):'')+'</div>';
 
-  document.getElementById('stitle').textContent='Fatura encontrada';
+  var fe=window._ofFatEscolhida||{};
+  document.getElementById('stitle').textContent='Fatura '+(fe.mes?mNome(fe.mes):'');
   document.getElementById('sbody').innerHTML=
     '<div style="background:linear-gradient(145deg,#1a1060,#0f1120);border:1px solid rgba(123,110,246,.25);border-radius:16px;padding:14px 16px;margin-bottom:12px">'+
-      '<div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--accl);opacity:.85">'+card.banco+' &middot; '+mNome(pai.mes)+'</div>'+
+      '<div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--accl);opacity:.85">Fatura '+(fe.mes?mNome(fe.mes):'')+' &rarr; lancamento de '+mNome(pai.mes)+'</div>'+
       '<div style="font-size:24px;font-weight:800;color:var(--t1);letter-spacing:-.5px;margin-top:4px">'+fmt(somaNovos)+'</div>'+
       '<div style="font-size:12px;color:var(--t2);margin-top:3px">'+novos.length+' a importar'+
         (ocultos>0?' &middot; '+ocultos+' pendente(s) oculta(s)':'')+
@@ -1607,7 +1672,7 @@ function _renderImportOF(){
         }).join('')+
         '</div>'+
         '<button onclick="confirmarImportOF()" class="savebtn">Importar '+novos.length+' item(ns)</button>')+
-    '<button onclick="_renderFilhosSheet()" class="delbtn" style="background:var(--s2);color:var(--t2);border-color:var(--bdr)">Cancelar</button>';
+    '<button onclick="_renderSelFatura()" class="delbtn" style="background:var(--s2);color:var(--t2);border-color:var(--bdr)">&#8249; Escolher outra fatura</button>';
   window._ofNovos=novos;
 }
 function confirmarImportOF(){
@@ -4145,7 +4210,7 @@ window.openLog=openLog;window.closeLog=closeLog;window.renderLog=renderLog;
 })();
 
 </script>
-<div id="ver" style="position:fixed;bottom:8px;left:0;right:0;text-align:center;font-size:10px;color:var(--t3);opacity:.45;z-index:99999;pointer-events:none;font-family:monospace">v1.131.571</div>
+<div id="ver" style="position:fixed;bottom:8px;left:0;right:0;text-align:center;font-size:10px;color:var(--t3);opacity:.45;z-index:99999;pointer-events:none;font-family:monospace">v1.132.572</div>
 </body>
 </html>
  

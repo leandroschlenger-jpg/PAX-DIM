@@ -175,15 +175,15 @@ async function listarCartoes(apiKey, itemIds) {
      2. creditCardMetadata.billForecastDate == mes
      3. janela do ciclo (fechamento anterior -> fechamento atual)
    O "mes" sempre se refere ao mes de VENCIMENTO da fatura.        */
-async function buscarFatura(apiKey, accountId, mes, bill) {
+async function buscarFatura(apiKey, accountId, mes, bill, billIdDireto) {
   const [ano, m] = mes.split('-').map(Number);
   const fmtD = d => d.toISOString().slice(0, 10);
 
   // Janela ampla: parcelas antigas entram em faturas novas
   const ini = new Date(Date.UTC(ano, m - 1, 1));
-  ini.setUTCDate(ini.getUTCDate() - 120);
+  ini.setUTCDate(ini.getUTCDate() - 150);
   const fim = new Date(Date.UTC(ano, m, 0));
-  fim.setUTCDate(fim.getUTCDate() + 5);
+  fim.setUTCDate(fim.getUTCDate() + 40);
 
   let todas = [], url = '/v2/transactions?accountId=' + encodeURIComponent(accountId) +
     '&dateFrom=' + fmtD(ini) + '&dateTo=' + fmtD(fim), guard = 0;
@@ -198,7 +198,34 @@ async function buscarFatura(apiKey, accountId, mes, bill) {
   const compras = todas.filter(t => t.type === 'DEBIT');
   const cmd = t => t.creditCardMetadata || {};
 
+  const montar = arr => arr.map(t => {
+    const cc  = t.creditCardMetadata || {};
+    const parc = (cc.installmentNumber && cc.totalInstallments && cc.totalInstallments > 1)
+      ? ' ' + cc.installmentNumber + '/' + cc.totalInstallments
+      : '';
+    const nome = (t.merchant && t.merchant.name) || t.description || 'Compra';
+    return {
+      extId:      t.id,
+      descricao:  (nome + parc).slice(0, 80),
+      valor:      Math.round(Math.abs(t.amount) * 100) / 100,
+      data:       String(cc.purchaseDate || t.date).slice(0, 10),
+      categoria:  mapCat(t.category),
+      status:     t.status === 'POSTED' ? 'OK' : '',
+      confirmada: t.status === 'POSTED',
+      parcela:    parc.trim() || null,
+      catOrig:    t.category || null
+    };
+  }).sort((a, b) => a.data.localeCompare(b.data));
+
   let sel = [], criterio = null;
+
+  // 0) billId escolhido explicitamente pelo usuario — tem prioridade absoluta
+  if (billIdDireto) {
+    sel = compras.filter(t => cmd(t).billId === billIdDireto);
+    criterio = 'billIdEscolhido';
+    if (!sel.length) criterio = 'billIdEscolhido:vazio';
+    return { itens: montar(sel), criterio };
+  }
 
   // 1) Vinculo direto com a bill — o mais confiavel
   if (bill && bill.id) {
@@ -228,34 +255,90 @@ async function buscarFatura(apiKey, accountId, mes, bill) {
     criterio = 'cicloEstimado:' + a + '..' + b;
   }
 
-  const itens = sel.map(t => {
-    const cc  = t.creditCardMetadata || {};
-    const parc = (cc.installmentNumber && cc.totalInstallments && cc.totalInstallments > 1)
-      ? ' ' + cc.installmentNumber + '/' + cc.totalInstallments
-      : '';
-    const nome = (t.merchant && t.merchant.name) || t.description || 'Compra';
-    return {
-      extId:     t.id,
-      descricao: (nome + parc).slice(0, 80),
-      valor:     Math.round(Math.abs(t.amount) * 100) / 100,
-      data:      String(cc.purchaseDate || t.date).slice(0, 10),
-      categoria: mapCat(t.category),
-      status:    t.status === 'POSTED' ? 'OK' : '',
-      confirmada: t.status === 'POSTED',
-      parcela:   parc.trim() || null,
-      catOrig:   t.category || null
-    };
-  }).sort((a, b) => a.data.localeCompare(b.data));
+  return { itens: montar(sel), criterio };
+}
 
-  return { itens, criterio };
+/* ── Lista TODAS as faturas do cartao, com resumo do que cada uma contem ──
+   Serve para o usuario escolher explicitamente qual fatura importar,
+   sem depender de adivinhar a relacao mes-do-app -> ciclo do banco.  */
+async function listarFaturas(apiKey, accountId) {
+  const bills = await pget('/bills?accountId=' + encodeURIComponent(accountId), apiKey);
+  const lista = (bills.results || []).slice();
+
+  // Puxa transacoes de uma janela ampla para contar itens por fatura
+  const hoje = new Date();
+  const ini  = new Date(hoje); ini.setUTCMonth(ini.getUTCMonth() - 8);
+  const fmtD = d => d.toISOString().slice(0, 10);
+  let todas = [], url = '/v2/transactions?accountId=' + encodeURIComponent(accountId) +
+    '&dateFrom=' + fmtD(ini), guard = 0;
+  try {
+    while (url && guard++ < 25) {
+      const page = await pget(url, apiKey);
+      todas = todas.concat(page.results || []);
+      url = page.next ? '/v2/transactions' + page.next : null;
+    }
+  } catch (e) { /* segue com o que deu */ }
+
+  const compras = todas.filter(t => t.type === 'DEBIT');
+  const porBill = {}, porForecast = {};
+  for (const t of compras) {
+    const cc = t.creditCardMetadata || {};
+    if (cc.billId) {
+      porBill[cc.billId] = porBill[cc.billId] || { n: 0, soma: 0 };
+      porBill[cc.billId].n++; porBill[cc.billId].soma += Math.abs(t.amount);
+    }
+    if (cc.billForecastDate) {
+      porForecast[cc.billForecastDate] = porForecast[cc.billForecastDate] || { n: 0, soma: 0 };
+      porForecast[cc.billForecastDate].n++; porForecast[cc.billForecastDate].soma += Math.abs(t.amount);
+    }
+  }
+
+  const hojeStr = fmtD(hoje);
+  const out = lista.map(b => {
+    const venc  = String(b.dueDate || '').slice(0, 10);
+    const fecha = b.billClosingDate ? String(b.billClosingDate).slice(0, 10) : null;
+    const mesVenc = venc.slice(0, 7);
+    const agg = porBill[b.id] || porForecast[mesVenc] || { n: 0, soma: 0 };
+    return {
+      billId:     b.id,
+      mes:        mesVenc,
+      vencimento: venc,
+      fechamento: fecha,
+      fechada:    fecha ? (fecha <= hojeStr) : (venc < hojeStr),
+      totalBanco: b.totalAmount == null ? null : Math.round(b.totalAmount * 100) / 100,
+      minimo:     b.minimumPaymentAmount == null ? null : Math.round(b.minimumPaymentAmount * 100) / 100,
+      encargos:   Math.round((b.financeCharges || []).reduce((s, c) => s + (c.amount || 0), 0) * 100) / 100,
+      qtdItens:   agg.n,
+      somaItens:  Math.round(agg.soma * 100) / 100,
+      vinculo:    porBill[b.id] ? 'billId' : (porForecast[mesVenc] ? 'forecast' : 'nenhum')
+    };
+  }).sort((a, b) => String(b.vencimento).localeCompare(String(a.vencimento)));
+
+  // Meses previstos que ainda nao tem bill emitida (fatura em formacao)
+  const mesesComBill = {}; out.forEach(o => { mesesComBill[o.mes] = 1; });
+  const emFormacao = Object.keys(porForecast)
+    .filter(m => !mesesComBill[m])
+    .sort()
+    .map(m => ({
+      billId: null, mes: m, vencimento: null, fechamento: null, fechada: false,
+      totalBanco: null, minimo: null, encargos: 0,
+      qtdItens: porForecast[m].n,
+      somaItens: Math.round(porForecast[m].soma * 100) / 100,
+      vinculo: 'forecast', emFormacao: true
+    }));
+
+  return { faturas: out, emFormacao };
 }
 
 /* ── Acha a bill (fatura) que VENCE no mes pedido ── */
-async function acharBill(apiKey, accountId, mes) {
+async function acharBill(apiKey, accountId, mes, billIdDireto) {
   try {
     const bills = await pget('/bills?accountId=' + encodeURIComponent(accountId), apiKey);
     const lista = bills.results || [];
-    const achada = lista.find(b => String(b.dueDate || '').slice(0, 7) === mes);
+    // Se o usuario escolheu uma fatura, ela manda
+    const achada = billIdDireto
+      ? lista.find(b => b.id === billIdDireto)
+      : lista.find(b => String(b.dueDate || '').slice(0, 7) === mes);
     return {
       bill: achada || null,
       // meses disponiveis, para orientar quando o mes pedido nao existe
@@ -330,6 +413,14 @@ exports.handler = async (event) => {
       return { statusCode: 200, headers: CORS, body: JSON.stringify({ cartoes }) };
     }
 
+    if (body.action === 'faturas') {
+      if (!body.accountId) {
+        return { statusCode: 400, headers: CORS, body: JSON.stringify({ erro: 'accountId obrigatorio' }) };
+      }
+      const r = await listarFaturas(apiKey, body.accountId);
+      return { statusCode: 200, headers: CORS, body: JSON.stringify(r) };
+    }
+
     if (body.action === 'fatura') {
       if (!body.accountId) {
         return { statusCode: 400, headers: CORS, body: JSON.stringify({ erro: 'accountId obrigatorio' }) };
@@ -337,8 +428,8 @@ exports.handler = async (event) => {
       if (!/^\d{4}-\d{2}$/.test(body.mes || '')) {
         return { statusCode: 400, headers: CORS, body: JSON.stringify({ erro: 'mes deve ser YYYY-MM' }) };
       }
-      const { bill, disponiveis } = await acharBill(apiKey, body.accountId, body.mes);
-      const { itens, criterio }   = await buscarFatura(apiKey, body.accountId, body.mes, bill);
+      const { bill, disponiveis } = await acharBill(apiKey, body.accountId, body.mes, body.billId);
+      const { itens, criterio }   = await buscarFatura(apiKey, body.accountId, body.mes, bill, body.billId);
       const soma = arr => Math.round(arr.reduce((s, i) => s + i.valor, 0) * 100) / 100;
       const conf = itens.filter(i => i.confirmada);
       return { statusCode: 200, headers: CORS, body: JSON.stringify({
