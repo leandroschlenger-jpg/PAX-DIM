@@ -445,7 +445,7 @@ inter-events:none}
         <div class="ai" onclick="document.getElementById('ifile').click()"><div class="aico" style="background:rgba(77,166,255,.1)">&#128193;</div><div class="abody"><div class="atitle">Importar backup</div><div class="asub">Restaurar dados</div></div><div class="aarr">&#8250;</div></div>
       </div>
       <input id="ifile" type="file" accept=".json" style="display:none" onchange="importData(event)">
-      <div style="text-align:center;padding:24px 0 8px;font-size:11px;color:var(--t3);font-family:monospace;opacity:.5">v1.130.570</div>
+      <div style="text-align:center;padding:24px 0 8px;font-size:11px;color:var(--t3);font-family:monospace;opacity:.5">v1.131.571</div>
     </div>
   </div>
 
@@ -1555,10 +1555,21 @@ function _renderImportOF(){
       '<div style="color:var(--t3);margin-top:4px">Novas compras ainda vao entrar. Voce pode importar so as confirmadas agora e rodar de novo depois do fechamento.</div>'+
     '</div>';
   } else if(f.fechada===true){
-    aviso='<div style="background:rgba(0,212,170,.07);border:1px solid rgba(0,212,170,.22);border-radius:12px;padding:10px 13px;margin-bottom:12px;font-size:12px;color:var(--grn)">'+
-      '&#10003; Fatura fechada'+(f.fechamento?' em '+fmtD(f.fechamento):'')+(f.totalBanco!=null?' &middot; total do banco: '+fmt(f.totalBanco):'')+
+    var confere=(f.totalBanco!=null)?Math.abs(f.totalBanco-j.total)<0.02:null;
+    aviso='<div style="background:rgba(0,212,170,.07);border:1px solid rgba(0,212,170,.22);border-radius:12px;padding:10px 13px;margin-bottom:12px;font-size:12px;color:var(--grn);line-height:1.5">'+
+      '&#10003; Fatura fechada'+(f.fechamento?' em '+fmtD(f.fechamento):'')+(f.vencimento?' &middot; vence '+fmtD(f.vencimento):'')+
+      (f.totalBanco!=null
+        ? '<div style="margin-top:4px;'+(confere?'color:var(--grn)':'color:var(--yel)')+'">Total do banco: '+fmt(f.totalBanco)+
+          ' &middot; soma das compras: '+fmt(j.total)+(confere?' &#10003;':' (diferenca — pode haver encargos/IOF)')+'</div>'
+        : '')+
     '</div>';
   }
+  // Diagnostico: como os itens foram amarrados a esta fatura
+  var critTxt=j.criterio==='billId'?'vinculo direto com a fatura do banco'
+    :j.criterio==='billForecastDate'?'mes de cobranca informado pelo banco'
+    :(j.criterio&&j.criterio.indexOf('cicloEstimado')===0)?('ciclo estimado '+j.criterio.split(':')[1]):'—';
+  var critAviso='<div style="font-size:10px;color:var(--t3);margin-bottom:12px;line-height:1.45">Criterio: '+critTxt+
+    (j.mesesDisponiveis&&j.mesesDisponiveis.length?'<br>Faturas disponiveis no banco: '+j.mesesDisponiveis.map(mNome).join(', '):'')+'</div>';
 
   document.getElementById('stitle').textContent='Fatura encontrada';
   document.getElementById('sbody').innerHTML=
@@ -1569,7 +1580,7 @@ function _renderImportOF(){
         (ocultos>0?' &middot; '+ocultos+' pendente(s) oculta(s)':'')+
         (dupes>0?' &middot; '+dupes+' ja importada(s)':'')+'</div>'+
     '</div>'+
-    aviso+
+    aviso+critAviso+
     (j.qtdPendente>0
       ? '<div onclick="_ofToggleConf()" style="display:flex;align-items:center;gap:10px;padding:11px 13px;background:var(--s2);border:1.5px solid '+(_ofSoConfirmadas?'var(--bdr2)':'var(--bdr)')+';border-radius:12px;margin-bottom:12px;cursor:pointer">'+
           '<div style="width:20px;height:20px;border-radius:6px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:900;'+
@@ -4134,7 +4145,7 @@ window.openLog=openLog;window.closeLog=closeLog;window.renderLog=renderLog;
 })();
 
 </script>
-<div id="ver" style="position:fixed;bottom:8px;left:0;right:0;text-align:center;font-size:10px;color:var(--t3);opacity:.45;z-index:99999;pointer-events:none;font-family:monospace">v1.130.570</div>
+<div id="ver" style="position:fixed;bottom:8px;left:0;right:0;text-align:center;font-size:10px;color:var(--t3);opacity:.45;z-index:99999;pointer-events:none;font-family:monospace">v1.131.571</div>
 </body>
 </html>
  

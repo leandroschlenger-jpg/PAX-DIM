@@ -168,18 +168,25 @@ async function listarCartoes(apiKey, itemIds) {
 }
 
 /* ── Busca as transações da fatura de um mês ──
-   Estratégia: puxa uma janela ampla e prioriza billForecastDate
-   (campo que o Open Finance devolve com o mês da fatura).          */
-async function buscarFatura(apiKey, accountId, mes) {
+   IMPORTANTE: a fatura que vence em agosto contem as compras do
+   ciclo de JULHO. Por isso NUNCA se filtra pela data da compra
+   dentro do mes pedido — o vinculo correto e, em ordem:
+     1. creditCardMetadata.billId  == id da bill que vence no mes
+     2. creditCardMetadata.billForecastDate == mes
+     3. janela do ciclo (fechamento anterior -> fechamento atual)
+   O "mes" sempre se refere ao mes de VENCIMENTO da fatura.        */
+async function buscarFatura(apiKey, accountId, mes, bill) {
   const [ano, m] = mes.split('-').map(Number);
-  // Janela: 75 dias antes do início do mês até o fim do mês
+  const fmtD = d => d.toISOString().slice(0, 10);
+
+  // Janela ampla: parcelas antigas entram em faturas novas
   const ini = new Date(Date.UTC(ano, m - 1, 1));
-  ini.setUTCDate(ini.getUTCDate() - 75);
+  ini.setUTCDate(ini.getUTCDate() - 120);
   const fim = new Date(Date.UTC(ano, m, 0));
-  const fmt = d => d.toISOString().slice(0, 10);
+  fim.setUTCDate(fim.getUTCDate() + 5);
 
   let todas = [], url = '/v2/transactions?accountId=' + encodeURIComponent(accountId) +
-    '&dateFrom=' + fmt(ini) + '&dateTo=' + fmt(fim), guard = 0;
+    '&dateFrom=' + fmtD(ini) + '&dateTo=' + fmtD(fim), guard = 0;
 
   while (url && guard++ < 20) {
     const page = await pget(url, apiKey);
@@ -189,16 +196,39 @@ async function buscarFatura(apiKey, accountId, mes) {
 
   // Só compras (DEBIT). Pagamentos da fatura (CREDIT) não são itens.
   const compras = todas.filter(t => t.type === 'DEBIT');
+  const cmd = t => t.creditCardMetadata || {};
 
-  // Se a instituição informa o mês da fatura, usa isso — é o mais correto
-  const comForecast = compras.filter(
-    t => t.creditCardMetadata && t.creditCardMetadata.billForecastDate === mes
-  );
-  const sel = comForecast.length > 0
-    ? comForecast
-    : compras.filter(t => String(t.date).slice(0, 7) === mes);
+  let sel = [], criterio = null;
 
-  return sel.map(t => {
+  // 1) Vinculo direto com a bill — o mais confiavel
+  if (bill && bill.id) {
+    sel = compras.filter(t => cmd(t).billId === bill.id);
+    if (sel.length) criterio = 'billId';
+  }
+
+  // 2) Mes previsto da fatura informado pela instituicao
+  if (!sel.length) {
+    sel = compras.filter(t => cmd(t).billForecastDate === mes);
+    if (sel.length) criterio = 'billForecastDate';
+  }
+
+  // 3) Janela do ciclo: do fechamento anterior ate o fechamento desta fatura
+  if (!sel.length) {
+    let corteFim;
+    if (bill && bill.billClosingDate)      corteFim = new Date(bill.billClosingDate);
+    else if (bill && bill.dueDate)         { corteFim = new Date(bill.dueDate); corteFim.setUTCDate(corteFim.getUTCDate() - 7); }
+    else                                   corteFim = new Date(Date.UTC(ano, m - 1, 1)); // fim de julho p/ fatura de agosto
+    const corteIni = new Date(corteFim);
+    corteIni.setUTCMonth(corteIni.getUTCMonth() - 1);
+    const a = fmtD(corteIni), b = fmtD(corteFim);
+    sel = compras.filter(t => {
+      const d = String(cmd(t).purchaseDate || t.date).slice(0, 10);
+      return d > a && d <= b;
+    });
+    criterio = 'cicloEstimado:' + a + '..' + b;
+  }
+
+  const itens = sel.map(t => {
     const cc  = t.creditCardMetadata || {};
     const parc = (cc.installmentNumber && cc.totalInstallments && cc.totalInstallments > 1)
       ? ' ' + cc.installmentNumber + '/' + cc.totalInstallments
@@ -216,27 +246,39 @@ async function buscarFatura(apiKey, accountId, mes) {
       catOrig:   t.category || null
     };
   }).sort((a, b) => a.data.localeCompare(b.data));
+
+  return { itens, criterio };
 }
 
-/* ── Descobre se a fatura daquele mes ja fechou ── */
-async function statusFatura(apiKey, accountId, mes) {
+/* ── Acha a bill (fatura) que VENCE no mes pedido ── */
+async function acharBill(apiKey, accountId, mes) {
   try {
     const bills = await pget('/bills?accountId=' + encodeURIComponent(accountId), apiKey);
-    const hoje = new Date().toISOString().slice(0, 10);
-    for (const b of (bills.results || [])) {
-      const venc = String(b.dueDate || '').slice(0, 10);
-      if (venc.slice(0, 7) !== mes) continue;
-      const fecha = b.billClosingDate ? String(b.billClosingDate).slice(0, 10) : null;
-      return {
-        temBill:   true,
-        fechada:   fecha ? (fecha <= hoje) : (venc < hoje),
-        fechamento: fecha,
-        vencimento: venc,
-        totalBanco: b.totalAmount == null ? null : Math.round(b.totalAmount * 100) / 100
-      };
-    }
-  } catch (e) { /* alguns conectores nao expoem bills — segue sem */ }
-  return { temBill: false, fechada: null, fechamento: null, vencimento: null, totalBanco: null };
+    const lista = bills.results || [];
+    const achada = lista.find(b => String(b.dueDate || '').slice(0, 7) === mes);
+    return {
+      bill: achada || null,
+      // meses disponiveis, para orientar quando o mes pedido nao existe
+      disponiveis: lista.map(b => String(b.dueDate || '').slice(0, 7)).filter(Boolean).sort()
+    };
+  } catch (e) {
+    return { bill: null, disponiveis: [], erro: String(e.message).slice(0, 120) };
+  }
+}
+
+/* ── Traduz a bill em status legivel ── */
+function statusDaBill(bill) {
+  if (!bill) return { temBill: false, fechada: null, fechamento: null, vencimento: null, totalBanco: null };
+  const hoje  = new Date().toISOString().slice(0, 10);
+  const venc  = String(bill.dueDate || '').slice(0, 10);
+  const fecha = bill.billClosingDate ? String(bill.billClosingDate).slice(0, 10) : null;
+  return {
+    temBill:    true,
+    fechada:    fecha ? (fecha <= hoje) : (venc < hoje),
+    fechamento: fecha,
+    vencimento: venc,
+    totalBanco: bill.totalAmount == null ? null : Math.round(bill.totalAmount * 100) / 100
+  };
 }
 
 /* ═══════════════ handler ═══════════════ */
@@ -295,18 +337,20 @@ exports.handler = async (event) => {
       if (!/^\d{4}-\d{2}$/.test(body.mes || '')) {
         return { statusCode: 400, headers: CORS, body: JSON.stringify({ erro: 'mes deve ser YYYY-MM' }) };
       }
-      const itens = await buscarFatura(apiKey, body.accountId, body.mes);
-      const fat   = await statusFatura(apiKey, body.accountId, body.mes);
-      const soma  = arr => Math.round(arr.reduce((s, i) => s + i.valor, 0) * 100) / 100;
-      const conf  = itens.filter(i => i.confirmada);
+      const { bill, disponiveis } = await acharBill(apiKey, body.accountId, body.mes);
+      const { itens, criterio }   = await buscarFatura(apiKey, body.accountId, body.mes, bill);
+      const soma = arr => Math.round(arr.reduce((s, i) => s + i.valor, 0) * 100) / 100;
+      const conf = itens.filter(i => i.confirmada);
       return { statusCode: 200, headers: CORS, body: JSON.stringify({
         itens,
-        total:          soma(itens),
+        total:           soma(itens),
         totalConfirmado: soma(conf),
-        qtdConfirmada:  conf.length,
-        qtdPendente:    itens.length - conf.length,
-        fatura:         fat,
-        mes:            body.mes
+        qtdConfirmada:   conf.length,
+        qtdPendente:     itens.length - conf.length,
+        fatura:          statusDaBill(bill),
+        criterio,                       // como os itens foram amarrados a fatura
+        mesesDisponiveis: disponiveis,  // faturas que o banco expoe
+        mes:             body.mes
       }) };
     }
 
