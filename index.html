@@ -445,7 +445,7 @@ inter-events:none}
         <div class="ai" onclick="document.getElementById('ifile').click()"><div class="aico" style="background:rgba(77,166,255,.1)">&#128193;</div><div class="abody"><div class="atitle">Importar backup</div><div class="asub">Restaurar dados</div></div><div class="aarr">&#8250;</div></div>
       </div>
       <input id="ifile" type="file" accept=".json" style="display:none" onchange="importData(event)">
-      <div style="text-align:center;padding:24px 0 8px;font-size:11px;color:var(--t3);font-family:monospace;opacity:.5">v1.132.572</div>
+      <div style="text-align:center;padding:24px 0 8px;font-size:11px;color:var(--t3);font-family:monospace;opacity:.5">v1.133.573</div>
     </div>
   </div>
 
@@ -1395,8 +1395,24 @@ function salvarOFItem(){
   localStorage.setItem('pax_of_items',v);
   toast('Item ID salvo');
 }
-function _ofCard(){try{return JSON.parse(localStorage.getItem('pax_of_card')||'null');}catch(e){return null;}}
-function _ofConfigurado(){return !!_ofToken()&&!!_ofCard();}
+/* Lista de cartões vinculados. Migra automaticamente do formato antigo
+   (pax_of_card, um único cartão) para pax_of_cards (vários).          */
+function _ofCards(){
+  var arr=[];
+  try{arr=JSON.parse(localStorage.getItem('pax_of_cards')||'[]');}catch(e){arr=[];}
+  if(!Array.isArray(arr))arr=[];
+  if(arr.length===0){
+    try{
+      var antigo=JSON.parse(localStorage.getItem('pax_of_card')||'null');
+      if(antigo&&antigo.accountId){arr=[antigo];localStorage.setItem('pax_of_cards',JSON.stringify(arr));}
+    }catch(e){}
+  }
+  return arr;
+}
+function _ofSaveCards(arr){localStorage.setItem('pax_of_cards',JSON.stringify(arr||[]));}
+function _ofCard(){var a=_ofCards();return a.length?a[0]:null;}
+function _ofConfigurado(){return !!_ofToken()&&_ofCards().length>0;}
+var _ofCardAtivo=null;
 function _ofCall(payload){
   payload.token=_ofToken();
   return fetch(PLUGGY_FN,{
@@ -1412,8 +1428,8 @@ function _ofCall(payload){
 }
 /* Tela de configuração — em Mais > Conectar cartão (Open Finance) */
 function openOFConfig(){
-  var card=_ofCard();
-  document.getElementById('stitle').textContent='Cartao via Open Finance';
+  var vinc=_ofCards();
+  document.getElementById('stitle').textContent='Cartoes via Open Finance';
   document.getElementById('sbody').innerHTML=
     '<div style="background:var(--s2);border:1px solid var(--bdr);border-radius:14px;padding:13px 15px;margin-bottom:14px;font-size:12px;color:var(--t2);line-height:1.55">'+
       'Conecte seu cartao pelo <b>Meu Pluggy</b> (gratuito, regulado pelo Banco Central) e importe os itens da fatura automaticamente.'+
@@ -1434,12 +1450,17 @@ function openOFConfig(){
     '<div style="font-size:11px;color:var(--t3);margin:-8px 0 12px">Se tiver mais de um, separe por virgula.</div>'+
     '<button onclick="salvarOFItem()" class="savebtn" style="background:var(--s3);color:var(--t2);border:1.5px solid var(--bdr);box-shadow:none">Salvar Item ID</button>'+
     '<div class="sep"></div>'+
-    '<div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--t3);margin-bottom:8px">Cartao vinculado</div>'+
-    (card
-      ? '<div style="background:var(--s2);border:1px solid var(--bdr2);border-radius:14px;padding:13px 15px;margin-bottom:10px">'+
-          '<div style="font-size:14px;font-weight:800;color:var(--t1)">'+card.banco+'</div>'+
-          '<div style="font-size:12px;color:var(--t3);margin-top:2px">'+card.nome+(card.numero?' &middot; '+card.numero:'')+'</div>'+
-        '</div>'
+    '<div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--t3);margin-bottom:8px">Cartoes vinculados ('+vinc.length+')</div>'+
+    (vinc.length
+      ? vinc.map(function(c,i){
+          return '<div style="display:flex;align-items:center;gap:10px;background:var(--s2);border:1px solid var(--bdr2);border-radius:14px;padding:12px 14px;margin-bottom:8px">'+
+            '<div style="flex:1;min-width:0">'+
+              '<div style="font-size:14px;font-weight:800;color:var(--t1)">'+c.banco+'</div>'+
+              '<div style="font-size:12px;color:var(--t3);margin-top:2px">'+c.nome+(c.numero?' &middot; '+c.numero:'')+'</div>'+
+            '</div>'+
+            '<button onclick="removerCartaoOF('+i+')" style="background:none;border:none;font-size:16px;color:var(--red);padding:6px;cursor:pointer;min-width:32px">&#10005;</button>'+
+          '</div>';
+        }).join('')
       : '<div style="font-size:13px;color:var(--t3);padding:8px 0 12px">Nenhum cartao vinculado ainda.</div>')+
     '<button onclick="buscarCartoesOF()" class="savebtn" style="background:rgba(123,110,246,.14);color:var(--accl);border:1.5px solid var(--bdr2);box-shadow:none">&#128179; Buscar meus cartoes</button>'+
     '<div id="ofCards" style="margin-top:12px"></div>';
@@ -1483,8 +1504,20 @@ function buscarCartoesOF(){
 function vincularCartaoOF(i){
   var c=(window._ofCandidatos||[])[i];
   if(!c)return;
-  localStorage.setItem('pax_of_card',JSON.stringify(c));
+  var arr=_ofCards();
+  if(arr.some(function(x){return x.accountId===c.accountId;})){
+    toast('Este cartao ja esta vinculado');return;
+  }
+  arr.push(c);_ofSaveCards(arr);
   toast('Cartao vinculado: '+c.banco);
+  openOFConfig();
+}
+function removerCartaoOF(i){
+  var arr=_ofCards();
+  var c=arr[i];if(!c)return;
+  if(!confirm('Desvincular '+c.banco+' — '+c.nome+'?'))return;
+  arr.splice(i,1);_ofSaveCards(arr);
+  toast('Cartao desvinculado');
   openOFConfig();
 }
 /* Passo 1: lista as faturas reais do banco para o usuário escolher */
@@ -1497,13 +1530,43 @@ function importarFaturaOF(){
   var db=load();
   var pai=db.fluxo.find(function(x){return x.id===_fpId;});
   if(!pai){toast('Pai nao encontrado');return;}
-  var card=_ofCard();
+  var vinc=_ofCards();
+  if(vinc.length>1){_renderSelCartao();return;}
+  _ofCarregarFaturas(vinc[0]);
+}
+/* Escolha do cartão quando há mais de um vinculado */
+function _renderSelCartao(){
+  var vinc=_ofCards();
+  var db=load();
+  var pai=db.fluxo.find(function(x){return x.id===_fpId;});
+  if(!pai){closeSH();return;}
+  document.getElementById('stitle').textContent='Escolha o cartao';
+  document.getElementById('sbody').innerHTML=
+    '<div style="font-size:12px;color:var(--t2);margin-bottom:4px">Lancamento: <b>'+pai.descricao+'</b> ('+mNome(pai.mes)+')</div>'+
+    '<div style="font-size:11px;color:var(--t3);margin-bottom:14px">De qual cartao vem esta fatura?</div>'+
+    vinc.map(function(c,i){
+      return '<div onclick="_ofUsarCartao('+i+')" style="background:var(--s2);border:1.5px solid var(--bdr);border-radius:14px;padding:14px 15px;margin-bottom:9px;cursor:pointer">'+
+        '<div style="font-size:15px;font-weight:800;color:var(--t1)">'+c.banco+'</div>'+
+        '<div style="font-size:12px;color:var(--t3);margin-top:2px">'+c.nome+(c.numero?' &middot; '+c.numero:'')+(c.bandeira?' &middot; '+c.bandeira:'')+'</div>'+
+        '<div style="font-size:11px;color:var(--accl);margin-top:7px;font-weight:700">Ver faturas &#8250;</div>'+
+      '</div>';
+    }).join('')+
+    '<button onclick="_renderFilhosSheet()" class="delbtn" style="background:var(--s2);color:var(--t2);border-color:var(--bdr);margin-top:6px">Cancelar</button>';
+}
+function _ofUsarCartao(i){
+  var c=_ofCards()[i];
+  if(!c)return;
+  _ofCarregarFaturas(c);
+}
+function _ofCarregarFaturas(card){
+  if(!card){toast('Nenhum cartao vinculado');return;}
+  _ofCardAtivo=card;
   document.getElementById('stitle').textContent='Faturas do cartao';
   document.getElementById('sbody').innerHTML=
     '<div style="text-align:center;padding:40px 16px">'+
       '<div style="font-size:34px;margin-bottom:12px">&#128179;</div>'+
       '<div style="font-size:15px;font-weight:800;color:var(--t1)">Consultando faturas</div>'+
-      '<div style="font-size:12px;color:var(--t3);margin-top:6px">'+card.banco+' &middot; Open Finance</div>'+
+      '<div style="font-size:12px;color:var(--t3);margin-top:6px">'+card.banco+' &middot; '+card.nome+'</div>'+
       '<div style="font-size:11px;color:var(--t3);margin-top:14px">Isso pode levar alguns segundos...</div>'+
     '</div>';
   _ofCall({action:'faturas',accountId:card.accountId}).then(function(j){
@@ -1513,7 +1576,7 @@ function importarFaturaOF(){
     document.getElementById('sbody').innerHTML=
       '<div style="background:rgba(255,95,87,.08);border:1px solid rgba(255,95,87,.25);border-radius:12px;padding:14px;font-size:12px;color:var(--red);line-height:1.55">'+
         '<b>Nao foi possivel listar as faturas</b><br>'+String(e.message||e)+'</div>'+
-      '<button onclick="_renderFilhosSheet()" class="savebtn" style="margin-top:14px">Voltar</button>';
+      '<button onclick="'+(_ofCards().length>1?'_renderSelCartao()':'_renderFilhosSheet()')+'" class="savebtn" style="margin-top:14px">Voltar</button>';
   });
 }
 function _renderSelFatura(){
@@ -1521,14 +1584,17 @@ function _renderSelFatura(){
   var db=load();
   var pai=db.fluxo.find(function(x){return x.id===_fpId;});
   if(!pai){closeSH();return;}
+  var card=_ofCardAtivo||_ofCard()||{};
+  var voltar=_ofCards().length>1?'_renderSelCartao()':'_renderFilhosSheet()';
   document.getElementById('stitle').textContent='Escolha a fatura';
   if(fs.length===0){
     document.getElementById('sbody').innerHTML=
       '<div style="background:rgba(255,204,0,.08);border:1px solid rgba(255,204,0,.28);border-radius:12px;padding:13px;font-size:12px;color:var(--yel);line-height:1.5">O banco nao devolveu nenhuma fatura para este cartao.</div>'+
-      '<button onclick="_renderFilhosSheet()" class="savebtn" style="margin-top:14px">Voltar</button>';
+      '<button onclick="'+voltar+'" class="savebtn" style="margin-top:14px">Voltar</button>';
     return;
   }
   document.getElementById('sbody').innerHTML=
+    '<div style="font-size:12px;color:var(--accl);font-weight:700;margin-bottom:3px">'+card.banco+(card.numero?' &middot; '+card.numero:'')+'</div>'+
     '<div style="font-size:12px;color:var(--t2);margin-bottom:4px">Lancamento: <b>'+pai.descricao+'</b> ('+mNome(pai.mes)+')</div>'+
     '<div style="font-size:11px;color:var(--t3);margin-bottom:14px;line-height:1.5">Escolha qual fatura do banco compoe este lancamento. A fatura que vence em um mes contem as compras do ciclo anterior.</div>'+
     fs.map(function(f,i){
@@ -1551,7 +1617,7 @@ function _renderSelFatura(){
         '<div style="font-size:11px;color:var(--accl);margin-top:7px;font-weight:700">Ver o que compoe &#8250;</div>'+
       '</div>';
     }).join('')+
-    '<button onclick="_renderFilhosSheet()" class="delbtn" style="background:var(--s2);color:var(--t2);border-color:var(--bdr);margin-top:6px">Cancelar</button>';
+    '<button onclick="'+voltar+'" class="delbtn" style="background:var(--s2);color:var(--t2);border-color:var(--bdr);margin-top:6px">'+(_ofCards().length>1?'&#8249; Trocar de cartao':'Cancelar')+'</button>';
 }
 function _ofEscolherFatura(i){
   var f=(window._ofFaturas||[])[i];
@@ -1559,7 +1625,8 @@ function _ofEscolherFatura(i){
   var db=load();
   var pai=db.fluxo.find(function(x){return x.id===_fpId;});
   if(!pai){closeSH();return;}
-  var card=_ofCard();
+  var card=_ofCardAtivo||_ofCard();
+  if(!card){toast('Nenhum cartao selecionado');return;}
   document.getElementById('sbody').innerHTML=
     '<div style="text-align:center;padding:40px 16px">'+
       '<div style="font-size:34px;margin-bottom:12px">&#128179;</div>'+
@@ -1601,7 +1668,7 @@ function _renderImportOF(){
   var db=load();
   var pai=db.fluxo.find(function(x){return x.id===_fpId;});
   if(!pai){closeSH();return;}
-  var card=_ofCard();
+  var card=_ofCardAtivo||_ofCard()||{};
   var jaImp={};
   _filhosDe(db,_fpId).forEach(function(f){if(f.extId)jaImp[f.extId]=1;});
 
@@ -1683,11 +1750,13 @@ function confirmarImportOF(){
   if(!pai){toast('Pai nao encontrado');return;}
   if(isMesFechado(pai.mes)){toast('Mes fechado');return;}
   var arr=_filhosDe(db,_fpId);
+  var cardAtual=_ofCardAtivo||_ofCard()||{};
   novos.forEach(function(it){
     arr.push({
       id:uid(),extId:it.extId,
       descricao:it.descricao,valor:it.valor,
-      categoria:it.categoria,data:it.data,status:it.status
+      categoria:it.categoria,data:it.data,status:it.status,
+      banco:cardAtual.banco||''
     });
   });
   var total=_syncPai(db,_fpId);
@@ -1726,6 +1795,7 @@ function _renderFilhosSheet(){
             '<div style="font-size:11px;color:var(--t3);margin-top:2px">'+
               (f.categoria||'Outros')+' &middot; '+fmtD(f.data)+
               ' &middot; <span style="color:'+(ok?'var(--grn)':'var(--yel)')+';font-weight:700">'+(ok?'OK':'Pend.')+'</span>'+
+              (f.banco?' &middot; <span style="color:var(--accl)">'+f.banco+'</span>':'')+
             '</div>'+
           '</div>'+
           '<div style="font-size:14px;font-weight:800;color:var(--t1);white-space:nowrap">'+fmt(f.valor)+'</div>'+
@@ -4210,7 +4280,7 @@ window.openLog=openLog;window.closeLog=closeLog;window.renderLog=renderLog;
 })();
 
 </script>
-<div id="ver" style="position:fixed;bottom:8px;left:0;right:0;text-align:center;font-size:10px;color:var(--t3);opacity:.45;z-index:99999;pointer-events:none;font-family:monospace">v1.132.572</div>
+<div id="ver" style="position:fixed;bottom:8px;left:0;right:0;text-align:center;font-size:10px;color:var(--t3);opacity:.45;z-index:99999;pointer-events:none;font-family:monospace">v1.133.573</div>
 </body>
 </html>
  
