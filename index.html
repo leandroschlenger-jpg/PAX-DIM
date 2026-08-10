@@ -440,12 +440,13 @@ inter-events:none}
         <div class="ai" onclick="openOFConfig()"><div class="aico" style="background:rgba(0,212,170,.12)">&#128179;</div><div class="abody"><div class="atitle">Cartao via Open Finance</div><div class="asub">Importar fatura automaticamente</div></div><div class="aarr">&#8250;</div></div>
       </div>
       <div class="ar" style="margin-top:8px">
+        <div class="ai" onclick="agruparTP()"><div class="aico" style="background:rgba(167,139,250,.12)">&#128101;</div><div class="abody"><div class="atitle">Agrupar &quot;TP - &quot;</div><div class="asub">Consolida em Transferencia para Thays</div></div><div class="aarr">&#8250;</div></div>
         <div class="ai" onclick="limparDuplicatas()"><div class="aico" style="background:rgba(255,204,0,.1)">&#129529;</div><div class="abody"><div class="atitle">Limpar duplicatas</div><div class="asub">Remove lancamentos duplicados</div></div><div class="aarr">&#8250;</div></div>
         <div class="ai" onclick="exportData()"><div class="aico" style="background:rgba(77,166,255,.1)">&#128190;</div><div class="abody"><div class="atitle">Exportar backup</div><div class="asub">Salvar JSON</div></div><div class="aarr">&#8250;</div></div>
         <div class="ai" onclick="document.getElementById('ifile').click()"><div class="aico" style="background:rgba(77,166,255,.1)">&#128193;</div><div class="abody"><div class="atitle">Importar backup</div><div class="asub">Restaurar dados</div></div><div class="aarr">&#8250;</div></div>
       </div>
       <input id="ifile" type="file" accept=".json" style="display:none" onchange="importData(event)">
-      <div style="text-align:center;padding:24px 0 8px;font-size:11px;color:var(--t3);font-family:monospace;opacity:.5">v1.133.573</div>
+      <div style="text-align:center;padding:24px 0 8px;font-size:11px;color:var(--t3);font-family:monospace;opacity:.5">v1.134.574</div>
     </div>
   </div>
 
@@ -1375,16 +1376,103 @@ function _somaFilhos(db,parentId){
   return _filhosDe(db,parentId).reduce(function(s,f){return s+(Number(f.valor)||0);},0);
 }
 function isCartao(t){return t&&(t.categoria||'')==='Cartao';}
-/* Recalcula o valor do Pai = soma dos filhos. Retorna o novo valor. */
+/* Recalcula o valor do Pai = soma dos filhos.
+   Se o Pai estiver com valor travado manualmente (_valorManual),
+   NAO sobrescreve — a divergencia e permitida e sinalizada.      */
 function _syncPai(db,parentId){
   var pai=db.fluxo.find(function(x){return x.id===parentId;});
   if(!pai)return 0;
   var filhos=_filhosDe(db,parentId);
   if(filhos.length===0)return pai.valor; // sem filhos: Pai mantém valor manual
+  if(pai._valorManual)return pai.valor;  // usuario fixou o valor de proposito
   var soma=_somaFilhos(db,parentId);
   pai.valor=Math.round(soma*100)/100;
   return pai.valor;
 }
+/* Diferenca entre o valor do Pai e a soma dos filhos (0 = bate) */
+function _difPai(db,parentId){
+  var pai=db.fluxo.find(function(x){return x.id===parentId;});
+  if(!pai)return 0;
+  var filhos=_filhosDe(db,parentId);
+  if(filhos.length===0)return 0;
+  return Math.round((pai.valor-_somaFilhos(db,parentId))*100)/100;
+}
+/* ══════════ GRUPO "TP - " → Transferencia para Thays ══════════
+   Consolida todos os lancamentos cuja descricao comeca com "TP - "
+   num unico lancamento pai por mes, com os antigos virando itens.
+   Só age em meses ABERTOS — o historico fechado fica intacto.     */
+var TP_PREFIXO='TP - ', TP_NOME='Transferencia para Thays';
+function _ehTP(t){return t&&typeof t.descricao==='string'&&t.descricao.indexOf(TP_PREFIXO)===0;}
+function _paiTPdoMes(db,mes){
+  return db.fluxo.find(function(x){return x.grupoTP&&x.mes===mes;});
+}
+/* Converte os TP soltos de um mes num pai unico. Retorna quantos moveu. */
+function _agruparTPdoMes(db,mes,recIdCompartilhado){
+  if(isMesFechado(mes))return 0;
+  var soltos=db.fluxo.filter(function(t){return t.mes===mes&&_ehTP(t)&&!t.grupoTP;});
+  if(soltos.length===0)return 0;
+  var pai=_paiTPdoMes(db,mes);
+  if(!pai){
+    var ref=soltos[0];
+    pai={
+      id:uid(),mes:mes,data:ref.data,operacao:'Saida',valor:0,
+      conta:ref.conta,descricao:TP_NOME,categoria:'Familia',
+      status:'',forma:'',grupoTP:true,
+      recId:recIdCompartilhado,recIdx:1,recTotal:'?'
+    };
+    db.fluxo.push(pai);
+  }
+  var arr=_filhosDe(db,pai.id);
+  var jaTem={};arr.forEach(function(f){if(f.origId)jaTem[f.origId]=1;});
+  var movidos=0;
+  soltos.forEach(function(t){
+    if(jaTem[t.id])return;
+    arr.push({
+      id:uid(),origId:t.id,
+      descricao:t.descricao.slice(TP_PREFIXO.length)||t.descricao,
+      valor:t.valor,categoria:t.categoria||'Familia',
+      data:t.data,status:t.status
+    });
+    movidos++;
+  });
+  // Remove os antigos do fluxo — eles agora vivem dentro do pai
+  var idsSoltos={};soltos.forEach(function(t){idsSoltos[t.id]=1;});
+  db.fluxo=db.fluxo.filter(function(t){return !idsSoltos[t.id];});
+  // Se todos os filhos estao OK, o pai fica OK
+  var todosOK=arr.length>0&&arr.every(function(f){return f.status==='OK';});
+  pai.status=todosOK?'OK':'';
+  delete pai._valorManual;
+  _syncPai(db,pai.id);
+  return movidos;
+}
+/* Roda a consolidacao em todos os meses abertos que tenham TP soltos */
+function agruparTP(silencioso){
+  var db=load();
+  var meses={};
+  db.fluxo.forEach(function(t){if(_ehTP(t)&&!t.grupoTP&&!isMesFechado(t.mes))meses[t.mes]=1;});
+  var lista=Object.keys(meses).sort();
+  if(lista.length===0){
+    if(!silencioso)toast('Nenhum lancamento "TP - " a agrupar');
+    return 0;
+  }
+  // Um unico recId para todos os meses = grupo recorrente indeterminado
+  var recExistente=(db.fluxo.find(function(x){return x.grupoTP&&x.recId;})||{}).recId;
+  var rid=recExistente||uid();
+  var total=0,idx=1;
+  lista.forEach(function(m){total+=_agruparTPdoMes(db,m,rid);});
+  // Renumera o grupo recorrente em ordem cronologica
+  db.fluxo.filter(function(x){return x.grupoTP;})
+    .sort(function(a,b){return a.mes.localeCompare(b.mes);})
+    .forEach(function(p){p.recId=rid;p.recIdx=idx++;p.recTotal='?';});
+  save(db);
+  if(!silencioso){
+    toast(total+' lancamento(s) agrupados em '+lista.length+' mes(es)');
+    _logActivity('grupo_tp','Agrupou '+total+' lancamentos TP em '+lista.length+' meses');
+    render(curPage);
+  }
+  return total;
+}
+
 /* ═══════ INTEGRAÇÃO OPEN FINANCE (Pluggy via Netlify Function) ═══════ */
 var PLUGGY_FN='/.netlify/functions/pluggy';
 function _ofToken(){return String(localStorage.getItem('pax_of_token')||'').trim();}
@@ -1784,7 +1872,8 @@ function _renderFilhosSheet(){
   if(!pai){closeSH();return;}
   var filhos=_filhosDe(db,_fpId);
   var soma=_somaFilhos(db,_fpId);
-  document.getElementById('stitle').textContent='Itens da fatura';
+  var dif=_difPai(db,_fpId);
+  document.getElementById('stitle').textContent=pai.grupoTP?'Itens do grupo':'Itens da fatura';
   var lista=filhos.length===0
     ? '<div style="text-align:center;padding:26px 12px;color:var(--t3);font-size:13px">Nenhum item lancado ainda.<br>Adicione os itens que compoem esta fatura.</div>'
     : filhos.map(function(f){
@@ -1814,15 +1903,29 @@ function _renderFilhosSheet(){
         '<div><div style="font-size:10px;color:var(--t3);text-transform:uppercase;letter-spacing:.06em">'+filhos.length+' '+(filhos.length===1?'item':'itens')+'</div>'+
         '<div style="font-size:15px;font-weight:800;color:var(--accl)">'+fmt(soma)+'</div></div>'+
       '</div>'+
-      (temFilhos
-        ? '<div style="font-size:11px;color:var(--grn);margin-top:9px;font-weight:700">&#10003; Total do pai calculado pela soma dos itens</div>'
-        : '<div style="font-size:11px;color:var(--t3);margin-top:9px">Ao adicionar o 1&#186; item, o total do pai passa a ser a soma dos itens.</div>')+
+      (!temFilhos
+        ? '<div style="font-size:11px;color:var(--t3);margin-top:9px">Ao adicionar o 1&#186; item, o total do pai passa a ser a soma dos itens.</div>'
+        : Math.abs(dif)>0.001
+          ? '<div style="font-size:11px;color:var(--yel);margin-top:9px;font-weight:700;line-height:1.5">&#9888; Diferenca de '+fmt(Math.abs(dif))+' '+(dif>0?'a mais no pai':'a mais nos itens')+
+            '<div style="color:var(--t3);font-weight:400;margin-top:2px">Permitido — pode ser IOF, encargos ou item nao lancado. '+
+            '<span onclick="_recalcPai()" style="color:var(--accl);font-weight:700;cursor:pointer">Igualar a soma</span></div></div>'
+          : '<div style="font-size:11px;color:var(--grn);margin-top:9px;font-weight:700">&#10003; Total do pai igual a soma dos itens</div>')+
     '</div>'+
     '<button onclick="importarFaturaOF()" class="savebtn" style="margin-bottom:14px;background:rgba(0,212,170,.13);color:var(--grn);border:1.5px solid rgba(0,212,170,.3);box-shadow:none">&#8623; Importar fatura do banco'+(_ofConfigurado()?'':' (configurar)')+'</button>'+
     '<div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--t3);margin-bottom:8px">Itens</div>'+
     lista+
     '<button onclick="novoFilho()" class="p-addream" style="margin-top:10px;color:var(--accl);border-color:var(--bdr2);background:rgba(123,110,246,.07)">+ Adicionar item</button>'+
     '<button onclick="closeSH();renderFluxo(load())" class="savebtn" style="margin-top:12px">Concluir</button>';
+}
+function _recalcPai(){
+  var db=load();
+  var pai=db.fluxo.find(function(x){return x.id===_fpId;});
+  if(!pai)return;
+  if(isMesFechado(pai.mes)){toast('Mes fechado');return;}
+  delete pai._valorManual;
+  var t=_syncPai(db,_fpId);
+  save(db);_renderFilhosSheet();
+  toast('Pai igualado: '+fmt(t));
 }
 function novoFilho(){_fpEdit=null;_openFilhoForm(null);}
 function editFilho(fid){
@@ -1977,8 +2080,11 @@ function renderFluxo(db){
     items.forEach(function(t){
       var isE=t.operacao==='Entrada',isPJ=t.conta==='PJ Itau Nu';
       var rec=t.recId?(' <span style="font-size:10px;color:var(--t3)">&#8635;'+t.recIdx+'/'+t.recTotal+'</span>'):'';
-      var nFilhos=isCartao(t)?_filhosDe(db,t.id).length:0;
-      var filhoTag=nFilhos>0?(' <span style="font-size:10px;color:var(--accl);font-weight:700">&#9783;'+nFilhos+'</span>'):'';
+      var temGrupo=isCartao(t)||t.grupoTP;
+      var nFilhos=temGrupo?_filhosDe(db,t.id).length:0;
+      var difF=nFilhos>0?_difPai(db,t.id):0;
+      var filhoTag=nFilhos>0?(' <span style="font-size:10px;color:var(--accl);font-weight:700">&#9783;'+nFilhos+'</span>'+
+        (Math.abs(difF)>0.001?' <span style="font-size:10px;color:var(--yel);font-weight:700" title="Valor difere da soma dos itens">&#9888;'+(difF>0?'+':'')+fmtK(difF)+'</span>':'')):'';
       var wrap=document.createElement('div');wrap.className='txwrap';wrap.id='w-'+t.id;
       wrap.innerHTML=
         '<div class="txbg-ok"><span style="font-size:20px">&#10003;</span></div>'+
@@ -1999,7 +2105,7 @@ function renderFluxo(db){
               (t.status==='OK'?'&#10003; OK':'&#8987; Pend.')+
             '</button>'+
           '</div>'+
-          (isCartao(t)?'<button class="filho-btn" data-tid="'+t.id+'" style="font-size:18px;padding:6px 7px;min-width:34px;min-height:36px;color:var(--accl);opacity:.9;background:none;border:none;cursor:pointer" title="Itens da fatura">&#9783;</button>':'')+
+          (temGrupo?'<button class="filho-btn" data-tid="'+t.id+'" style="font-size:18px;padding:6px 7px;min-width:34px;min-height:36px;color:var(--accl);opacity:.9;background:none;border:none;cursor:pointer" title="Itens">&#9783;</button>':'')+
           '<button class="ebtn" data-tid="'+t.id+'" style="font-size:20px;opacity:.7;padding:6px 8px;min-width:36px;min-height:36px">&#9998;</button>'+
           (t.obs?'<button class="obs-btn" data-tid="'+t.id+'" style="font-size:20px;padding:6px 8px;min-width:36px;min-height:36px;color:var(--yel);opacity:.8">&#128203;</button>':'')+
         '</div>';
@@ -2032,6 +2138,38 @@ function bindSwipe(txs){
   });
 }
 function isMesFechado(mes){var db=load();return(db.mesesFechados||[]).indexOf(mes)>=0;}
+/* Primeiro mes ABERTO de um grupo recorrente (o mais antigo nao fechado) */
+function _primeiroMesAberto(db,recId){
+  var fech=db.mesesFechados||[];
+  var abertos=db.fluxo.filter(function(x){return x.recId===recId&&fech.indexOf(x.mes)<0;})
+                      .map(function(x){return x.mes;}).sort();
+  return abertos.length?abertos[0]:null;
+}
+/* Replica o valor do primeiro mes aberto para os meses seguintes do grupo.
+   Preserva meses que o usuario editou individualmente (_valorEditado).
+   Retorna quantos meses foram atualizados.                            */
+function _propagarValorRec(db,editadoId){
+  var base=db.fluxo.find(function(x){return x.id===editadoId;});
+  if(!base||!base.recId)return 0;
+  var primeiro=_primeiroMesAberto(db,base.recId);
+  // So propaga se o lancamento editado E o primeiro mes aberto do grupo
+  if(!primeiro||base.mes!==primeiro)return 0;
+  // O mes que o usuario acabou de editar vira a referencia
+  base._valorEditado=true;
+  var fech=db.mesesFechados||[];
+  var n=0;
+  db.fluxo.forEach(function(t){
+    if(t.recId!==base.recId)return;
+    if(t.id===base.id)return;
+    if(t.mes<=base.mes)return;          // so para frente
+    if(fech.indexOf(t.mes)>=0)return;   // nunca mexe em mes fechado
+    if(t._valorEditado)return;          // usuario ajustou esse mes de proposito
+    if(Math.abs((t.valor||0)-base.valor)<0.001)return;
+    t.valor=base.valor;
+    n++;
+  });
+  return n;
+}
 function fecharMes(){
   var db=load();
   var jeFechado=(db.mesesFechados||[]).indexOf(curMes)>=0;
@@ -2231,13 +2369,35 @@ function saveTx(){
     var orig=db.fluxo.find(function(x){return x.id===editId;})||{};
     var rid=rec!=='nao'?(orig.recId||uid()):undefined;
     var recFields=rec!=='nao'?{recId:rid,recIdx:orig.recIdx||1,recTotal:rec==='indef'?'?':vezes}:{};
-    // Atualiza lancamento atual
+    // Atualiza lancamento atual — preserva flags internas do original
     var i=db.fluxo.findIndex(function(x){return x.id===editId;});
-    if(i>=0)db.fluxo[i]=Object.assign({},base,{id:editId},recFields);
-    // Se e Cartao com filhos, o valor do pai e sempre a soma dos filhos
-    if(i>=0&&isCartao(db.fluxo[i])&&_filhosDe(db,editId).length>0)_syncPai(db,editId);
-    // Se deixou de ser Cartao, descarta os filhos orfaos
-    if(i>=0&&!isCartao(db.fluxo[i])&&db.filhos&&db.filhos[editId])delete db.filhos[editId];
+    if(i>=0){
+      var manterFlags={};
+      if(orig._valorManual)manterFlags._valorManual=true;
+      if(orig.grupoTP)manterFlags.grupoTP=true;
+      if(orig._valorEditado)manterFlags._valorEditado=true;
+      // Editou um mes que NAO e o primeiro aberto do grupo? Marca como ajuste
+      // individual, para a propagacao nao sobrescrever depois.
+      if(orig.recId){
+        var pAberto=_primeiroMesAberto(db,orig.recId);
+        if(pAberto&&orig.mes>pAberto&&Math.abs((orig.valor||0)-base.valor)>0.001){
+          manterFlags._valorEditado=true;
+        }
+      }
+      db.fluxo[i]=Object.assign({},base,{id:editId},recFields,manterFlags);
+      // Se tem filhos e o usuario mudou o valor a mao, o valor passa a ser manual
+      var temFilhos=_filhosDe(db,editId).length>0;
+      if(temFilhos){
+        var somaF=_somaFilhos(db,editId);
+        if(Math.abs(base.valor-somaF)>0.001){
+          db.fluxo[i]._valorManual=true;  // divergencia intencional — permitida
+        } else {
+          delete db.fluxo[i]._valorManual; // voltou a bater: retoma automatico
+        }
+      }
+      // Se deixou de ser Cartao/TP, descarta os filhos orfaos
+      if(!isCartao(db.fluxo[i])&&!db.fluxo[i].grupoTP&&db.filhos&&db.filhos[editId])delete db.filhos[editId];
+    }
     // Cria proximos se aumentou recorrencia
     var origTotal=orig.recId?(orig.recTotal==='?'?9999:Number(orig.recTotal)||1):1;
     var novos=vezes-origTotal;
@@ -2271,7 +2431,17 @@ function saveTx(){
     toast(vezes===1?'Adicionado':vezes>100?'Recorrencia indeterminada criada':vezes+' repeticoes criadas');
   }
   _logActivity('lancamento',(editId?'Editou':'Adicionou')+': '+base.descricao+' R$'+base.valor+' ('+base.operacao+')');
+  // Recorrencia: o primeiro mes ABERTO manda o valor para os meses seguintes
+  var propag=editId?_propagarValorRec(db,editId):0;
+  // Se criou um "TP - " novo num mes aberto, ja consolida no grupo
+  if(!editId&&_ehTP(base)&&!isMesFechado(base.mes)){
+    save(db);
+    var mv=agruparTP(true);
+    db=load();
+    if(mv>0)toast('Somado a '+TP_NOME);
+  }
   save(db);closeSH();
+  if(propag>0)setTimeout(function(){toast('Valor replicado para '+propag+' mes(es) a frente');},900);
   if(base.mes!==curMes){curMes=base.mes;updML();}
   renderFluxo(db);
   }catch(err){toast('Erro ao salvar: '+err.message);console.error(err);}
@@ -4280,7 +4450,7 @@ window.openLog=openLog;window.closeLog=closeLog;window.renderLog=renderLog;
 })();
 
 </script>
-<div id="ver" style="position:fixed;bottom:8px;left:0;right:0;text-align:center;font-size:10px;color:var(--t3);opacity:.45;z-index:99999;pointer-events:none;font-family:monospace">v1.133.573</div>
+<div id="ver" style="position:fixed;bottom:8px;left:0;right:0;text-align:center;font-size:10px;color:var(--t3);opacity:.45;z-index:99999;pointer-events:none;font-family:monospace">v1.134.574</div>
 </body>
 </html>
  
