@@ -440,14 +440,14 @@ inter-events:none}
         <div class="ai" onclick="openOFConfig()"><div class="aico" style="background:rgba(0,212,170,.12)">&#128179;</div><div class="abody"><div class="atitle">Cartao via Open Finance</div><div class="asub">Importar fatura automaticamente</div></div><div class="aarr">&#8250;</div></div>
       </div>
       <div class="ar" style="margin-top:8px">
-        <div class="ai" onclick="agruparTP()"><div class="aico" style="background:rgba(167,139,250,.12)">&#128101;</div><div class="abody"><div class="atitle">Agrupar &quot;TP - &quot;</div><div class="asub">Consolida em Transferencia para Thays</div></div><div class="aarr">&#8250;</div></div>
+        <div class="ai" onclick="diagTP()"><div class="aico" style="background:rgba(167,139,250,.12)">&#128101;</div><div class="abody"><div class="atitle">Agrupar &quot;TP - &quot;</div><div class="asub">Consolida em Transferencia para Thays</div></div><div class="aarr">&#8250;</div></div>
         <div class="ai" onclick="projetarRecorrencias()"><div class="aico" style="background:rgba(45,212,170,.12)">&#8635;</div><div class="abody"><div class="atitle">Projetar recorrencias</div><div class="asub">Cria os meses futuros das repeticoes</div></div><div class="aarr">&#8250;</div></div>
         <div class="ai" onclick="limparDuplicatas()"><div class="aico" style="background:rgba(255,204,0,.1)">&#129529;</div><div class="abody"><div class="atitle">Limpar duplicatas</div><div class="asub">Remove lancamentos duplicados</div></div><div class="aarr">&#8250;</div></div>
         <div class="ai" onclick="exportData()"><div class="aico" style="background:rgba(77,166,255,.1)">&#128190;</div><div class="abody"><div class="atitle">Exportar backup</div><div class="asub">Salvar JSON</div></div><div class="aarr">&#8250;</div></div>
         <div class="ai" onclick="document.getElementById('ifile').click()"><div class="aico" style="background:rgba(77,166,255,.1)">&#128193;</div><div class="abody"><div class="atitle">Importar backup</div><div class="asub">Restaurar dados</div></div><div class="aarr">&#8250;</div></div>
       </div>
       <input id="ifile" type="file" accept=".json" style="display:none" onchange="importData(event)">
-      <div style="text-align:center;padding:24px 0 8px;font-size:11px;color:var(--t3);font-family:monospace;opacity:.5">v1.135.575</div>
+      <div style="text-align:center;padding:24px 0 8px;font-size:11px;color:var(--t3);font-family:monospace;opacity:.5">v1.136.576</div>
     </div>
   </div>
 
@@ -1402,7 +1402,7 @@ function _difPai(db,parentId){
    Consolida todos os lancamentos cuja descricao comeca com "TP - "
    num unico lancamento pai por mes, com os antigos virando itens.
    Só age em meses ABERTOS — o historico fechado fica intacto.     */
-var TP_PREFIXO='TP - ', TP_NOME='Transferencia para Thays';
+var TP_PREFIXO='TP - ', TP_NOME='Transferencia para Thays', TP_CAT='Transferencia TP';
 function _ehTP(t){return t&&typeof t.descricao==='string'&&t.descricao.indexOf(TP_PREFIXO)===0;}
 function _paiTPdoMes(db,mes){
   return db.fluxo.find(function(x){return x.grupoTP&&x.mes===mes;});
@@ -1417,7 +1417,7 @@ function _agruparTPdoMes(db,mes,recIdCompartilhado){
     var ref=soltos[0];
     pai={
       id:uid(),mes:mes,data:ref.data,operacao:'Saida',valor:0,
-      conta:ref.conta,descricao:TP_NOME,categoria:'Familia',
+      conta:ref.conta,descricao:TP_NOME,categoria:TP_CAT,
       status:'',forma:'',grupoTP:true,
       recId:recIdCompartilhado,recIdx:1,recTotal:'?'
     };
@@ -1446,34 +1446,124 @@ function _agruparTPdoMes(db,mes,recIdCompartilhado){
   _syncPai(db,pai.id);
   return movidos;
 }
-/* Roda a consolidacao em todos os meses abertos que tenham TP soltos */
+/* Cria o grupo TP a partir de um mes-modelo (usado quando os "TP - "
+   originais so existem em meses FECHADOS, que nao devem ser alterados) */
+function _criarTPdoModelo(db,mesModelo,mesDestino,rid){
+  var modelo=db.fluxo.filter(function(t){return t.mes===mesModelo&&_ehTP(t);});
+  if(modelo.length===0)return null;
+  if(_paiTPdoMes(db,mesDestino))return null;
+  var ref=modelo[0];
+  var dia=+String(ref.data||(mesModelo+'-06')).split('-')[2]||6;
+  var pai={
+    id:uid(),mes:mesDestino,data:_dataNoMes(mesDestino,dia),operacao:'Saida',valor:0,
+    conta:ref.conta,descricao:TP_NOME,categoria:TP_CAT,
+    status:'',forma:'',grupoTP:true,recId:rid,recIdx:1,recTotal:'?'
+  };
+  db.fluxo.push(pai);
+  db.filhos[pai.id]=modelo.map(function(t){
+    return {id:uid(),
+      descricao:t.descricao.slice(TP_PREFIXO.length)||t.descricao,
+      valor:t.valor,categoria:t.categoria||'Familia',
+      data:_dataNoMes(mesDestino,+String(t.data).split('-')[2]||dia),status:''};
+  });
+  _syncPai(db,pai.id);
+  return pai;
+}
+/* Roda a consolidacao. Se nao houver "TP - " em meses abertos mas houver
+   em meses fechados, usa o mes fechado mais recente como modelo e cria
+   o grupo a partir do mes atual — sem tocar no historico fechado.    */
 function agruparTP(silencioso){
   var db=load();
-  var meses={};
-  db.fluxo.forEach(function(t){if(_ehTP(t)&&!t.grupoTP&&!isMesFechado(t.mes))meses[t.mes]=1;});
-  var lista=Object.keys(meses).sort();
-  if(lista.length===0){
-    if(!silencioso)toast('Nenhum lancamento "TP - " a agrupar');
+  var hoje=_hoje.getFullYear()+'-'+('0'+(_hoje.getMonth()+1)).slice(-2);
+  var abertos={},fechados={};
+  db.fluxo.forEach(function(t){
+    if(!_ehTP(t)||t.grupoTP)return;
+    if(isMesFechado(t.mes))fechados[t.mes]=1;else abertos[t.mes]=1;
+  });
+  var listaAbertos=Object.keys(abertos).sort();
+  var listaFechados=Object.keys(fechados).sort();
+  var jaTemGrupo=db.fluxo.some(function(x){return x.grupoTP;});
+
+  if(listaAbertos.length===0&&listaFechados.length===0&&!jaTemGrupo){
+    if(!silencioso)toast('Nenhum lancamento "'+TP_PREFIXO+'" encontrado');
     return 0;
   }
-  // Um unico recId para todos os meses = grupo recorrente indeterminado
   var recExistente=(db.fluxo.find(function(x){return x.grupoTP&&x.recId;})||{}).recId;
   var rid=recExistente||uid();
-  var total=0,idx=1;
-  lista.forEach(function(m){total+=_agruparTPdoMes(db,m,rid);});
-  // Renumera o grupo recorrente em ordem cronologica
+  var total=0,criouDoModelo=false;
+
+  // 1) Consolida os meses abertos que tem TP soltos
+  listaAbertos.forEach(function(m){total+=_agruparTPdoMes(db,m,rid);});
+
+  // 2) Nenhum grupo ainda e so ha TP em meses fechados: cria a partir de hoje
+  if(!jaTemGrupo&&listaAbertos.length===0&&listaFechados.length>0){
+    var modelo=listaFechados[listaFechados.length-1];
+    var p=_criarTPdoModelo(db,modelo,hoje,rid);
+    if(p){criouDoModelo=true;total=(db.filhos[p.id]||[]).length;}
+  }
+
+  // Renumera o grupo em ordem cronologica
+  var idx=1;
   db.fluxo.filter(function(x){return x.grupoTP;})
     .sort(function(a,b){return a.mes.localeCompare(b.mes);})
     .forEach(function(p){p.recId=rid;p.recIdx=idx++;p.recTotal='?';});
   save(db);
-  // Estende o grupo para os meses futuros (repeticao indeterminada)
+  // Estende para os meses futuros
   var proj=projetarRecorrencias(true);
+
   if(!silencioso){
-    toast(total+' agrupados em '+lista.length+' mes(es)'+(proj?' + '+proj+' projetados':''));
-    _logActivity('grupo_tp','Agrupou '+total+' lancamentos TP em '+lista.length+' meses');
+    var msg;
+    if(criouDoModelo){
+      msg='Grupo criado a partir de '+mNome(listaFechados[listaFechados.length-1])+
+          ' ('+total+' itens)'+(proj?' + '+proj+' meses':'');
+    } else if(total>0){
+      msg=total+' agrupados em '+listaAbertos.length+' mes(es)'+(proj?' + '+proj+' projetados':'');
+    } else if(proj>0){
+      msg=proj+' mes(es) projetados';
+    } else {
+      msg='Grupo ja esta atualizado';
+    }
+    toast(msg);
+    _logActivity('grupo_tp',msg);
     render(curPage);
   }
-  return total;
+  return total+proj;
+}
+/* Diagnostico: mostra o que existe de TP e o que sera feito */
+function diagTP(){
+  var db=load();
+  var abertos={},fechados={},grupos=[];
+  db.fluxo.forEach(function(t){
+    if(t.grupoTP){grupos.push(t);return;}
+    if(!_ehTP(t))return;
+    var alvo=isMesFechado(t.mes)?fechados:abertos;
+    (alvo[t.mes]=alvo[t.mes]||[]).push(t);
+  });
+  var linha=function(obj,rotulo,cor){
+    var ms=Object.keys(obj).sort();
+    if(!ms.length)return '';
+    return '<div style="margin-bottom:10px"><div style="font-size:11px;font-weight:700;color:'+cor+';margin-bottom:4px">'+rotulo+'</div>'+
+      ms.map(function(m){
+        return '<div style="font-size:12px;color:var(--t2);padding:3px 0">'+mNome(m)+' &mdash; '+obj[m].length+' item(ns): '+
+          obj[m].map(function(t){return t.descricao.slice(TP_PREFIXO.length);}).join(', ')+'</div>';
+      }).join('')+'</div>';
+  };
+  document.getElementById('stitle').textContent='Diagnostico "TP - "';
+  document.getElementById('sbody').innerHTML=
+    (grupos.length
+      ? '<div style="margin-bottom:12px"><div style="font-size:11px;font-weight:700;color:var(--grn);margin-bottom:4px">JA AGRUPADOS ('+grupos.length+' meses)</div>'+
+        grupos.sort(function(a,b){return a.mes.localeCompare(b.mes);}).map(function(p){
+          return '<div style="font-size:12px;color:var(--t2);padding:3px 0">'+mNome(p.mes)+' &mdash; '+fmt(p.valor)+' ('+_filhosDe(db,p.id).length+' itens)</div>';
+        }).join('')+'</div>'
+      : '<div style="font-size:12px;color:var(--yel);margin-bottom:12px">Nenhum grupo criado ainda.</div>')+
+    linha(abertos,'SOLTOS EM MESES ABERTOS (serao agrupados)','var(--accl)')+
+    linha(fechados,'SOLTOS EM MESES FECHADOS (nao serao alterados)','var(--t3)')+
+    (Object.keys(abertos).length===0&&Object.keys(fechados).length===0&&!grupos.length
+      ? '<div style="font-size:12px;color:var(--t3);line-height:1.6">Nao ha nenhum lancamento comecando com "'+TP_PREFIXO+'". '+
+        'Confira se a descricao usa exatamente esse prefixo (com espaco antes e depois do hifen).</div>'
+      : '')+
+    '<button onclick="agruparTP()" class="savebtn" style="margin-top:14px">Agrupar agora</button>';
+  document.getElementById('sbg').classList.add('on');
 }
 
 /* ═══════ INTEGRAÇÃO OPEN FINANCE (Pluggy via Netlify Function) ═══════ */
@@ -2227,7 +2317,7 @@ function openTxSheet(ex){
   var db=load(),cs={};db.fluxo.forEach(function(t){cs[t.conta]=1;});
   var cl=['Ifood','PJ Itau Nu'];Object.keys(cs).forEach(function(c){if(cl.indexOf(c)<0)cl.push(c);});
   var cc=ex?ex.conta:'Ifood';
-  var cats=['Receita','Moradia','Alimentacao','Saude','Educacao','Veiculo','Cartao','Juridico','Impostos','Investimento','Familia','Emprestimo','Casamento','Lazer','Viagem','Tecnologia','Compras','Venda','Outros'];
+  var cats=['Receita','Moradia','Alimentacao','Saude','Educacao','Veiculo','Cartao','Transferencia TP','Juridico','Impostos','Investimento','Familia','Emprestimo','Casamento','Lazer','Viagem','Tecnologia','Compras','Venda','Outros'];
   document.getElementById('stitle').textContent=editId?'Editar':'Nova Transacao';
   var curRec='nao',curQtd=12;
   if(ex&&ex.recId){curRec=ex.recTotal==='?'?'indef':'fixa';curQtd=ex.recTotal==='?'?12:Number(ex.recTotal)||12;}
@@ -4544,7 +4634,7 @@ window.openLog=openLog;window.closeLog=closeLog;window.renderLog=renderLog;
 })();
 
 </script>
-<div id="ver" style="position:fixed;bottom:8px;left:0;right:0;text-align:center;font-size:10px;color:var(--t3);opacity:.45;z-index:99999;pointer-events:none;font-family:monospace">v1.135.575</div>
+<div id="ver" style="position:fixed;bottom:8px;left:0;right:0;text-align:center;font-size:10px;color:var(--t3);opacity:.45;z-index:99999;pointer-events:none;font-family:monospace">v1.136.576</div>
 </body>
 </html>
  
