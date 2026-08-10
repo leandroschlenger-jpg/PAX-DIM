@@ -441,12 +441,13 @@ inter-events:none}
       </div>
       <div class="ar" style="margin-top:8px">
         <div class="ai" onclick="agruparTP()"><div class="aico" style="background:rgba(167,139,250,.12)">&#128101;</div><div class="abody"><div class="atitle">Agrupar &quot;TP - &quot;</div><div class="asub">Consolida em Transferencia para Thays</div></div><div class="aarr">&#8250;</div></div>
+        <div class="ai" onclick="projetarRecorrencias()"><div class="aico" style="background:rgba(45,212,170,.12)">&#8635;</div><div class="abody"><div class="atitle">Projetar recorrencias</div><div class="asub">Cria os meses futuros das repeticoes</div></div><div class="aarr">&#8250;</div></div>
         <div class="ai" onclick="limparDuplicatas()"><div class="aico" style="background:rgba(255,204,0,.1)">&#129529;</div><div class="abody"><div class="atitle">Limpar duplicatas</div><div class="asub">Remove lancamentos duplicados</div></div><div class="aarr">&#8250;</div></div>
         <div class="ai" onclick="exportData()"><div class="aico" style="background:rgba(77,166,255,.1)">&#128190;</div><div class="abody"><div class="atitle">Exportar backup</div><div class="asub">Salvar JSON</div></div><div class="aarr">&#8250;</div></div>
         <div class="ai" onclick="document.getElementById('ifile').click()"><div class="aico" style="background:rgba(77,166,255,.1)">&#128193;</div><div class="abody"><div class="atitle">Importar backup</div><div class="asub">Restaurar dados</div></div><div class="aarr">&#8250;</div></div>
       </div>
       <input id="ifile" type="file" accept=".json" style="display:none" onchange="importData(event)">
-      <div style="text-align:center;padding:24px 0 8px;font-size:11px;color:var(--t3);font-family:monospace;opacity:.5">v1.134.574</div>
+      <div style="text-align:center;padding:24px 0 8px;font-size:11px;color:var(--t3);font-family:monospace;opacity:.5">v1.135.575</div>
     </div>
   </div>
 
@@ -1465,8 +1466,10 @@ function agruparTP(silencioso){
     .sort(function(a,b){return a.mes.localeCompare(b.mes);})
     .forEach(function(p){p.recId=rid;p.recIdx=idx++;p.recTotal='?';});
   save(db);
+  // Estende o grupo para os meses futuros (repeticao indeterminada)
+  var proj=projetarRecorrencias(true);
   if(!silencioso){
-    toast(total+' lancamento(s) agrupados em '+lista.length+' mes(es)');
+    toast(total+' agrupados em '+lista.length+' mes(es)'+(proj?' + '+proj+' projetados':''));
     _logActivity('grupo_tp','Agrupou '+total+' lancamentos TP em '+lista.length+' meses');
     render(curPage);
   }
@@ -2341,6 +2344,87 @@ function addConta(){
   g.insertBefore(b,g.lastElementChild);selConta(b,n);
 }
 function addMes(ds,n){var p=ds.split('-'),dt=new Date(+p[0],+p[1]-1+n,+p[2]);return dt.getFullYear()+'-'+('0'+(dt.getMonth()+1)).slice(-2)+'-'+('0'+dt.getDate()).slice(-2);}
+/* Soma meses num "YYYY-MM" sem estourar (jan/31 + 1 = fev, nao marco) */
+function addMesStr(mes,n){
+  var p=mes.split('-'),ano=+p[0],m=+p[1]-1+n;
+  ano+=Math.floor(m/12);m=((m%12)+12)%12;
+  return ano+'-'+('0'+(m+1)).slice(-2);
+}
+/* Ajusta o dia para caber no mes (31 -> 30 em nov, 28/29 em fev) */
+function _dataNoMes(mes,dia){
+  var p=mes.split('-'),ano=+p[0],m=+p[1];
+  var ultimo=new Date(ano,m,0).getDate();
+  return mes+'-'+('0'+Math.min(dia,ultimo)).slice(-2);
+}
+/* ══════════ PROJETAR RECORRENCIAS PARA OS MESES FUTUROS ══════════
+   Garante que todo grupo com repeticao INDETERMINADA tenha ocorrencia
+   em cada mes, do mes atual ate N meses a frente. Usa como referencia
+   o valor do primeiro mes aberto (mesma regra da propagacao).
+   Grupos "TP" levam junto os itens do mes de referencia.          */
+function projetarRecorrencias(silencioso,mesesAFrente){
+  var db=load();
+  var N=mesesAFrente||12;
+  var hoje=_hoje.getFullYear()+'-'+('0'+(_hoje.getMonth()+1)).slice(-2);
+  var limite=addMesStr(hoje,N);
+  var grupos={};
+  db.fluxo.forEach(function(t){
+    if(!t.recId)return;
+    (grupos[t.recId]=grupos[t.recId]||[]).push(t);
+  });
+  var criados=0,gruposTocados=0;
+  Object.keys(grupos).forEach(function(rid){
+    var arr=grupos[rid].slice().sort(function(a,b){return a.mes.localeCompare(b.mes);});
+    var ultimo=arr[arr.length-1];
+    // Só projeta repeticao indeterminada — as de quantidade fixa tem fim definido
+    if(String(ultimo.recTotal)!=='?')return;
+    var existentes={};arr.forEach(function(t){existentes[t.mes]=1;});
+    // Referencia: primeiro mes aberto do grupo (a regra do valor), senao o ultimo
+    var pri=_primeiroMesAberto(db,rid);
+    var ref=(pri&&arr.filter(function(t){return t.mes===pri;})[0])||ultimo;
+    var diaRef=+String(ref.data||(ref.mes+'-06')).split('-')[2]||6;
+    var novosDoGrupo=0;
+    var m=hoje;
+    while(m<=limite){
+      if(!existentes[m]&&m>ultimo.mes){
+        var novo=Object.assign({},ref,{
+          id:uid(),mes:m,data:_dataNoMes(m,diaRef),
+          status:'',recId:rid,recTotal:'?'
+        });
+        delete novo._valorEditado;   // mes projetado nunca nasce "editado a mao"
+        delete novo._valorManual;
+        db.fluxo.push(novo);
+        // Grupo TP: replica os itens do mes de referencia
+        if(ref.grupoTP){
+          var itensRef=_filhosDe(db,ref.id);
+          db.filhos[novo.id]=itensRef.map(function(f){
+            return {id:uid(),descricao:f.descricao,valor:f.valor,
+                    categoria:f.categoria,data:_dataNoMes(m,+String(f.data).split('-')[2]||diaRef),
+                    status:''};
+          });
+        }
+        criados++;novosDoGrupo++;
+      }
+      m=addMesStr(m,1);
+    }
+    if(novosDoGrupo)gruposTocados++;
+    // Renumera o grupo em ordem cronologica
+    var idx=1;
+    db.fluxo.filter(function(x){return x.recId===rid;})
+      .sort(function(a,b){return a.mes.localeCompare(b.mes);})
+      .forEach(function(t){t.recIdx=idx++;t.recTotal='?';});
+  });
+  if(criados>0){
+    save(db);
+    if(!silencioso){
+      toast(criados+' lancamento(s) projetados em '+gruposTocados+' grupo(s)');
+      _logActivity('projecao','Projetou '+criados+' lancamentos recorrentes');
+      render(curPage);
+    }
+  } else if(!silencioso){
+    toast('Nenhuma recorrencia pendente de projecao');
+  }
+  return criados;
+}
 function saveTx(){
   try{
   var fdataEl=document.getElementById('fdata');
@@ -4357,6 +4441,16 @@ window.openLog=openLog;window.closeLog=closeLog;window.renderLog=renderLog;
     if(u.id==='paulo'){goP('home');}
     else{render('fluxo');renderLemb(load());}
     setTimeout(function(){_logActivity('login','Entrou no app');},1200);
+    // Depois do sync, estende as repeticoes indeterminadas para os meses futuros
+    if(u.id!=='paulo'){
+      setTimeout(function(){
+        try{
+          if(!_fbSynced)return;
+          var n=projetarRecorrencias(true);
+          if(n>0){toast(n+' lancamento(s) recorrentes projetados');render(curPage);}
+        }catch(e){}
+      },2500);
+    }
   }
 
 
@@ -4450,7 +4544,7 @@ window.openLog=openLog;window.closeLog=closeLog;window.renderLog=renderLog;
 })();
 
 </script>
-<div id="ver" style="position:fixed;bottom:8px;left:0;right:0;text-align:center;font-size:10px;color:var(--t3);opacity:.45;z-index:99999;pointer-events:none;font-family:monospace">v1.134.574</div>
+<div id="ver" style="position:fixed;bottom:8px;left:0;right:0;text-align:center;font-size:10px;color:var(--t3);opacity:.45;z-index:99999;pointer-events:none;font-family:monospace">v1.135.575</div>
 </body>
 </html>
  
